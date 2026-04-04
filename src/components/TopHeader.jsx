@@ -1,14 +1,20 @@
 import { useState, useRef, useEffect } from 'react';
 import ThemeToggle from './ThemeToggle';
+import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from '../context/ThemeContext';
 import { useWallet } from '../context/WalletContext';
 import { useTrustToken } from '../hooks/useTrustToken';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function TopHeader({ pageTitle = 'Dashboard', pageSubtitle = 'Overview', toggleMobile }) {
+export default function TopHeader({ pageTitle, pageSubtitle, toggleMobile }) {
   const { isDarkMode } = useTheme();
+  const { t } = useTranslation();
   const { walletAddress, isConnected, chainId, isSupported, disconnectWallet, connectWallet, switchNetwork } = useWallet();
   const { trustBalance, maticBalance, claimTestTokens, canClaim, isLoading } = useTrustToken();
+
+  const title = pageTitle || t('common.dashboard');
+  const subtitle = pageSubtitle || t('dashboard.overview');
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -33,15 +39,20 @@ export default function TopHeader({ pageTitle = 'Dashboard', pageSubtitle = 'Ove
           <iconify-icon icon="lucide:menu" className="text-xl"></iconify-icon>
         </button>
         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-          <h1 className={`text-xl md:text-3xl font-black font-cabinet tracking-tighter leading-none ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>{pageTitle}</h1>
+          <h1 className={`text-xl md:text-3xl font-black font-cabinet tracking-tighter leading-none ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
+            {title}
+          </h1>
           <div className="hidden md:flex items-center gap-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse"></span>
-            <span className="text-[10px] md:text-xs text-[#8C8C8C] font-black uppercase tracking-[0.3em] leading-none whitespace-nowrap">{pageSubtitle}</span>
+            <span className="text-[10px] md:text-xs text-[#8C8C8C] font-black uppercase tracking-[0.3em] leading-none whitespace-nowrap">
+              {subtitle}
+            </span>
           </div>
         </div>
       </div>
       
       <div className="flex items-center gap-3 md:gap-5">
+        <LanguageSwitcher />
         <ThemeToggle />
 
         {showClaimBtn && (
@@ -117,9 +128,9 @@ export default function TopHeader({ pageTitle = 'Dashboard', pageSubtitle = 'Ove
             </AnimatePresence>
           </div>
         ) : (
-          <button onClick={connectWallet} className="flex items-center gap-3 px-5 py-2.5 md:px-8 md:py-3 rounded-full border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-all duration-300 font-black text-[10px] md:text-sm tracking-wide uppercase active:scale-95">
-            <iconify-icon icon="lucide:wallet" className="text-xl"></iconify-icon>
-            <span className="hidden sm:inline">Connect Wallet</span>
+          <button onClick={connectWallet} className="flex items-center gap-3 px-5 py-2.5 md:px-8 md:py-3 rounded-full border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-all duration-300 font-black text-[10px] md:text-sm tracking-wide uppercase active:scale-95 group">
+            <iconify-icon icon="lucide:wallet" className="text-xl group-hover:scale-110 transition-transform"></iconify-icon>
+            <span className="hidden sm:inline group-hover:translate-x-1 transition-transform">Connect Wallet</span>
           </button>
         )}
       </div>

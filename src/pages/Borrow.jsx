@@ -4,10 +4,12 @@ import AppShell from '../components/AppShell';
 import { useTheme } from '../context/ThemeContext';
 import { useWallet } from '../context/WalletContext';
 import { useLendingPool } from '../hooks/useLendingPool';
+import { useTranslation } from 'react-i18next';
 import Skeleton from '../components/Skeleton';
 import toast from 'react-hot-toast';
 
 export default function Borrow() {
+  const { t } = useTranslation();
   const { isDarkMode } = useTheme();
   const { address } = useWallet();
   const navigate = useNavigate();
@@ -24,9 +26,9 @@ export default function Borrow() {
   const safeAmount = Math.min(amount, limitValue);
 
   const pathways = [
-    { id: 2, label: "Reputation Only", desc: "No vouchers. No collateral. Purely score-based.", icon: "lucide:trending-up", rate: "7.1%", vouchers: 0 },
-    { id: 0, label: "Community Vouching", desc: "Backed by 3+ circle members with strong trust scores.", icon: "lucide:users-2", rate: "4.2%", vouchers: 3 },
-    { id: 1, label: "Digital Collateral", desc: "Lock crypto into escrow. Auto-released on full repayment.", icon: "lucide:shield-check", rate: "2.8%", vouchers: 0 }
+    { id: 2, label: t('borrow.reputationOnlyTitle'), desc: t('borrow.reputationOnlyDesc'), icon: "lucide:trending-up", rate: "7.1%", vouchers: 0 },
+    { id: 0, label: t('borrow.communityVouchingTitle'), desc: t('borrow.communityVouchingDesc'), icon: "lucide:users-2", rate: "4.2%", vouchers: 3 },
+    { id: 1, label: t('borrow.digitalCollateralTitle'), desc: t('borrow.digitalCollateralDesc'), icon: "lucide:shield-check", rate: "2.8%", vouchers: 0 }
   ];
 
   const handleRequestLoan = async () => {
@@ -67,7 +69,7 @@ export default function Borrow() {
   const weeklyInstallment = totalRepay / 4;
 
   return (
-    <AppShell pageTitle="Credit Drawdown" pageSubtitle="Capital Access Architecture">
+    <AppShell pageTitle={t('borrow.title')} pageSubtitle={t('borrow.subtitle')}>
       <div className="max-w-7xl mx-auto space-y-12 pb-24">
         
         {/* Pathway Selection */}
@@ -139,7 +141,7 @@ export default function Borrow() {
             <div className="space-y-12">
               <div className="space-y-6">
                 <div className="flex justify-between items-end">
-                  <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest">Drawdown Amount</p>
+                  <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest">{t('borrow.drawdownAmount')}</p>
                   <p className="text-3xl font-black text-[#F5A623] font-cabinet">${safeAmount.toFixed(2)}</p>
                 </div>
                 <input 
@@ -163,7 +165,7 @@ export default function Borrow() {
                   <p className="text-xl font-black text-[#FAFAF8] font-cabinet">${weeklyInstallment.toFixed(2)} TRUST</p>
                 </div>
                 <div className="p-6 rounded-xl bg-[#FAFAF8] dark:bg-[#0A0F1E] border border-[#E8E8E8] dark:border-[#1E2A3A]">
-                  <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2">Total Repayment</p>
+                  <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2">{t('borrow.totalRepayment')}</p>
                   <p className="text-xl font-black text-[#FAFAF8] font-cabinet">${totalRepay.toFixed(2)} TRUST</p>
                 </div>
                 <div className="p-6 rounded-xl bg-[#FAFAF8] dark:bg-[#0A0F1E] border border-[#E8E8E8] dark:border-[#1E2A3A]">
@@ -185,7 +187,7 @@ export default function Borrow() {
                             : 'bg-gradient-to-r from-[#F5A623] to-[#D4AF37] text-black hover:opacity-90 shadow-[0_0_30px_rgba(245,166,35,0.2)]'
                         }`}>
                     {isSubmitting && <svg className="animate-spin h-4 w-4 text-black" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
-                    {isSubmitting ? 'Requesting loan...' : `Drawdown $${safeAmount.toFixed(2)} Capital`}
+                    {isSubmitting ? t('dashboard.loading') : `${t('borrow.requestLoan')} $${safeAmount.toFixed(2)}`}
                   </button>
                 </div>
               </div>

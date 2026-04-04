@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppShell from '../components/AppShell';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useWallet } from '../context/WalletContext';
 import { useReputationNFT } from '../hooks/useReputationNFT';
 import { useLendingPool } from '../hooks/useLendingPool';
@@ -11,10 +12,10 @@ import { getTier, TIER_COLORS } from '../utils/constants';
 import Skeleton from '../components/Skeleton';
 
 const shortAddr = (a = '') => a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—';
-const daysLeft  = (due) => {
+const daysLeft = (due, t) => {
   if (!due) return '—';
   const d = Math.ceil((due - Date.now()) / 86400000);
-  return d > 0 ? `${d} days` : 'Overdue';
+  return d > 0 ? `${d} ${t('dashboard.days')}` : t('dashboard.overdue');
 };
 
 function StatCard({ label, value, sub, subColor = '#8C8C8C', accent = false, children }) {
@@ -31,6 +32,7 @@ function StatCard({ label, value, sub, subColor = '#8C8C8C', accent = false, chi
 }
 
 function LoanHealthBar({ loan }) {
+  const { t } = useTranslation();
   const total = Number(loan.amount);
   const due = loan.dueDate;
   const now = Date.now();
@@ -41,16 +43,16 @@ function LoanHealthBar({ loan }) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-        <span className="text-[#8C8C8C]">Time Elapsed</span>
-        <span style={{ color: urgency }}>{Math.round(pct || 0)}% of term used</span>
+        <span className="text-[#8C8C8C]">{t('dashboard.timeElapsed')}</span>
+        <span style={{ color: urgency }}>{t('dashboard.termUsed', { pct: Math.round(pct || 0) })}</span>
       </div>
       <div className="h-2 w-full bg-[#1E2A3A] rounded-full overflow-hidden">
         <motion.div className="h-full rounded-full" style={{ background: urgency }}
            initial={{ width: 0 }} animate={{ width: `${pct || 0}%` }} transition={{ duration: 1 }} />
       </div>
       <div className="flex justify-between text-[9px] text-[#8C8C8C] font-bold">
-        <span>Borrowed</span>
-        <span>Due in {daysLeft(due)}</span>
+        <span>{t('dashboard.borrowed')}</span>
+        <span>{t('dashboard.dueIn', { time: daysLeft(due, t) })}</span>
       </div>
     </div>
   );
@@ -79,8 +81,8 @@ export default function Dashboard() {
   };
 
   return (
-    <AppShell pageTitle={address ? `Terminal Active` : 'Dashboard'}
-              pageSubtitle={address ? `${shortAddr(address)}` : 'Connect wallet to sync data'}>
+    <AppShell pageTitle={address ? t('dashboard.welcome') : t('common.dashboard')}
+              pageSubtitle={address ? `${shortAddr(address)}` : t('common.connectWallet')}>
       <div className="max-w-7xl mx-auto space-y-10 pb-24">
 
         {/* ── TOP ROW: stats ── */}

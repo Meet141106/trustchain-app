@@ -6,11 +6,13 @@ import { useVouchSystem } from '../hooks/useVouchSystem';
 import { useWallet } from '../context/WalletContext';
 import Skeleton from '../components/Skeleton';
 import { useReputationNFT } from '../hooks/useReputationNFT';
+import { useTranslation } from 'react-i18next';
 
 const shortAddr = (a = '') => a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—';
 
 export default function VouchInvite() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { address } = useWallet();
   const { vouchRequests, createVouchRequest, stakeForBorrower, isLoading } = useVouchSystem();
   const { trustScore } = useReputationNFT();
@@ -41,7 +43,7 @@ export default function VouchInvite() {
   if (isLoading) return <AppShell><Skeleton h="400px" /></AppShell>;
 
   return (
-    <AppShell pageTitle="Syndicate Gateway" pageSubtitle="Request & Attest Reputation">
+    <AppShell pageTitle={t('vouch.title')} pageSubtitle={t('vouch.subtitle')}>
       <div className="max-w-7xl mx-auto space-y-10 pb-24">
         
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -49,8 +51,8 @@ export default function VouchInvite() {
           {/* Main Action Column */}
           <div className="lg:col-span-3 space-y-8">
             <div className="bg-white dark:bg-[#111827] p-10 rounded-[24px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
-              <h3 className="text-lg font-black font-cabinet text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest mb-2">Request Attestation</h3>
-              <p className="text-[10px] text-[#8C8C8C] uppercase font-bold tracking-[0.2em] mb-10">Invite a trusted node to back your identity</p>
+              <h3 className="text-lg font-black font-cabinet text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest mb-2">{t('vouch.requestAttestationTitle')}</h3>
+              <p className="text-[10px] text-[#8C8C8C] uppercase font-bold tracking-[0.2em] mb-10">{t('vouch.requestAttestationDesc')}</p>
 
               <div className="space-y-8">
                 <div className="space-y-3">
@@ -84,7 +86,7 @@ export default function VouchInvite() {
                     onClick={handleSendRequest}
                     className="w-full py-5 bg-[#F5A623] text-black rounded-xl text-[11px] font-black uppercase tracking-[0.2em] shadow-xl hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50"
                 >
-                    {isSubmitting ? 'Transmitting Request...' : 'Transmit Invitation'}
+                    {isSubmitting ? t('vouch.transmitting') : t('vouch.transmitInvitation')}
                 </button>
               </div>
             </div>
@@ -146,7 +148,7 @@ export default function VouchInvite() {
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-[#8C8C8C] mb-6">Sent invitations</h4>
                 <div className="space-y-4">
                     {sentRequests.length === 0 ? (
-                        <p className="text-[9px] text-[#8C8C8C] font-bold uppercase tracking-widest text-center py-4">No invites sent</p>
+                        <p className="text-[9px] text-[#8C8C8C] font-bold uppercase tracking-widest text-center py-4">{t('vouch.noInvitesSent')}</p>
                     ) : (
                         sentRequests.map(req => (
                             <div key={req.id} className="p-4 bg-[#FAFAF8] dark:bg-[#0A0F1E] border border-[#E8E8E8] dark:border-[#1E2A3A] rounded-xl flex justify-between items-center">

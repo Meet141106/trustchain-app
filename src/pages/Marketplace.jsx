@@ -4,10 +4,12 @@ import AppShell from '../components/AppShell';
 import { useTheme } from '../context/ThemeContext';
 import { useWallet } from '../context/WalletContext';
 import { useLendingPool } from '../hooks/useLendingPool';
+import { useTranslation } from 'react-i18next';
 import Skeleton from '../components/Skeleton';
 import toast from 'react-hot-toast';
 
 export default function Marketplace() {
+  const { t } = useTranslation();
   const { isDarkMode } = useTheme();
   const { address } = useWallet();
   const navigate = useNavigate();
@@ -40,16 +42,16 @@ export default function Marketplace() {
   };
 
   return (
-    <AppShell pageTitle="Liquidity Marketplace" pageSubtitle="Supply Capital & Earn Yield">
+    <AppShell pageTitle={t('marketplace.title')} pageSubtitle={t('marketplace.subtitle')}>
       <div className="max-w-7xl mx-auto space-y-12 pb-24">
         
         {/* Marketplace Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {[
-            { l: 'Total Liquidity',   v: isLoading ? '...' : `$${Number(poolStats?.liquidity || 0).toLocaleString()}`, c: '#1D9E75' },
-            { l: 'Active Loans',      v: isLoading ? '...' : poolStats?.activeLoans || 0, c: '#F5A623' },
-            { l: 'Lender Count',      v: isLoading ? '...' : poolStats?.lenderCount || 0, c: '#FAFAF8' },
-            { l: 'Average Return',    v: isLoading ? '...' : `${Number(poolStats?.avgInterestRate || 0)}%`, c: '#1D9E75' },
+            { l: t('marketplace.totalLiquidity'),   v: isLoading ? '...' : `$${Number(poolStats?.liquidity || 0).toLocaleString()}`, c: '#1D9E75' },
+            { l: t('marketplace.activeLoans'),      v: isLoading ? '...' : poolStats?.activeLoans || 0, c: '#F5A623' },
+            { l: t('marketplace.lenderCount'),      v: isLoading ? '...' : poolStats?.lenderCount || 0, c: '#FAFAF8' },
+            { l: t('marketplace.averageReturn'),    v: isLoading ? '...' : `${Number(poolStats?.avgInterestRate || 0)}%`, c: '#1D9E75' },
             ].map((m, i) => (
             <div key={i} className="bg-white dark:bg-[#111827] p-6 rounded-2xl border border-[#E8E8E8] dark:border-[#1E2A3A]">
                 <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2">{m.l}</p>
@@ -61,8 +63,8 @@ export default function Marketplace() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Card: Deposit Capital */}
           <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A] flex flex-col relative overflow-hidden">
-            <h3 className="text-xl font-black font-cabinet text-[#1A1A1A] dark:text-[#FAFAF8] mb-3 uppercase tracking-widest">Provide Protocol Liquidity</h3>
-            <p className="text-xs text-[#8C8C8C] leading-relaxed mb-8">Supply stable capital to the TrustLend core pool and earn an algorithmic variable rate based on protocol utilization.</p>
+            <h3 className="text-xl font-black font-cabinet text-[#1A1A1A] dark:text-[#FAFAF8] mb-3 uppercase tracking-widest">{t('marketplace.provideLiquidityTitle')}</h3>
+            <p className="text-xs text-[#8C8C8C] leading-relaxed mb-8">{t('marketplace.provideLiquidityDesc')}</p>
             
             <div className="space-y-8 flex-1">
               <div className="p-6 rounded-xl bg-[#FAFAF8] dark:bg-[#0A0F1E] border border-[#E8E8E8] dark:border-[#1E2A3A]">
@@ -103,7 +105,7 @@ export default function Marketplace() {
                         ? 'bg-[#1E2A3A] text-[#8C8C8C] cursor-not-allowed'
                         : 'bg-[#1D9E75] text-[#111827] hover:bg-opacity-90 shadow-[0_0_20px_rgba(29,158,117,0.2)]'
                     }`}>
-              {isSubmitting ? 'Deploying Capital...' : 'Supply Capital'}
+              {isSubmitting ? t('marketplace.supplying') : t('marketplace.supplyCapital')}
             </button>
           </div>
 
