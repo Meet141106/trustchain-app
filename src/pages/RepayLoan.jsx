@@ -67,7 +67,8 @@ export default function RepayLoan() {
   }, [wallet]);
 
   const handleRepay = async () => {
-    if (!loan || !user) return;
+    if (!loan) { setError('No active loan found.'); return; }
+    if (phase !== 'idle') return; // prevent double-submit
     setError('');
     try {
       // Phase 1: mock blockchain repayLoan()
@@ -79,12 +80,13 @@ export default function RepayLoan() {
       setPhase('supabase');
       await updateLoan(loan.id, { loan_status: 'repaid', repaid_at: new Date().toISOString(), tx_hash: hash });
 
-      // Phase 3: Supabase — increment trust score
-      const prev     = user.trust_score ?? 30;
-      const gained   = 10;
-      const next     = Math.min(prev + gained, 100);
-      const prevTier = getTier(prev);
-      const nextTier = getTier(next);
+      // Phase 3: Re-fetch FRESH user score to avoid stale-state race condition
+      const freshUser = await getUser(wallet);
+      const prev      = freshUser?.trust_score ?? 30;
+      const gained    = 10;
+      const next      = Math.min(prev + gained, 100);
+      const prevTier  = getTier(prev);
+      const nextTier  = getTier(next);
       await updateUser(wallet, { trust_score: next, tier: nextTier });
 
       setOldScore(prev);
@@ -93,7 +95,7 @@ export default function RepayLoan() {
       setPhase('done');
     } catch (err) {
       console.error(err);
-      setError(err.message);
+      setError(err.message || 'Transaction failed. Please try again.');
       setPhase('error');
     }
   };

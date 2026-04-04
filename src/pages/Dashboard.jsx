@@ -2,18 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppShell from '../components/AppShell';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getUser, getUserLoans } from '../lib/supabase';
+import { getUser, getUserLoans, getTier, TIER_COLORS, TIER_LIMITS } from '../lib/supabase';
 
-/* ── tier helpers ── */
-function getTier(score) {
-  if (score >= 90) return 'Platinum';
-  if (score >= 75) return 'Gold';
-  if (score >= 60) return 'Silver';
-  if (score >= 40) return 'Bronze';
-  return 'Entry';
-}
-const TIER_COLORS   = { Entry: '#F5A623', Bronze: '#CD7F32', Silver: '#A8A9AD', Gold: '#FFD700', Platinum: '#E5E4E2' };
-const BORROW_LIMITS = { Entry: 10, Bronze: 50, Silver: 200, Gold: 1000, Platinum: 5000 };
 
 /* ── small helpers ── */
 const shortAddr = (a = '') => a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—';
@@ -105,7 +95,7 @@ export default function Dashboard() {
   const score      = user?.trust_score ?? 30;
   const tier       = getTier(score);
   const tierColor  = TIER_COLORS[tier];
-  const limit      = BORROW_LIMITS[tier];
+  const limit      = TIER_LIMITS[tier];
   const activeLoan = loans.find(l => l.loan_status === 'active');
   const hasLoan    = !!activeLoan;
   const isNewUser  = !user;

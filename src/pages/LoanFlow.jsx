@@ -130,21 +130,20 @@ function StepSelectPath({ onNext, limit, tier, tierColor }) {
 }
 
 /* ════════════ STEP 2 — Confirm ════════════ */
-function StepConfirm({ wallet, onSuccess }) {
+function StepConfirm({ wallet, amount, onSuccess }) {
   const [phase, setPhase] = useState('idle'); // idle|pending|blockchain|done|error
   const [error, setError] = useState('');
-  const AMOUNT = 10;
 
   const confirm = async () => {
     try {
       setPhase('pending');
 
       // 1. Create loan in Supabase → status: pending
-      const loan = await createLoan({ walletAddress: wallet, amount: AMOUNT, path: 'trust' });
+      const loan = await createLoan({ walletAddress: wallet, amount, path: 'trust' });
 
       // 2. Mock blockchain createLoan()
       setPhase('blockchain');
-      const { tx_hash } = await mockBlockchainCreateLoan(AMOUNT);
+      const { tx_hash } = await mockBlockchainCreateLoan(amount);
 
       // 3. Update Supabase → status: active + tx_hash
       const activeLoan = await updateLoan(loan.id, {
@@ -176,12 +175,12 @@ function StepConfirm({ wallet, onSuccess }) {
       {/* Loan summary card */}
       <div className="bg-[#0A0F1E] border border-[#1E2A3A] rounded-2xl p-6 space-y-0">
         {[
-          { l: 'Loan Amount',  v: `$${AMOUNT}.00`,      c: '#F5A623' },
+          { l: 'Loan Amount',  v: `$${amount}.00`,      c: '#F5A623' },
           { l: 'Loan Path',    v: 'Trust-Only',          c: '#FAFAF8' },
           { l: 'Term',         v: '30 days',             c: '#FAFAF8' },
           { l: 'APR',          v: '0% (Demo)',           c: '#1D9E75' },
           { l: 'Collateral',   v: 'None',                c: '#1D9E75' },
-          { l: 'Repayment',    v: `$${AMOUNT}.00 flat`, c: '#FAFAF8' },
+          { l: 'Repayment',    v: `$${amount}.00 flat`, c: '#FAFAF8' },
         ].map(({ l, v, c }, i) => (
           <div key={i} className="flex justify-between py-3.5 border-b border-[#1E2A3A] last:border-0">
             <span className="text-[11px] font-black uppercase tracking-widest text-[#8C8C8C]">{l}</span>
