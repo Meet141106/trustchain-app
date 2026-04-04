@@ -1,4 +1,5 @@
-import { Link, useParams } from 'react-router-dom';
+import React from 'react';
+import { useParams, Link } from 'react-router-dom';
 import AppShell from '../components/AppShell';
 import { useTheme } from '../context/ThemeContext';
 import { motion } from 'framer-motion';
@@ -8,120 +9,106 @@ export default function LoanRequestDetail() {
   const { id } = useParams();
 
   return (
-    <AppShell pageTitle="Loan Request Detail" pageSubtitle="Capital Deployment Audit" showNav={true}>
-      <div className="max-w-7xl mx-auto space-y-12 pb-20">
+    <AppShell pageTitle="Audit Terminal" pageSubtitle="Asset Underwriting System">
+      <div className="max-w-7xl mx-auto space-y-12 pb-24">
         
-        {/* Loan Identity Header */}
-        <div className={`p-10 rounded-[3rem] border transition-all duration-500
-          ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#8A6E2F] flex items-center justify-center text-white text-3xl font-black shadow-2xl">
-                S
-              </div>
-              <div>
-                <p className="text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.3em] mb-1">Request ID: {id || "#TR-9421"}</p>
-                <h1 className={`font-cabinet text-4xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
-                  Sovereign Node 452
-                </h1>
-                <div className="flex items-center gap-3 mt-2">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={i} className={`w-6 h-6 rounded-full border-2 border-white dark:border-[#1A1A1A] bg-[#E8E8E8] flex items-center justify-center text-[8px] font-black
-                        ${isDarkMode ? 'bg-[#333] text-white' : 'bg-[#FAFAF8] text-[#1A1A1A]'}`}>
-                        {String.fromCharCode(64 + i)}
-                      </div>
-                    ))}
-                  </div>
-                  <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">Vouched by 12 Nodes</span>
+        {/* REQUESTER IDENTITY BANNER */}
+        <div className="bg-[#111827] p-10 rounded-[12px] border border-[#1E2A3A] flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-1 h-full bg-[#F5A623]"></div>
+          <div className="flex items-center gap-6">
+             <div className="w-20 h-20 rounded-2xl bg-[#0A0F1E] border border-[#F5A623]/20 flex items-center justify-center font-black text-3xl text-[#FAFAF8]">S</div>
+             <div>
+                <div className="flex items-center gap-3 mb-2">
+                   <h2 className="text-3xl font-black font-cabinet text-[#FAFAF8]">Siddharth M.</h2>
+                   <span className="px-3 py-1 rounded bg-[#F59E0B]/10 text-[#F59E0B] text-[8px] font-black uppercase tracking-widest border border-[#F59E0B]/20">Silver Tier</span>
                 </div>
-              </div>
-            </div>
-            <div className={`px-6 py-3 rounded-full border flex items-center gap-3
-              ${isDarkMode ? 'bg-[#10B981]/10 border-[#10B981]/20 text-[#10B981]' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
-               <iconify-icon icon="lucide:shield-check" className="text-lg"></iconify-icon>
-               <span className="text-[10px] font-black uppercase tracking-widest">Minimial Risk Audit</span>
-            </div>
+                <p className="text-xs text-[#8C8C8C] leading-relaxed max-w-md">Professional Node Operator seeking micro-capital for infrastructure maintenance. 100% repayment rate over 14 cycles.</p>
+             </div>
+          </div>
+          <div className="text-right">
+             <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest mb-1">Requested Amount</p>
+             <p className="text-4xl font-black text-[#FAFAF8] font-cabinet">$75.00</p>
+             <p className="text-[10px] font-black text-[#1D9E75] uppercase tracking-widest mt-2">Target Yield: 4.2%</p>
           </div>
         </div>
 
-        {/* Financial Logic */}
-        <div className={`p-12 md:p-16 rounded-[4rem] border transition-all duration-500 relative overflow-hidden group
-          ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
-           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#D4AF37] opacity-[0.02] blur-[100px] -z-10"></div>
-           
-           <div className="flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left">
-              <div className="space-y-4">
-                 <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.3em]">Funding Commitment Needed</p>
-                 <h2 className={`font-cabinet text-7xl md:text-8xl font-black tracking-tighter leading-none
-                   ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>$5,000.00</h2>
-                 <p className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest">USDC Settlement Archway</p>
-              </div>
-
-              <div className={`p-10 rounded-[3rem] min-w-[220px] transition-all duration-500 transform hover:scale-105
-                ${isDarkMode ? 'bg-black text-white border border-[#333]' : 'bg-[#1A1A1A] text-white'}`}>
-                 <p className="text-[10px] font-black text-[#D4AF37] uppercase tracking-widest mb-4">Allocated APY</p>
-                 <span className="text-5xl font-black font-cabinet tracking-tighter leading-none">12.4%</span>
-              </div>
-           </div>
-
-           <div className={`grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 pt-16 border-t ${isDarkMode ? 'border-[#333]' : 'border-[#F5F3F0]'}`}>
-              {[
-                { label: 'Term Length', val: '90 Cycles', icon: 'lucide:calendar' },
-                { label: 'Collateral Mechanism', val: 'Reputation Only', icon: 'lucide:award' },
-                { label: 'Vouch Liquidity', val: '$12,400 Staked', icon: 'lucide:layers' }
-              ].map((item, i) => (
-                 <div key={i} className="space-y-2 group/item">
-                    <div className="flex items-center gap-2 text-[#8C8C8C] group-hover/item:text-[#D4AF37] transition-colors">
-                       <iconify-icon icon={item.icon} className="text-lg"></iconify-icon>
-                       <span className="text-[9px] font-black uppercase tracking-widest">{item.label}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          
+          {/* SOCIAL VOUCH PROGRESS */}
+          <div className="bg-[#111827] p-10 rounded-[12px] border border-[#1E2A3A]">
+             <h4 className="text-[10px] font-black text-[#F5A623] uppercase tracking-[0.3em] mb-10">Social Vouch Progress</h4>
+             <div className="space-y-10">
+                <div className="flex justify-between items-center px-4">
+                  {[
+                    { name: 'Arnab G.', status: 'Vouched', score: 84, color: 'bg-[#1D9E75]' },
+                    { name: 'Pending', status: 'Waiting', score: 0, color: 'bg-[#1E2A3A]' },
+                    { name: 'Pending', status: 'Waiting', score: 0, color: 'bg-[#1E2A3A]' }
+                  ].map((v, i) => (
+                    <div key={i} className="flex flex-col items-center gap-4">
+                       <div className={`w-14 h-14 rounded-full ${v.color} border-4 border-[#111827] flex items-center justify-center text-[#FAFAF8] font-black shadow-lg`}>
+                          {v.name[0]}
+                       </div>
+                       <div className="text-center">
+                          <p className="text-[9px] font-black text-[#FAFAF8] uppercase tracking-widest">{v.name}</p>
+                          <p className="text-[8px] font-bold text-[#8C8C8C] uppercase">{v.status}</p>
+                       </div>
                     </div>
-                    <p className={`font-black text-xl tracking-tight ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>{item.val}</p>
-                 </div>
-              ))}
-           </div>
+                  ))}
+                </div>
+                <div className="p-6 rounded-xl bg-[#0A0F1E] border border-[#1E2A3A] text-center">
+                   <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] mb-2">Vouch Confidence</p>
+                   <p className="text-2xl font-black text-[#F59E0B] font-cabinet">33%</p>
+                   <p className="text-[8px] font-bold text-[#8C8C8C] mt-2 uppercase">2 more vouches required to unlock capital</p>
+                </div>
+             </div>
+          </div>
+
+          {/* REPUTATION BREAKDOWN */}
+          <div className="bg-[#111827] p-10 rounded-[12px] border border-[#1E2A3A] lg:col-span-2">
+             <h4 className="text-[10px] font-black text-[#F5A623] uppercase tracking-[0.3em] mb-10">Reputation Synthesis</h4>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[
+                  { label: 'Identity Proof', score: 92, desc: 'Verified KYC & Socials' },
+                  { label: 'Asset Wealth', score: 45, desc: 'On-chain TVL balance' },
+                  { label: 'Social Density', score: 68, desc: 'Network node centrality' }
+                ].map((s, i) => (
+                  <div key={i} className="p-6 rounded-xl bg-[#0A0F1E] border border-[#1E2A3A]">
+                     <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest mb-4">{s.label}</p>
+                     <p className="text-3xl font-black text-[#FAFAF8] font-mono">{s.score}<span className="text-sm text-[#8C8C8C]">/100</span></p>
+                     <p className="text-[8px] font-bold text-[#8C8C8C] mt-4 uppercase leading-relaxed">{s.desc}</p>
+                  </div>
+                ))}
+             </div>
+             
+             {/* AI Underwriting Analysis */}
+             <div className="mt-10 p-8 rounded-xl bg-[#1D9E75]/5 border border-[#1D9E75]/10">
+                <div className="flex items-center gap-4 mb-4 text-[#1D9E75]">
+                   <iconify-icon icon="lucide:sparkles" className="text-xl"></iconify-icon>
+                   <h5 className="text-[10px] font-black uppercase tracking-[0.2em]">AI Underwriting Prediction</h5>
+                </div>
+                <p className="text-xs text-[#FAFAF8] leading-relaxed italic">"Probability of default is estimated at **0.8%**. Requester has displayed a linear liquidity flow pattern with seasonal peaks. Recommending Vouch Tier expansion."</p>
+             </div>
+          </div>
         </div>
 
-        {/* Borrower Reputation Audit */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-           <div className={`p-10 rounded-[3.5rem] border group transition-all duration-500
-             ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
-              <div className="flex items-center gap-8 mb-8">
-                 <div className="w-20 h-20 rounded-3xl bg-[#D4AF37] flex items-center justify-center text-black shadow-xl group-hover:rotate-12 transition-transform">
-                    <span className="text-3xl font-black font-cabinet">842</span>
-                 </div>
-                 <div>
-                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest mb-1 font-cabinet">Reputation Quotient</p>
-                    <h4 className={`text-2xl font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>Noir Elite Level</h4>
-                 </div>
-              </div>
-              <p className="text-sm font-medium text-[#8C8C8C] leading-relaxed">
-                Subject belongs to the top <span className={isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}>2.1%</span> of the network. Fidelity audit confirms zero liquidation events across 8 cycles.
-              </p>
-           </div>
-
-           <div className={`p-10 rounded-[3.5rem] border relative overflow-hidden group transition-all duration-500
-             ${isDarkMode ? 'bg-black border-[#333]' : 'bg-[#1A1A1A] text-white'}`}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37] opacity-[0.1] blur-[60px] group-hover:scale-150 duration-700"></div>
-              <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#D4AF37] mb-8 group-hover:rotate-12 transition-transform">
-                 <iconify-icon icon="lucide:brain" className="text-3xl animate-pulse"></iconify-icon>
-              </div>
-              <h4 className="font-cabinet text-2xl font-black tracking-tight mb-4">Protocol Intel Audit</h4>
-              <p className="text-sm text-white/50 leading-relaxed font-medium">
-                Sovereign behavior patterns suggest <span className="text-white font-black underline decoration-[#D4AF37]">98.4% Settlement Fidelity</span>. High alignment with Syndicate growth metrics.
-              </p>
-           </div>
-        </div>
-
-        {/* Global Action Vector */}
-        <div className="flex flex-col sm:flex-row gap-6 pt-12">
-           <Link to="/marketplace" className={`flex-1 py-6 rounded-full border font-black uppercase text-[12px] tracking-[0.3em] text-center transition-all
-             ${isDarkMode ? 'border-[#333] text-[#8C8C8C] hover:bg-white/5' : 'border-[#E8E8E8] text-[#8C8C8C] hover:bg-[#FAFAF8]'}`}>
-              Reject Audit
-           </Link>
-           <button className="flex-[2] py-6 rounded-full bg-[#1A1A1A] dark:bg-[#D4AF37] text-white dark:text-black font-black uppercase text-[12px] tracking-[0.3em] text-center luxury-shadow hover:scale-105 transition-all flex items-center justify-center gap-4 group active:scale-95 shadow-2xl">
-              Initialize Funding Drawdown <iconify-icon icon="lucide:arrow-right" className="ml-2 transition-transform group-hover:translate-x-2"></iconify-icon>
-           </button>
+        {/* ACTION TERMINAL */}
+        <div className="bg-[#111827] p-10 rounded-[12px] border border-[#1E2A3A]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+               <h4 className="text-lg font-black font-cabinet text-[#FAFAF8] uppercase tracking-widest mb-6">Social Vouching</h4>
+               <p className="text-xs text-[#8C8C8C] leading-relaxed mb-8">Stake **$25.00 equivalent** from your reputation pool to vouch for Siddharth. If he repays, you earn **0.8% QP boost**. If he defaults, your score is impacted.</p>
+               <button className="w-full py-5 bg-[#F5A623] text-black rounded-[8px] text-[11px] font-black uppercase tracking-[0.2em] hover:bg-white transition-all active:scale-[0.98]">
+                  Vouch for Siddharth
+               </button>
+            </div>
+            <div className="border-l border-[#1E2A3A] md:pl-12">
+               <h4 className="text-lg font-black font-cabinet text-[#FAFAF8] uppercase tracking-widest mb-6">Direct Lending</h4>
+               <p className="text-xs text-[#8C8C8C] leading-relaxed mb-8">Deploy capital directly to fund the remaining **$50.00**. Earn 4.2% yield. Capital is 100% principal protected by community treasury.</p>
+               <button className="w-full py-5 border border-[#1D9E75] text-[#1D9E75] rounded-[8px] text-[11px] font-black uppercase tracking-[0.2em] hover:bg-[#1D9E75] hover:text-white transition-all">
+                  Deploy $50.00 Fund
+               </button>
+            </div>
+          </div>
         </div>
       </div>
     </AppShell>

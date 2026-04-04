@@ -2,105 +2,132 @@ import React from 'react';
 import AppShell from '../components/AppShell';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
+import { Link } from 'react-router-dom';
 
 export default function Marketplace() {
   const { isDarkMode } = useTheme();
 
-  const requests = [
-    { id: 1, borrower: "Sovereign Node 452", amount: "$5,000", score: 842, rate: "2.4% APR", term: "90 Days", status: "Open", vouchers: 12 },
-    { id: 2, borrower: "Reputation Circle Beta", amount: "$12,400", score: 790, rate: "3.1% APR", term: "180 Days", status: "Open", vouchers: 8 },
-    { id: 3, borrower: "Archway Verified Individual", amount: "$2,800", score: 620, rate: "4.5% APR", term: "30 Days", status: "Open", vouchers: 5 },
-    { id: 4, borrower: "Syndicate Genesis Pool", amount: "$45,000", score: 910, rate: "1.9% APR", term: "365 Days", status: "Open", vouchers: 24 }
-  ];
-
   return (
-    <AppShell pageTitle="Liquidity Archway" pageSubtitle="Marketplace">
-      <div className="max-w-7xl mx-auto space-y-12">
+    <AppShell pageTitle="Liquidity Archway" pageSubtitle="Capital Deployment Interface">
+      <div className="max-w-7xl mx-auto space-y-12 pb-24">
         
-        {/* Marketplace Header Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        {/* Marketplace Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[
-            { label: "Archway Liquidity", val: "$1.4M", icon: "lucide:droplets" },
-            { label: "Deployment Yield", val: "3.42%", icon: "lucide:trending-up" },
-            { label: "Protocol Fidelity", val: "99.2%", icon: "lucide:shield-check" }
-          ].map((stat, idx) => (
-            <div key={stat.label} className={`p-10 rounded-[2.5rem] border ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
-              <div className="flex items-center gap-6">
-                <div className="w-14 h-14 rounded-2xl bg-[#D4AF37]/5 flex items-center justify-center text-[#D4AF37]">
-                  <iconify-icon icon={stat.icon} className="text-2xl"></iconify-icon>
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-1 font-cabinet">{stat.label}</p>
-                  <p className={`text-2xl font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>{stat.val}</p>
-                </div>
-              </div>
+            { label: 'Total Pool Liquidity', val: '$1.2M+', trend: '+12%', color: 'text-[#1D9E75]' },
+            { label: 'Avg. Protocol Yield', val: '4.8%', trend: 'Stable', color: 'text-[#F5A623]' },
+            { label: 'Active Requests', val: '142', trend: 'High Demand', color: 'text-[#F5A623]' },
+            { label: 'Default Rate', val: '0.12%', trend: '-0.04%', color: 'text-[#1D9E75]' }
+          ].map((m, i) => (
+            <div key={i} className="bg-[#111827] p-6 rounded-[12px] border border-[#1E2A3A]">
+              <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest mb-1">{m.label}</p>
+              <p className={`text-2xl font-black font-cabinet ${m.color}`}>{m.val}</p>
+              <p className="text-[8px] font-bold text-[#8C8C8C] mt-2 uppercase tracking-widest">{m.trend}</p>
             </div>
           ))}
         </div>
 
-        {/* Request List Table */}
-        <div className={`rounded-[3rem] border overflow-hidden ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className={`${isDarkMode ? 'bg-black/20' : 'bg-[#FAFAF8]'} border-b border-[#E8E8E8] dark:border-[#333]`}>
-                <th className="px-12 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Archway Member</th>
-                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Capital Request</th>
-                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Trust Level</th>
-                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Social Vouch</th>
-                <th className="px-12 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] text-right">Audit</th>
-              </tr>
-            </thead>
-            <tbody className={`divide-y ${isDarkMode ? 'divide-[#333]' : 'divide-[#F5F3F0]'}`}>
-              {requests.map((req, idx) => (
-                <motion.tr 
-                  key={req.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="group hover:bg-[#FAFAF8] dark:hover:bg-white/5 transition-colors cursor-pointer"
-                >
-                  <td className="px-12 py-10">
-                    <div className="flex items-center gap-6">
-                      <div className="relative">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#8A6E2F] flex items-center justify-center text-white text-xs font-black shadow-xl">
-                          {req.borrower.charAt(0)}
-                        </div>
-                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#10B981] rounded-full border-2 border-white dark:border-[#1A1A1A] flex items-center justify-center">
-                          <iconify-icon icon="lucide:check" className="text-[10px] text-white"></iconify-icon>
-                        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+          {/* Filter Sidebar */}
+          <div className="space-y-8">
+            <div className="bg-[#111827] p-8 rounded-[12px] border border-[#1E2A3A]">
+              <h4 className="text-[10px] font-black text-[#F5A623] uppercase tracking-[0.3em] mb-8">Refine Search</h4>
+              
+              <div className="space-y-10">
+                <div className="space-y-4">
+                  <p className="text-[9px] font-black text-[#FAFAF8] uppercase tracking-widest">Yield Range</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {['<3%', '3-5%', '5-8%', '8%+'].map(y => (
+                      <button key={y} className="px-3 py-1 rounded bg-[#0A0F1E] border border-[#1E2A3A] text-[9px] font-black text-[#8C8C8C] hover:border-[#F5A623] transition-all">{y}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-[9px] font-black text-[#FAFAF8] uppercase tracking-widest">Risk Frontier</p>
+                  <div className="space-y-2">
+                    {['Sovereign (Low)', 'Syndicate (Mid)', 'Emergent (High)'].map(r => (
+                      <label key={r} className="flex items-center gap-3 cursor-pointer group">
+                        <div className="w-4 h-4 rounded border border-[#1E2A3A] bg-[#0A0F1E] group-hover:border-[#F5A623]"></div>
+                        <span className="text-[10px] font-black text-[#8C8C8C] uppercase group-hover:text-[#FAFAF8]">{r}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-[#1E2A3A]">
+                  <button className="w-full py-4 bg-[#1E2A3A] text-white rounded-[8px] text-[10px] font-black uppercase tracking-widest hover:bg-[#F59E0B] hover:text-black transition-all">
+                    Reset Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-xl bg-[#F59E0B]/5 border border-[#F59E0B]/10 text-[#F59E0B]">
+               <p className="text-[10px] font-black uppercase tracking-widest leading-relaxed">
+                  Tip: Loans with 3+ vouchers have a 99.8% historical repayment rate.
+               </p>
+            </div>
+          </div>
+
+          {/* Opportunity Grid */}
+          <div className="lg:col-span-3 space-y-8">
+            <div className="flex justify-between items-center">
+               <h3 className="text-xl font-black font-cabinet text-[#FAFAF8] uppercase tracking-widest">Vouching Opportunities</h3>
+               <div className="flex bg-[#111827] p-1 rounded-lg border border-[#1E2A3A]">
+                  <button className="px-4 py-2 bg-[#F5A623] text-black text-[9px] font-black uppercase rounded-md tracking-widest">Live</button>
+                  <button className="px-4 py-2 text-[#8C8C8C] text-[9px] font-black uppercase rounded-md tracking-widest">Funded</button>
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                { name: 'Siddharth M.', score: 68, amount: '$75.00', yield: '4.2%', vouched: '1/3', tags: ['Education', 'Tech'] },
+                { name: 'Priyanjali K.', score: 82, amount: '$200.00', yield: '3.1%', vouched: '3/3', tags: ['Agri', 'Safe'] },
+                { name: 'Rahul V.', score: 54, amount: '$40.00', yield: '6.8%', vouched: '0/3', tags: ['Retail'] },
+                { name: 'Zoya A.', score: 71, amount: '$120.00', yield: '3.9%', vouched: '2/3', tags: ['Gig Work'] }
+              ].map((loan, i) => (
+                <div key={i} className="bg-[#111827] p-8 rounded-[12px] border border-[#1E2A3A] hover:border-[#F5A623]/40 transition-all group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4">
+                    <span className="text-[8px] font-black text-[#F5A623] uppercase tracking-widest">{loan.vouched} Vouched</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-[#1E2A3A] flex items-center justify-center font-black text-xs text-[#FAFAF8] border border-[#F5A623]/20">
+                      {loan.name[0]}
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-[#FAFAF8]">{loan.name}</p>
+                      <p className="text-[9px] font-black text-[#1D9E75] uppercase tracking-widest">Score: {loan.score}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest mb-1">Requesting</p>
+                        <p className="text-xl font-black text-[#FAFAF8] font-cabinet">{loan.amount}</p>
                       </div>
-                      <span className={`text-sm font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
-                        {req.borrower}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-8 py-10">
-                    <p className={`text-lg font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-[#D4AF37]' : 'text-[#1A1A1A]'}`}>{req.amount}</p>
-                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] mt-1">{req.term} @ {req.rate}</p>
-                  </td>
-                  <td className="px-8 py-10">
-                    <div className="flex items-center gap-3">
-                      <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
-                        ${req.score > 800 ? 'bg-[#10B981]/10 text-[#10B981]' : 'bg-[#D4AF37]/10 text-[#D4AF37]'}`}>
-                        {req.score} QP
+                      <div>
+                        <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest mb-1">Target Yield</p>
+                        <p className="text-xl font-black text-[#1D9E75] font-cabinet">{loan.yield}</p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-8 py-10">
-                    <div className="flex items-center gap-2">
-                      <iconify-icon icon="lucide:users-2" className="text-[#8C8C8C]"></iconify-icon>
-                      <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">{req.vouchers} Vouchers</span>
+
+                    <div className="flex flex-wrap gap-2">
+                       {loan.tags.map(t => (
+                         <span key={t} className="px-2 py-0.5 rounded bg-[#0A0F1E] border border-[#1E2A3A] text-[8px] font-black text-[#8C8C8C] uppercase">{t}</span>
+                       ))}
                     </div>
-                  </td>
-                  <td className="px-12 py-10 text-right">
-                    <button className="px-8 py-4 rounded-full bg-[#1A1A1A] text-white group-hover:bg-[#D4AF37] group-hover:text-black transition-all font-black text-[10px] tracking-[0.2em] uppercase dark:bg-[#D4AF37] dark:text-black dark:group-hover:bg-white active:scale-95">
-                      Fund Facility
-                    </button>
-                  </td>
-                </motion.tr>
+
+                    <Link to="/loan-request-detail" className="block w-full py-4 border border-[#F5A623] text-[#F5A623] rounded-[8px] text-[10px] font-black uppercase tracking-widest text-center hover:bg-[#F5A623] hover:text-black transition-all">
+                      Audit Request
+                    </Link>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
       </div>
     </AppShell>

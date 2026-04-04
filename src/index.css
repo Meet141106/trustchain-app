@@ -6,9 +6,15 @@
 @tailwind utilities;
 
 :root {
-  --gold: #D4AF37;
-  --gold-light: #C9A961;
-  --dark: #1A1A1A;
+  --background: #0A0F1E;
+  --card-bg: #111827;
+  --card-border: #1E2A3A;
+  --gold: #F5A623;
+  --teal: #1D9E75;
+  --amber: #F59E0B;
+  --coral-red: #EF4444;
+  --text-primary: #FAFAF8;
+  --text-secondary: #8C8C8C;
 }
 
 /* Base Styles */
@@ -18,6 +24,8 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  background-color: var(--background);
+  color: var(--text-primary);
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
