@@ -5,16 +5,16 @@ const path = require("path");
 async function main() {
   console.log("Starting Demo Setup on:", hre.network.name);
 
-  // 1. Get contract addresses from the published frontend file
-  const addressesPath = path.join(__dirname, "../../src/contracts/addresses.js");
-  if (!fs.existsSync(addressesPath)) {
-    throw new Error("Addresses file not found. Run deploy.js first.");
+  // 1. Get contract addresses from the config JSON (single source of truth)
+  const configPath = path.join(__dirname, "../../src/config/contracts.json");
+  if (!fs.existsSync(configPath)) {
+    throw new Error("contracts.json not found. Run deploy.js first.");
   }
-  const content = fs.readFileSync(addressesPath, 'utf8');
-  const trustTokenAddr = content.match(/TRUST_TOKEN: "([^"]+)"/)[1];
-  const lendingPoolAddr = content.match(/LENDING_POOL: "([^"]+)"/)[1];
-  const reputationNFTAddr = content.match(/REPUTATION_NFT: "([^"]+)"/)[1];
-  const vouchSystemAddr = content.match(/VOUCH_SYSTEM: "([^"]+)"/)[1];
+  const contracts = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  const trustTokenAddr = contracts.TrustToken;
+  const lendingPoolAddr = contracts.LendingPool;
+  const reputationNFTAddr = contracts.ReputationNFT;
+  const vouchSystemAddr = contracts.VouchSystem;
 
   console.log("Using contracts:");
   console.log("- TRUST:", trustTokenAddr);
@@ -42,6 +42,9 @@ async function main() {
   console.log("2. Transferring 500 TRUST to VOUCHER...");
   await trustToken.connect(deployer).transfer(voucher.address, trustUnits(500));
 
+  console.log("2b. Transferring 500 TRUST to BORROWER (for interest on repayments)...");
+  await trustToken.connect(deployer).transfer(borrower.address, trustUnits(500));
+
   console.log("3. Transferring 0.1 ETH/MATIC to BORROWER for gas...");
   // On local node, they already have 10000 ETH, so this is just protocol check
   await deployer.sendTransaction({ to: borrower.address, value: hre.ethers.parseEther("0.1") });
@@ -53,11 +56,14 @@ async function main() {
   console.log("5. Call lendingPool.updateTrustScore(BORROWER, 68)...");
   await lendingPool.connect(deployer).updateTrustScore(borrower.address, 68);
 
-  console.log("6. Mint ReputationNFT for BORROWER...");
-  // The updateTrustScore already synced the NFT if it existed, but we need to mint it first
-  // Actually, we'll mint it now.
-  await lendingPool.connect(deployer).mintReputationNFT(borrower.address);
-  // Re-syncing score to 68 since mint default is 30
+  console.log("6. Mint ReputationNFT for BORROWER (if not already minted)...");
+  try {
+    await lendingPool.connect(deployer).mintReputationNFT(borrower.address);
+    console.log("   ✓ NFT minted");
+  } catch (e) {
+    console.log("   ⏭ NFT already exists, skipping mint");
+  }
+  // Re-sync score to 68 since mint defaults to 30
   await lendingPool.connect(deployer).updateTrustScore(borrower.address, 68);
 
   // 7. Log final state

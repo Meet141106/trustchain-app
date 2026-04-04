@@ -555,7 +555,7 @@ function StepFirstAction({ wallet, role, navigate }) {
 /* ═══════════════════════ ROOT COMPONENT ═══════════════════════ */
 export default function Onboarding() {
   const navigate = useNavigate();
-  const wallet   = sessionStorage.getItem('tl_wallet') || '';
+  const wallet   = localStorage.getItem('tl_wallet') || '';
   const [step, setStep]       = useState(0);
   const [snapshot, setSnapshot] = useState(null);
   const [role, setRole]       = useState('');

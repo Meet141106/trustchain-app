@@ -37,8 +37,8 @@ contract LendingPool is Ownable, ReentrancyGuard, Pausable {
        ENUMS
     ═══════════════════════════════════════════ */
 
-    /// @notice Loan lifecycle status.
-    enum LoanStatus { Active, Repaid, Defaulted, Liquidated }
+    /// @notice Loan lifecycle status. None = 0 (default for uninitialized storage).
+    enum LoanStatus { None, Active, Repaid, Defaulted, Liquidated }
 
     /// @notice Determines interest rate applied to the loan.
     enum LoanPath  { VouchBacked, Collateral, TrustOnly }
@@ -105,10 +105,11 @@ contract LendingPool is Ownable, ReentrancyGuard, Pausable {
     uint256 private constant RATE_TRUST_ONLY = 710;   // 7.1%
 
     /// @dev Trust score bands → maximum borrow amounts (in TRUST, 18 decimals)
-    uint256 private constant LIMIT_ENTRY    = 10   * 1e18;  // score 30-39
-    uint256 private constant LIMIT_BRONZE   = 50   * 1e18;  // score 40-59
-    uint256 private constant LIMIT_SILVER   = 200  * 1e18;  // score 60-79
-    uint256 private constant LIMIT_GOLD     = 500  * 1e18;  // score 80-100
+    /// MUST match src/config/tiers.js exactly
+    uint256 private constant LIMIT_BRONZE    = 10    * 1e18;  // score 30-49
+    uint256 private constant LIMIT_SILVER    = 200   * 1e18;  // score 50-69
+    uint256 private constant LIMIT_GOLD      = 500   * 1e18;  // score 70-89
+    uint256 private constant LIMIT_PLATINUM  = 1000  * 1e18;  // score 90-100
 
     /// @dev Default number of equal installments per loan
     uint8 private constant DEFAULT_INSTALLMENTS = 4;
@@ -543,10 +544,11 @@ contract LendingPool is Ownable, ReentrancyGuard, Pausable {
      */
     function getBorrowLimit(address borrower) public view returns (uint256) {
         uint8 score = trustScores[borrower];
-        if (score >= 80) return LIMIT_GOLD;
-        if (score >= 60) return LIMIT_SILVER;
-        if (score >= 40) return LIMIT_BRONZE;
-        return LIMIT_ENTRY;
+        if (score >= 90) return LIMIT_PLATINUM;
+        if (score >= 70) return LIMIT_GOLD;
+        if (score >= 50) return LIMIT_SILVER;
+        if (score >= 30) return LIMIT_BRONZE;
+        return 0; // score < 30 = cannot borrow
     }
 
     /**

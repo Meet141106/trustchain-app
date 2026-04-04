@@ -80,8 +80,8 @@ export default function ConnectWallet() {
       setPhase(3);
       await upsertUser(address);
 
-      // persist wallet in sessionStorage so Onboarding can read it
-      sessionStorage.setItem('tl_wallet', address.toLowerCase());
+      // persist wallet in localStorage so Onboarding can read it
+      localStorage.setItem('tl_wallet', address.toLowerCase());
 
       // Phase 4 – done
       setPhase(4);

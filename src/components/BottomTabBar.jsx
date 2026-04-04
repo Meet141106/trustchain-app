@@ -1,18 +1,16 @@
 import { Home, TrendingUp, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useStore } from '../store';
 
 export default function BottomTabBar() {
   const location = useLocation();
-  const role = useStore((state) => state.user.role);
   
   const getTabClass = (path) => {
     return location.pathname === path ? 'text-[#F5A623]' : 'text-gray-400';
   };
 
-  const homePath = role === 'lender' ? '/lender-dashboard' : '/borrower-dashboard';
+  const homePath = '/dashboard';
   const investPath = '/marketplace';
-  const profilePath = '/profile';
+  const profilePath = '/reputation';
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-[88px] bg-[#0F1420] border-t border-white/5 flex items-center justify-around px-4 z-50">

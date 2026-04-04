@@ -7,6 +7,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import toast from 'react-hot-toast';
+import { syncWalletState } from '../lib/syncWallet';
 
 export const AMOY_CHAIN_ID  = 80002;
 export const LOCAL_CHAIN_ID = 31337;
@@ -64,6 +65,11 @@ export function WalletProvider({ children }) {
       setProvider(p);
       setSigner(s);
       setBalance(bal);
+
+      // Sync on-chain state → Supabase on every connection
+      syncWalletState(address, p).catch(e =>
+        console.warn('[WalletContext] sync error:', e)
+      );
     } catch (e) {
       console.warn('[WalletContext] hydrate error:', e);
     }
@@ -74,14 +80,14 @@ export function WalletProvider({ children }) {
     setWalletAddress(lower);
     setChainId(Number(cid));
     setIsConnected(true);
-    sessionStorage.setItem('tl_wallet', lower);
+    localStorage.setItem('tl_wallet', lower);
     hydrateEthers(lower);
   }, [hydrateEthers]);
 
   useEffect(() => {
     if (!window.ethereum) return;
     const autoReconnect = async () => {
-      const saved = sessionStorage.getItem('tl_wallet');
+      const saved = localStorage.getItem('tl_wallet');
       if (!saved) return;
       try {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
@@ -170,7 +176,7 @@ export function WalletProvider({ children }) {
     setSigner(null);
     setBalance('0.00');
     setIsConnected(false);
-    sessionStorage.removeItem('tl_wallet');
+    localStorage.removeItem('tl_wallet');
   }, []);
 
   return (

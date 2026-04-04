@@ -65,7 +65,7 @@ export function useLendingPool() {
             setBorrowLimit(ethers.formatUnits(limit, 18));
             
             const loan = await contract.getLoan(walletAddress);
-            if (loan && loan.amount > 0n) {
+            if (loan && Number(loan.status) === 1) {
                 const owed = await contract.getTotalOwed(walletAddress);
                 setUserLoan({
                     amount: ethers.formatUnits(loan.amount, 18),
