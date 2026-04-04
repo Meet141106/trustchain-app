@@ -62,6 +62,21 @@ export const explorerAddrUrl = (addr) => \`\${ADDRESSES.EXPLORER}/address/\${add
   fs.writeFileSync(addressesPath, addressesContent);
   console.log("✓ Addresses written to frontend.");
 
+  // 7b. Write contracts.json (used by src/lib/blockchain.js)
+  const contractsJsonPath = path.join(__dirname, "../../src/lib/contracts.json");
+  const contractsJson = {
+    network: hre.network.name,
+    chainId: String(hre.network.config.chainId || 31337),
+    deployedAt: new Date().toISOString(),
+    StableToken: trustTokenAddr,
+    TrustToken: trustTokenAddr,
+    LendingPool: lendingPoolAddr,
+    ReputationNFT: reputationNFTAddr,
+    VouchSystem: vouchSystemAddr,
+  };
+  fs.writeFileSync(contractsJsonPath, JSON.stringify(contractsJson, null, 2));
+  console.log("✓ contracts.json written to src/lib/.");
+
   // 8. Auto-export ABIs to frontend src/contracts/
   const contractsDir = path.join(__dirname, "../../src/contracts");
   const abiFiles = [
@@ -83,6 +98,41 @@ export const explorerAddrUrl = (addr) => \`\${ADDRESSES.EXPLORER}/address/\${add
   console.log("LendingPool:", lendingPoolAddr);
   console.log("ReputationNFT:", reputationNFTAddr);
   console.log("VouchSystem:", vouchSystemAddr);
+  console.log("──────────────────────────────────────────────────");
+
+  // ═══════════════════════════════════════════
+  // 9. DEMO SETUP — ready-to-use for hackathon demo
+  // ═══════════════════════════════════════════
+  console.log("\n🎮 Setting up demo state...");
+
+  const signers = await hre.ethers.getSigners();
+  const borrower = signers[1];  // Hardhat account #1
+  const lenderAcct = signers[2];   // Hardhat account #2
+
+  // a) Transfer TRUST to lender so they can deposit
+  console.log("  → Transferring 10,000 TRUST to lender", lenderAcct.address);
+  await trustToken.transfer(lenderAcct.address, hre.ethers.parseEther("10000"));
+
+  // b) Lender approves and deposits into pool
+  console.log("  → Lender depositing 8,000 TRUST into pool...");
+  await trustToken.connect(lenderAcct).approve(lendingPoolAddr, hre.ethers.parseEther("8000"));
+  await lendingPool.connect(lenderAcct).depositToPool(hre.ethers.parseEther("8000"));
+
+  // c) Set borrower trust score (68 = Silver tier, $200 limit)
+  console.log("  → Setting borrower trust score to 68 (Silver Tier)...");
+  await lendingPool.updateTrustScore(borrower.address, 68);
+
+  // d) Mint reputation NFT for borrower
+  console.log("  → Minting ReputationNFT for borrower...");
+  await lendingPool.mintReputationNFT(borrower.address);
+  // Re-sync score since mint defaults to 30
+  await lendingPool.updateTrustScore(borrower.address, 68);
+
+  console.log("──────────────────────────────────────────────────");
+  console.log("🎮 DEMO STATE READY");
+  console.log("  Borrower:", borrower.address, "(Account #1 in MetaMask)");
+  console.log("  Borrower Trust Score: 68 (Silver Tier, limit $200)");
+  console.log("  Pool Liquidity: 508,000+ TRUST");
   console.log("──────────────────────────────────────────────────");
 }
 
