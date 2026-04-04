@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.cdnfonts.com/css/satoshi');
+    
+    :root {
+      --navy: #0A0F1E;
+      --gold: #F5A623;
+      --teal: #2DD4BF;
+    }
+
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background-color: var(--navy);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    .gold-glow {
+      text-shadow: 0 0 15px rgba(245, 166, 35, 0.2);
+    }
+
+    .blur-blob {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(245, 166, 35, 0.06) 0%, rgba(10, 15, 30, 0) 70%);
+      filter: blur(40px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+  <style>sd-component { display: block; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/petite-vue@0.4.1/dist/petite-vue.iife.js" defer init></script>
+</head>
+<body>
+  <div class="w-full h-screen flex flex-col bg-[#0A0F1E] relative overflow-hidden">
+    
+    <!-- Background Effects -->
+    <div class="blur-blob -top-20 -left-20"></div>
+    <div class="blur-blob top-1/2 -right-20"></div>
+
+    <!-- Persistent Header Component -->
+    <!-- component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+<div v-scope="{ ...{&quot;homeHref&quot;:&quot;https://draft-86f3e69d-7c2e-46d2-b819-1484ce374498.preview.superdesign.dev&quot;}, $emit() {} }">
+<header class="shrink-0 pt-14 px-8 z-10"><a :href="homeHref" class="flex items-center gap-2 no-underline text-inherit"><div class="w-8 h-8 rounded-lg bg-[#F5A623] flex items-center justify-center shadow-lg shadow-[#F5A623]/20"><iconify-icon icon="lucide:landmark" class="text-[#0A0F1E] text-lg"></iconify-icon></div><span class="font-bold text-xl tracking-tight text-white">TrustLend</span></a></header>
+</div>
+<!-- /component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+
+    <main class="flex-1 overflow-y-auto px-6 pt-6 pb-24 z-10">
+      <!-- Top Stats Section -->
+      <section class="mb-8">
+        <div class="flex flex-col gap-6">
+          <div>
+            <p class="text-gray-400 text-xs uppercase tracking-widest font-bold mb-1">Total Deployed</p>
+            <div class="flex items-baseline gap-2">
+              <span class="text-4xl font-bold tracking-tight text-white">$12,450</span>
+              <span class="text-sm text-emerald-400 font-medium">+4.2%</span>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+              <p class="text-gray-500 text-[10px] uppercase tracking-widest font-bold mb-1">Monthly APY</p>
+              <p class="text-xl font-bold text-[#F5A623] gold-glow">12.4%</p>
+            </div>
+            <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+              <p class="text-gray-500 text-[10px] uppercase tracking-widest font-bold mb-1">Active Loans</p>
+              <p class="text-xl font-bold">18</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active Loans List -->
+      <section class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold">Active Funding</h2>
+          <span class="text-xs text-gray-400">In good standing</span>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <!-- Loan Card 1 -->
+          <div class="bg-[#0F1420] p-4 rounded-2xl border border-white/5 flex flex-col gap-4">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center border border-white/10">
+                  <span class="text-xs font-bold">72</span>
+                </div>
+                <div>
+                  <p class="text-sm font-bold">Borrower #2941</p>
+                  <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Silver Reputation</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 px-2 py-1 rounded-full bg-emerald-500/10">
+                <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                <span class="text-[10px] font-bold text-emerald-400 uppercase">Healthy</span>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-end border-t border-white/5 pt-3">
+              <div class="flex flex-col">
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Funded Amount</span>
+                <span class="text-base font-bold">$1,200</span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Rate</span>
+                <span class="text-base font-bold text-[#F5A623]">14%</span>
+              </div>
+              <div class="flex flex-col items-end">
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Ends In</span>
+                <span class="text-base font-bold">12 Days</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loan Card 2 -->
+          <div class="bg-[#0F1420] p-4 rounded-2xl border border-white/5 flex flex-col gap-4">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center border border-white/10">
+                  <span class="text-xs font-bold">88</span>
+                </div>
+                <div>
+                  <p class="text-sm font-bold">Borrower #1082</p>
+                  <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider">Gold Reputation</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 px-2 py-1 rounded-full bg-amber-500/10">
+                <div class="w-2 h-2 rounded-full bg-[#F5A623]"></div>
+                <span class="text-[10px] font-bold text-[#F5A623] uppercase">At Risk</span>
+              </div>
+            </div>
+            
+            <div class="flex justify-between items-end border-t border-white/5 pt-3">
+              <div class="flex flex-col">
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Funded Amount</span>
+                <span class="text-base font-bold">$2,500</span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Rate</span>
+                <span class="text-base font-bold text-[#F5A623]">11%</span>
+              </div>
+              <div class="flex flex-col items-end">
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Ends In</span>
+                <span class="text-base font-bold">4 Days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Marketplace Link -->
+      <div class="mt-4">
+        <a href="https://draft-efb2cc33-6230-46b6-8890-4a19567c3d76.preview.superdesign.dev" id="cta-marketplace" class="w-full h-14 bg-[#F5A623] rounded-2xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all font-bold text-[#0A0F1E] shadow-xl shadow-[#F5A623]/20">
+          <iconify-icon icon="lucide:search" class="text-xl"></iconify-icon>
+          Browse Loan Requests
+        </a>
+      </div>
+
+      <!-- Bottom Meta Stats -->
+      <div class="mt-10 py-6 border-t border-white/5 flex items-center justify-between">
+        <div>
+          <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Lifetime Interest</p>
+          <p class="text-lg font-bold text-emerald-400">+$3,421.80</p>
+        </div>
+        <a href="https://draft-6d8cca20-dcc0-4825-98b2-34e77636ad65.preview.superdesign.dev" id="history-link" class="text-[10px] text-gray-400 font-bold uppercase border-b border-gray-400/30 pb-0.5">View History</a>
+      </div>
+    </main>
+
+    <!-- Persistent Navigation Bar -->
+    <!-- component: BottomTabBar (f4af316d-a3ce-499f-a7c9-bcbd63afc6a8) -->
+<div v-scope="{ ...{&quot;activeItem&quot;:&quot;home&quot;,&quot;homeHref&quot;:&quot;https://draft-86f3e69d-7c2e-46d2-b819-1484ce374498.preview.superdesign.dev&quot;,&quot;investHref&quot;:&quot;https://draft-338de2ed-6c6c-4611-9375-1c41a1faea6e.preview.superdesign.dev&quot;,&quot;profileHref&quot;:&quot;https://draft-17f03956-158b-4529-a577-c6bc613e4392.preview.superdesign.dev&quot;}, $emit() {} }">
+<nav class="fixed bottom-0 left-0 right-0 h-[88px] bg-[#0F1420] border-t border-white/5 flex items-center justify-around px-4 z-50"><a :href="homeHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'home' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:home" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Home</span></a><a :href="investHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'invest' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:trending-up" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Invest</span></a><a :href="profileHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'profile' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:user" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Profile</span></a></nav>
+</div>
+<!-- /component: BottomTabBar (f4af316d-a3ce-499f-a7c9-bcbd63afc6a8) -->
+
+  </div>
+</body>
+</html>

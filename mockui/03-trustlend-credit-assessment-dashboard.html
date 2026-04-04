@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.cdnfonts.com/css/satoshi');
+    
+    :root {
+      --navy: #0A0F1E;
+      --gold: #F5A623;
+      --teal: #2DD4BF;
+    }
+
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background-color: var(--navy);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    .gold-glow {
+      text-shadow: 0 0 20px rgba(245, 166, 35, 0.4);
+    }
+
+    .blur-blob {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(245, 166, 35, 0.08) 0%, rgba(10, 15, 30, 0) 70%);
+      filter: blur(40px);
+      z-index: 0;
+    }
+
+    .score-gradient {
+      background: conic-gradient(from 180deg at 50% 50%, #F5A623 0deg, #F5A623 260deg, rgba(255, 255, 255, 0.1) 260deg, rgba(255, 255, 255, 0.1) 360deg);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+    }
+  </style>
+  <style>sd-component { display: block; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/petite-vue@0.4.1/dist/petite-vue.iife.js" defer init></script>
+</head>
+<body>
+  <div class="w-full h-screen flex flex-col bg-[#0A0F1E] relative overflow-hidden">
+    
+    <!-- Decorative Background Elements -->
+    <div class="blur-blob -top-20 -right-20"></div>
+    <div class="blur-blob top-1/2 -left-40"></div>
+
+    <!-- Header -->
+    <!-- component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+<div v-scope="{ ...{&quot;homeHref&quot;:&quot;https://draft-86f3e69d-7c2e-46d2-b819-1484ce374498.preview.superdesign.dev&quot;}, $emit() {} }">
+<header class="shrink-0 pt-14 px-8 z-10"><a :href="homeHref" class="flex items-center gap-2 no-underline text-inherit"><div class="w-8 h-8 rounded-lg bg-[#F5A623] flex items-center justify-center shadow-lg shadow-[#F5A623]/20"><iconify-icon icon="lucide:landmark" class="text-[#0A0F1E] text-lg"></iconify-icon></div><span class="font-bold text-xl tracking-tight text-white">TrustLend</span></a></header>
+</div>
+<!-- /component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto px-6 pt-6 pb-24 z-10">
+      
+      <!-- Profile Header -->
+      <div class="flex items-center justify-between mb-8">
+        <div class="flex flex-col">
+          <span class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Profile</span>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-mono text-gray-300">0x71C...3d8f</span>
+            <iconify-icon icon="lucide:copy" class="text-gray-500 text-xs cursor-pointer hover:text-white"></iconify-icon>
+          </div>
+        </div>
+        <div class="px-3 py-1.5 rounded-full bg-[#F5A623]/10 border border-[#F5A623]/20 flex items-center gap-2">
+          <iconify-icon icon="lucide:shield-check" class="text-[#F5A623]"></iconify-icon>
+          <span class="text-xs font-bold text-[#F5A623] uppercase tracking-wide">Silver Borrower</span>
+        </div>
+      </div>
+
+      <!-- Credit Score Meter -->
+      <div class="relative flex flex-col items-center justify-center mb-10">
+        <div class="w-56 h-56 rounded-full flex items-center justify-center relative">
+          <!-- Circular Progress Ring (CSS Conic Gradient) -->
+          <div class="absolute inset-0 rounded-full score-gradient rotate-[215deg] opacity-80 shadow-[0_0_40px_rgba(245,166,35,0.1)]"></div>
+          <div class="absolute inset-4 rounded-full bg-[#0A0F1E]"></div>
+          
+          <!-- Score Text -->
+          <div class="relative flex flex-col items-center">
+            <span class="text-6xl font-bold text-[#F5A623] gold-glow tracking-tight">72</span>
+            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-[0.2em] mt-1">Credit Score</span>
+          </div>
+        </div>
+
+        <!-- Tier Status Below Meter -->
+        <div class="mt-8 w-full">
+          <div class="flex justify-between items-end mb-2">
+            <div class="flex flex-col">
+              <span class="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Tier Progression</span>
+              <span class="text-sm font-bold text-white">Next: Gold</span>
+            </div>
+            <span class="text-xs text-gray-400">18pts to upgrade</span>
+          </div>
+          <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-[#F5A623] to-[#D48A1B] rounded-full" style="width: 72%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reputation Stats Grid -->
+      <div class="grid grid-cols-2 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5">
+          <iconify-icon icon="lucide:check-circle" class="text-[#2DD4BF] text-xl mb-3"></iconify-icon>
+          <div class="text-2xl font-bold text-white">12</div>
+          <div class="text-[10px] uppercase font-bold text-gray-500 tracking-wider mt-1">Loans Repaid</div>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <iconify-icon icon="lucide:coins" class="text-[#F5A623] text-xl mb-3"></iconify-icon>
+          <div class="text-2xl font-bold text-white">$4,250</div>
+          <div class="text-[10px] uppercase font-bold text-gray-500 tracking-wider mt-1">Total Repaid</div>
+        </div>
+      </div>
+
+      <!-- Soulbound NFT Section -->
+      <div class="mb-4">
+        <span class="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-4 block">Your Reputation NFT</span>
+        <a href="https://draft-17f03956-158b-4529-a577-c6bc613e4392.preview.superdesign.dev" id="nft-showcase-card" class="block glass-card rounded-3xl p-6 relative overflow-hidden group">
+          <div class="relative z-10 flex items-center gap-6">
+            <div class="w-24 h-24 shrink-0 rounded-2xl bg-gradient-to-br from-[#0F1420] to-[#1A2235] border border-white/10 flex items-center justify-center relative">
+              <div class="absolute inset-0 opacity-20 pointer-events-none">
+                <svg width="100%" height="100%" viewBox="0 0 100 100">
+                  <path d="M10,10 L90,90 M90,10 L10,90" stroke="#F5A623" stroke-width="0.5" fill="none" />
+                  <circle cx="50" cy="50" r="20" stroke="#F5A623" stroke-width="0.5" fill="none" />
+                </svg>
+              </div>
+              <iconify-icon icon="lucide:award" class="text-4xl text-[#F5A623]"></iconify-icon>
+            </div>
+            <div class="flex flex-col">
+              <h3 class="font-bold text-lg mb-1">Silver Passport #724</h3>
+              <p class="text-sm text-gray-400 mb-3">Soulbound Identity Token</p>
+              <span class="text-xs font-bold text-[#2DD4BF] flex items-center gap-1">
+                Verified Reputation
+                <iconify-icon icon="lucide:chevron-right" class="text-xs"></iconify-icon>
+              </span>
+            </div>
+          </div>
+          <!-- Glow decorative element -->
+          <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-[#F5A623]/10 blur-2xl rounded-full group-hover:bg-[#F5A623]/20 transition-all"></div>
+        </a>
+      </div>
+    </main>
+
+    <!-- Bottom Tab Bar -->
+    <!-- component: BottomTabBar (f4af316d-a3ce-499f-a7c9-bcbd63afc6a8) -->
+<div v-scope="{ ...{&quot;activeItem&quot;:&quot;profile&quot;,&quot;homeHref&quot;:&quot;https://draft-86f3e69d-7c2e-46d2-b819-1484ce374498.preview.superdesign.dev&quot;,&quot;investHref&quot;:&quot;https://draft-338de2ed-6c6c-4611-9375-1c41a1faea6e.preview.superdesign.dev&quot;,&quot;profileHref&quot;:&quot;https://draft-c80517e1-b249-4ec0-8bb1-060260ed2d66.preview.superdesign.dev&quot;}, $emit() {} }">
+<nav class="fixed bottom-0 left-0 right-0 h-[88px] bg-[#0F1420] border-t border-white/5 flex items-center justify-around px-4 z-50"><a :href="homeHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'home' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:home" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Home</span></a><a :href="investHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'invest' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:trending-up" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Invest</span></a><a :href="profileHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'profile' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:user" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Profile</span></a></nav>
+</div>
+<!-- /component: BottomTabBar (f4af316d-a3ce-499f-a7c9-bcbd63afc6a8) -->
+
+  </div>
+</body>
+</html>

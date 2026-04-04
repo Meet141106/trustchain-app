@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.cdnfonts.com/css/satoshi');
+    
+    :root {
+      --navy: #0A0F1E;
+      --gold: #F5A623;
+    }
+
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background-color: var(--navy);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    .gold-glow {
+      text-shadow: 0 0 20px rgba(245, 166, 35, 0.3);
+    }
+
+    .blur-blob {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(245, 166, 35, 0.08) 0%, rgba(10, 15, 30, 0) 70%);
+      filter: blur(40px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Prevent vertical scroll bounce on iOS */
+    html, body {
+      overflow: hidden;
+      height: 100%;
+    }
+  </style>
+  <style>sd-component { display: block; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/petite-vue@0.4.1/dist/petite-vue.iife.js" defer init></script>
+</head>
+<body>
+  <div class="w-full h-screen flex flex-col bg-[#0A0F1E] relative overflow-hidden">
+    
+    <!-- Decorative Background Elements -->
+    <div class="blur-blob -top-20 -left-20"></div>
+    <div class="blur-blob top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-50"></div>
+    <div class="blur-blob bottom-20 -right-20 opacity-30"></div>
+
+    <!-- Shared Header -->
+    <!-- component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+<div v-scope="{ ...{&quot;homeHref&quot;:&quot;#&quot;}, $emit() {} }">
+<header class="shrink-0 pt-14 px-8 z-10"><a :href="homeHref" class="flex items-center gap-2 no-underline text-inherit"><div class="w-8 h-8 rounded-lg bg-[#F5A623] flex items-center justify-center shadow-lg shadow-[#F5A623]/20"><iconify-icon icon="lucide:landmark" class="text-[#0A0F1E] text-lg"></iconify-icon></div><span class="font-bold text-xl tracking-tight text-white">TrustLend</span></a></header>
+</div>
+<!-- /component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col px-8 pt-6 z-10 overflow-y-auto">
+      <div class="mb-8">
+        <a href="#" id="back-nav-link" class="inline-flex items-center gap-2 text-gray-500 hover:text-white transition-colors mb-6">
+          <iconify-icon icon="lucide:chevron-left" class="text-xl"></iconify-icon>
+          <span class="text-sm font-medium">Back</span>
+        </a>
+        
+        <h1 class="text-3xl font-bold tracking-tight mb-2">
+          Connect Your <span class="text-[#F5A623] gold-glow">Wallet</span>
+        </h1>
+        <p class="text-gray-400 leading-relaxed">
+          Choose your preferred method to securely connect your reputation and access liquidity.
+        </p>
+      </div>
+
+      <!-- Wallet Options -->
+      <div class="flex flex-col gap-4">
+        <!-- MetaMask Card -->
+        <a href="https://draft-c80517e1-b249-4ec0-8bb1-060260ed2d66.preview.superdesign.dev" id="wallet-metamask-card" class="group flex items-center p-5 bg-white/5 border border-white/10 rounded-[24px] hover:bg-white/10 hover:border-[#F5A623]/30 transition-all active:scale-[0.98]">
+          <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
+            <iconify-icon icon="logos:metamask-icon" class="text-3xl"></iconify-icon>
+          </div>
+          <div class="ml-4 flex-1">
+            <h3 class="text-lg font-bold text-white mb-0.5">MetaMask</h3>
+            <p class="text-sm text-gray-400">Popular browser extension wallet</p>
+          </div>
+          <iconify-icon icon="lucide:chevron-right" class="text-gray-600 group-hover:text-[#F5A623] transition-colors"></iconify-icon>
+        </a>
+
+        <!-- WalletConnect Card -->
+        <a href="https://draft-c80517e1-b249-4ec0-8bb1-060260ed2d66.preview.superdesign.dev" id="wallet-walletconnect-card" class="group flex items-center p-5 bg-white/5 border border-white/10 rounded-[24px] hover:bg-white/10 hover:border-[#F5A623]/30 transition-all active:scale-[0.98]">
+          <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
+            <iconify-icon icon="logos:walletconnect" class="text-2xl"></iconify-icon>
+          </div>
+          <div class="ml-4 flex-1">
+            <h3 class="text-lg font-bold text-white mb-0.5">WalletConnect</h3>
+            <p class="text-sm text-gray-400">Connect via QR code or mobile app</p>
+          </div>
+          <iconify-icon icon="lucide:chevron-right" class="text-gray-600 group-hover:text-[#F5A623] transition-colors"></iconify-icon>
+        </a>
+
+        <!-- Trust/Info Card -->
+        <div class="mt-4 p-5 rounded-3xl bg-gradient-to-br from-[#F5A623]/10 to-transparent border border-[#F5A623]/10">
+          <div class="flex gap-3">
+            <iconify-icon icon="lucide:info" class="text-[#F5A623] text-xl shrink-0 mt-0.5"></iconify-icon>
+            <p class="text-sm text-gray-300 leading-snug">
+              TrustLend only reads your transaction history to determine your creditworthiness. We never store your private keys.
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer / Bottom Note -->
+    <footer class="shrink-0 pb-[34px] px-8 z-10">
+      <p class="text-center text-[10px] uppercase tracking-widest text-gray-500 font-bold">
+        Security verified by <span class="text-white">OpenZeppelin</span>
+      </p>
+    </footer>
+
+  </div>
+</body>
+</html>
