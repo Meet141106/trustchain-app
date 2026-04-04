@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <meta name="view-transition" content="same-origin">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.cdnfonts.com/css/satoshi');
+    
+    :root {
+      --navy: #0A0F1E;
+      --gold: #F5A623;
+      --teal: #2DD4BF;
+      --red: #EF4444;
+    }
+
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background-color: var(--navy);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    @view-transition {
+      navigation: auto;
+    }
+
+    ::view-transition-old(main-nav),
+    ::view-transition-new(main-nav) {
+      animation: none;
+      mix-blend-mode: normal;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .transaction-row:active {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .blur-blob {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(245, 166, 35, 0.05) 0%, rgba(10, 15, 30, 0) 70%);
+      filter: blur(40px);
+      z-index: 0;
+      pointer-events: none;
+    }
+  </style>
+  <style>sd-component { display: block; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/petite-vue@0.4.1/dist/petite-vue.iife.js" defer init></script>
+</head>
+<body class="bg-[#0A0F1E]">
+  <div class="w-full h-screen flex flex-col bg-[#0A0F1E] relative overflow-hidden">
+    <!-- Decorative Background -->
+    <div class="blur-blob -top-20 -right-20"></div>
+    <div class="blur-blob bottom-20 -left-20"></div>
+
+    <!-- Header -->
+    <!-- component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+<div v-scope="{ ...{&quot;homeHref&quot;:&quot;https://draft-86f3e69d-7c2e-46d2-b819-1484ce374498.preview.superdesign.dev&quot;}, $emit() {} }">
+<header class="shrink-0 pt-14 px-8 z-10"><a :href="homeHref" class="flex items-center gap-2 no-underline text-inherit"><div class="w-8 h-8 rounded-lg bg-[#F5A623] flex items-center justify-center shadow-lg shadow-[#F5A623]/20"><iconify-icon icon="lucide:landmark" class="text-[#0A0F1E] text-lg"></iconify-icon></div><span class="font-bold text-xl tracking-tight text-white">TrustLend</span></a></header>
+</div>
+<!-- /component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+
+    <!-- Page Title & Filter -->
+    <section class="shrink-0 px-8 pt-6 z-10">
+      <h1 class="text-2xl font-bold tracking-tight mb-6">History</h1>
+      
+      <!-- Filter Bar -->
+      <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2">
+        <button class="px-5 py-2.5 rounded-full bg-[#F5A623] text-[#0A0F1E] text-sm font-bold transition-all">All</button>
+        <button class="px-5 py-2.5 rounded-full bg-white/5 text-gray-400 text-sm font-medium hover:bg-white/10 transition-all border border-white/5">Loans</button>
+        <button class="px-5 py-2.5 rounded-full bg-white/5 text-gray-400 text-sm font-medium hover:bg-white/10 transition-all border border-white/5">Repayments</button>
+        <button class="px-5 py-2.5 rounded-full bg-white/5 text-gray-400 text-sm font-medium hover:bg-white/10 transition-all border border-white/5">Rewards</button>
+      </div>
+    </section>
+
+    <!-- Transactions List -->
+    <main class="flex-1 overflow-y-auto px-6 py-4 z-10 space-y-2 pb-[120px]" style="view-transition-name: main-content">
+      
+      <!-- Repayment - Teal -->
+      <div class="group">
+        <details class="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+          <summary class="list-none cursor-pointer flex items-center justify-between p-4">
+            <div class="flex items-center gap-4">
+              <div class="w-11 h-11 rounded-full bg-teal-400/10 flex items-center justify-center">
+                <iconify-icon icon="lucide:arrow-up-right" class="text-teal-400 text-xl"></iconify-icon>
+              </div>
+              <div>
+                <h3 class="font-bold text-base text-teal-400">Repayment</h3>
+                <p class="text-xs text-gray-500 font-medium">Oct 24, 2023</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-base">$1,250.00</p>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-teal-400/10 text-teal-400 border border-teal-400/20 mt-1">
+                Confirmed
+              </span>
+            </div>
+          </summary>
+          <div class="px-4 pb-4 pt-2 border-t border-white/5">
+            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Transaction Hash</p>
+            <p class="text-xs text-gray-400 font-mono break-all bg-black/30 p-2 rounded-lg mb-4">0x7a250d5630b4cf539739df2c5dacb4c659f2488d</p>
+            <a href="#" id="tx-explorer-1" class="flex items-center justify-center gap-2 text-xs font-bold text-[#F5A623] hover:underline underline-offset-4">
+              View on explorer
+              <iconify-icon icon="lucide:external-link"></iconify-icon>
+            </a>
+          </div>
+        </details>
+      </div>
+
+      <!-- Borrow - Neutral -->
+      <div class="group">
+        <details class="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+          <summary class="list-none cursor-pointer flex items-center justify-between p-4">
+            <div class="flex items-center gap-4">
+              <div class="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center">
+                <iconify-icon icon="lucide:arrow-down-left" class="text-white text-xl"></iconify-icon>
+              </div>
+              <div>
+                <h3 class="font-bold text-base text-white">Borrow</h3>
+                <p class="text-xs text-gray-500 font-medium">Oct 22, 2023</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-base">$2,000.00</p>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-teal-400/10 text-teal-400 border border-teal-400/20 mt-1">
+                Confirmed
+              </span>
+            </div>
+          </summary>
+          <div class="px-4 pb-4 pt-2 border-t border-white/5">
+            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Transaction Hash</p>
+            <p class="text-xs text-gray-400 font-mono break-all bg-black/30 p-2 rounded-lg mb-4">0xb4cf539739df2c5dacb4c659f2488d7a250d5630</p>
+            <a href="#" id="tx-explorer-2" class="flex items-center justify-center gap-2 text-xs font-bold text-[#F5A623]">
+              View on explorer
+              <iconify-icon icon="lucide:external-link"></iconify-icon>
+            </a>
+          </div>
+        </details>
+      </div>
+
+      <!-- Liquidation Warning - Red -->
+      <div class="group">
+        <details class="bg-white/[0.02] border border-red-500/20 rounded-2xl overflow-hidden transition-all duration-300">
+          <summary class="list-none cursor-pointer flex items-center justify-between p-4">
+            <div class="flex items-center gap-4">
+              <div class="w-11 h-11 rounded-full bg-red-500/10 flex items-center justify-center">
+                <iconify-icon icon="lucide:alert-triangle" class="text-red-500 text-xl"></iconify-icon>
+              </div>
+              <div>
+                <h3 class="font-bold text-base text-red-500">Risk Warning</h3>
+                <p class="text-xs text-gray-500 font-medium">Oct 20, 2023</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-base text-red-400">-</p>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20 mt-1">
+                System
+              </span>
+            </div>
+          </summary>
+          <div class="px-4 pb-4 pt-2 border-t border-white/5">
+            <p class="text-xs text-gray-400 leading-relaxed mb-4">Your health factor dropped below 1.2. Please add collateral to avoid potential liquidation of your active loan position.</p>
+            <a href="https://draft-70134bff-3035-443b-894e-b72281d4672b.preview.superdesign.dev" id="fix-health-link" class="flex items-center justify-center gap-2 text-xs font-bold text-red-400 bg-red-500/5 py-2 rounded-lg">
+              Manage Collateral
+            </a>
+          </div>
+        </details>
+      </div>
+
+      <!-- Reward - Gold -->
+      <div class="group">
+        <details class="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+          <summary class="list-none cursor-pointer flex items-center justify-between p-4">
+            <div class="flex items-center gap-4">
+              <div class="w-11 h-11 rounded-full bg-[#F5A623]/10 flex items-center justify-center">
+                <iconify-icon icon="lucide:star" class="text-[#F5A623] text-xl"></iconify-icon>
+              </div>
+              <div>
+                <h3 class="font-bold text-base text-[#F5A623]">Reward</h3>
+                <p class="text-xs text-gray-500 font-medium">Oct 15, 2023</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-base">$45.20</p>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#F5A623]/10 text-[#F5A623] border border-[#F5A623]/20 mt-1">
+                Pending
+              </span>
+            </div>
+          </summary>
+          <div class="px-4 pb-4 pt-2 border-t border-white/5">
+            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Claim Status</p>
+            <p class="text-xs text-gray-400 mb-4">Rewards are processed every 14 days. This will be available for withdrawal on Oct 29.</p>
+            <a href="#" id="tx-explorer-3" class="flex items-center justify-center gap-2 text-xs font-bold text-[#F5A623]">
+              Reward Details
+            </a>
+          </div>
+        </details>
+      </div>
+
+      <!-- Borrow - Neutral -->
+      <div class="group">
+        <details class="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+          <summary class="list-none cursor-pointer flex items-center justify-between p-4">
+            <div class="flex items-center gap-4">
+              <div class="w-11 h-11 rounded-full bg-white/5 flex items-center justify-center">
+                <iconify-icon icon="lucide:arrow-down-left" class="text-white text-xl"></iconify-icon>
+              </div>
+              <div>
+                <h3 class="font-bold text-base text-white">Borrow</h3>
+                <p class="text-xs text-gray-500 font-medium">Sep 30, 2023</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-base">$500.00</p>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-teal-400/10 text-teal-400 border border-teal-400/20 mt-1">
+                Confirmed
+              </span>
+            </div>
+          </summary>
+          <div class="px-4 pb-4 pt-2 border-t border-white/5">
+            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1">Transaction Hash</p>
+            <p class="text-xs text-gray-400 font-mono break-all bg-black/30 p-2 rounded-lg mb-4">0x39df2c5dacb4c659f2488d7a250d5630b4cf5397</p>
+            <a href="#" id="tx-explorer-4" class="flex items-center justify-center gap-2 text-xs font-bold text-[#F5A623]">
+              View on explorer
+              <iconify-icon icon="lucide:external-link"></iconify-icon>
+            </a>
+          </div>
+        </details>
+      </div>
+
+      <!-- Immutable Note -->
+      <div class="pt-8 pb-4">
+        <div class="flex flex-col items-center text-center px-6">
+          <iconify-icon icon="lucide:shield" class="text-gray-600 text-2xl mb-2"></iconify-icon>
+          <p class="text-[11px] text-gray-500 uppercase tracking-widest leading-relaxed font-bold">
+            All transactions are immutable <br/> and publicly verifiable on-chain.
+          </p>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Tab Bar -->
+    <!-- component: BottomTabBar (f4af316d-a3ce-499f-a7c9-bcbd63afc6a8) -->
+<div v-scope="{ ...{&quot;activeItem&quot;:&quot;profile&quot;,&quot;homeHref&quot;:&quot;https://draft-86f3e69d-7c2e-46d2-b819-1484ce374498.preview.superdesign.dev&quot;,&quot;investHref&quot;:&quot;https://draft-338de2ed-6c6c-4611-9375-1c41a1faea6e.preview.superdesign.dev&quot;,&quot;profileHref&quot;:&quot;https://draft-c80517e1-b249-4ec0-8bb1-060260ed2d66.preview.superdesign.dev&quot;}, $emit() {} }" style="view-transition-name: main-nav">
+<nav class="fixed bottom-0 left-0 right-0 h-[88px] bg-[#0F1420] border-t border-white/5 flex items-center justify-around px-4 z-50"><a :href="homeHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'home' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:home" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Home</span></a><a :href="investHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'invest' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:trending-up" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Invest</span></a><a :href="profileHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'profile' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:user" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Profile</span></a></nav>
+</div>
+<!-- /component: BottomTabBar (f4af316d-a3ce-499f-a7c9-bcbd63afc6a8) -->
+  </div>
+</body>
+</html>

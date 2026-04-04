@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.cdnfonts.com/css/satoshi');
+    
+    :root {
+      --navy: #0A0F1E;
+      --gold: #F5A623;
+      --teal: #14B8A6;
+    }
+
+    body {
+      font-family: 'Satoshi', sans-serif;
+      background-color: var(--navy);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    .gold-glow {
+      text-shadow: 0 0 15px rgba(245, 166, 35, 0.4);
+    }
+
+    .blur-blob {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(20, 184, 166, 0.08) 0%, rgba(10, 15, 30, 0) 70%);
+      filter: blur(40px);
+      z-index: 0;
+    }
+
+    .member-card.active {
+      border: 2px solid var(--gold);
+      box-shadow: 0 0 15px rgba(245, 166, 35, 0.15);
+    }
+  </style>
+  <style>sd-component { display: block; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/petite-vue@0.4.1/dist/petite-vue.iife.js" defer init></script>
+</head>
+<body>
+  <div class="w-full h-screen flex flex-col bg-[#0A0F1E] relative overflow-hidden">
+    <!-- Background Gradients -->
+    <div class="blur-blob -top-20 -right-20"></div>
+    <div class="blur-blob bottom-40 -left-20"></div>
+
+    <!-- Shared Header Component -->
+    <!-- component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+<div v-scope="{ ...{&quot;homeHref&quot;:&quot;https://draft-86f3e69d-7c2e-46d2-b819-1484ce374498.preview.superdesign.dev&quot;}, $emit() {} }">
+<header class="shrink-0 pt-14 px-8 z-10"><a :href="homeHref" class="flex items-center gap-2 no-underline text-inherit"><div class="w-8 h-8 rounded-lg bg-[#F5A623] flex items-center justify-center shadow-lg shadow-[#F5A623]/20"><iconify-icon icon="lucide:landmark" class="text-[#0A0F1E] text-lg"></iconify-icon></div><span class="font-bold text-xl tracking-tight text-white">TrustLend</span></a></header>
+</div>
+<!-- /component: Header (bd202092-713c-4cf4-9f6d-98b812d02225) -->
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto px-6 pt-6 pb-24 relative z-10">
+      
+      <!-- Group Identity Section -->
+      <div class="mb-8">
+        <div class="flex justify-between items-start">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight mb-1">Mumbai Circle #4</h2>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-full bg-[#14B8A6]/10 text-[#14B8A6] text-[10px] font-bold uppercase tracking-wider">Active Pool</span>
+              <span class="text-gray-500 text-xs">Formed Jan 2024</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-[#F5A623] text-xl font-bold leading-none">942</div>
+            <div class="text-gray-500 text-[10px] uppercase font-bold tracking-tighter">Group Score</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Members Row -->
+      <div class="mb-10">
+        <p class="text-gray-400 text-sm mb-4">Circle Members</p>
+        <div class="flex justify-between items-start">
+          <!-- Member 1 (Borrower) -->
+          <div class="flex flex-col items-center gap-2">
+            <div class="relative">
+              <div class="w-14 h-14 rounded-full border-2 border-[#F5A623] p-0.5">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Priya" alt="Priya" class="w-full h-full rounded-full bg-slate-800" />
+              </div>
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-[#14B8A6] border-2 border-[#0A0F1E] rounded-full flex items-center justify-center">
+                <iconify-icon icon="lucide:check" class="text-white text-[10px]"></iconify-icon>
+              </div>
+            </div>
+            <span class="text-xs font-semibold text-[#F5A623]">Priya</span>
+            <span class="text-[8px] bg-[#F5A623]/20 px-1.5 py-0.5 rounded text-[#F5A623] font-bold uppercase">Borrower</span>
+          </div>
+
+          <!-- Member 2 -->
+          <div class="flex flex-col items-center gap-2">
+            <div class="relative">
+              <div class="w-14 h-14 rounded-full border border-white/10 p-0.5 opacity-80">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Rahul" alt="Rahul" class="w-full h-full rounded-full bg-slate-800" />
+              </div>
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-[#14B8A6] border-2 border-[#0A0F1E] rounded-full flex items-center justify-center">
+                <iconify-icon icon="lucide:check" class="text-white text-[10px]"></iconify-icon>
+              </div>
+            </div>
+            <span class="text-xs font-medium text-gray-300">Rahul</span>
+          </div>
+
+          <!-- Member 3 -->
+          <div class="flex flex-col items-center gap-2">
+            <div class="relative">
+              <div class="w-14 h-14 rounded-full border border-white/10 p-0.5 opacity-80">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Anita" alt="Anita" class="w-full h-full rounded-full bg-slate-800" />
+              </div>
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-[#14B8A6] border-2 border-[#0A0F1E] rounded-full flex items-center justify-center">
+                <iconify-icon icon="lucide:check" class="text-white text-[10px]"></iconify-icon>
+              </div>
+            </div>
+            <span class="text-xs font-medium text-gray-300">Anita</span>
+          </div>
+
+          <!-- Member 4 -->
+          <div class="flex flex-col items-center gap-2">
+            <div class="relative">
+              <div class="w-14 h-14 rounded-full border border-white/10 p-0.5 opacity-80">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sunita" alt="Sunita" class="w-full h-full rounded-full bg-slate-800" />
+              </div>
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-[#14B8A6] border-2 border-[#0A0F1E] rounded-full flex items-center justify-center">
+                <iconify-icon icon="lucide:check" class="text-white text-[10px]"></iconify-icon>
+              </div>
+            </div>
+            <span class="text-xs font-medium text-gray-300">Sunita</span>
+          </div>
+
+          <!-- Member 5 (Requires Vouch) -->
+          <div class="flex flex-col items-center gap-2">
+            <div class="relative">
+              <div class="w-14 h-14 rounded-full border border-dashed border-white/30 p-0.5">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Deepak" alt="Deepak" class="w-full h-full rounded-full bg-slate-800 opacity-40" />
+              </div>
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-gray-600 border-2 border-[#0A0F1E] rounded-full flex items-center justify-center">
+                <iconify-icon icon="lucide:minus" class="text-white text-[10px]"></iconify-icon>
+              </div>
+            </div>
+            <span class="text-xs font-medium text-gray-500">Deepak</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Summary Card -->
+      <div class="bg-white/5 border border-white/10 rounded-3xl p-6 mb-6">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-[#14B8A6]/20 flex items-center justify-center">
+            <iconify-icon icon="lucide:users-2" class="text-[#14B8A6] text-xl"></iconify-icon>
+          </div>
+          <div>
+            <div class="text-gray-400 text-xs">Current Pool Loan</div>
+            <div class="text-2xl font-bold tracking-tight">$250.00</div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-sm">Your Responsibility</span>
+            <span class="font-semibold">$50.00</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-sm">Repayment Term</span>
+            <span class="font-semibold">12 Weeks</span>
+          </div>
+          <div class="flex justify-between items-center pt-4 border-t border-white/5">
+            <span class="text-gray-400 text-sm">Individual Vouch Status</span>
+            <span class="text-[#14B8A6] text-xs font-bold">4 / 5 Confirmed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Community Pledge Box -->
+      <div class="bg-[#F5A623]/5 border border-[#F5A623]/20 rounded-2xl p-4 mb-8">
+        <div class="flex gap-3">
+          <iconify-icon icon="lucide:alert-circle" class="text-[#F5A623] text-xl shrink-0 mt-0.5"></iconify-icon>
+          <div>
+            <p class="text-[#F5A623] text-sm font-bold mb-1">Community Pledge</p>
+            <p class="text-gray-400 text-xs leading-relaxed">
+              If one member defaults, the entire circle loses future access to higher loan tiers. Your vouching helps ensure group stability.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vouch Button (Custom since label differs from PrimaryButton default) -->
+      <a href="#" id="vouch-action-btn" class="w-full h-14 bg-[#F5A623] rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all font-bold text-lg text-[#0A0F1E] mb-4">
+        <iconify-icon icon="lucide:handshake" class="text-xl"></iconify-icon>
+        Vouch for Priya
+      </a>
+      
+      <button id="secondary-action-btn" class="w-full h-14 bg-white/5 rounded-2xl flex items-center justify-center font-bold text-gray-300 active:scale-[0.98] transition-all">
+        View Loan Details
+      </button>
+
+    </main>
+
+    <!-- Shared Navigation Component -->
+    <!-- component: BottomTabBar (f4af316d-a3ce-499f-a7c9-bcbd63afc6a8) -->
+<div v-scope="{ ...{&quot;activeItem&quot;:&quot;invest&quot;,&quot;homeHref&quot;:&quot;https://draft-86f3e69d-7c2e-46d2-b819-1484ce374498.preview.superdesign.dev&quot;,&quot;investHref&quot;:&quot;https://draft-74b255bd-7bbd-40a0-b5ae-a716c06d41f1.preview.superdesign.dev&quot;,&quot;profileHref&quot;:&quot;https://draft-17f03956-158b-4529-a577-c6bc613e4392.preview.superdesign.dev&quot;}, $emit() {} }">
+<nav class="fixed bottom-0 left-0 right-0 h-[88px] bg-[#0F1420] border-t border-white/5 flex items-center justify-around px-4 z-50"><a :href="homeHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'home' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:home" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Home</span></a><a :href="investHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'invest' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:trending-up" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Invest</span></a><a :href="profileHref" class="flex flex-col items-center gap-1 transition-colors hover:text-[#F5A623]" :class="activeItem === 'profile' ? 'text-[#F5A623]' : 'text-gray-400'"><iconify-icon icon="lucide:user" class="text-2xl"></iconify-icon><span class="text-[10px] font-bold uppercase tracking-widest">Profile</span></a></nav>
+</div>
+<!-- /component: BottomTabBar (f4af316d-a3ce-499f-a7c9-bcbd63afc6a8) -->
+
+  </div>
+</body>
+</html>

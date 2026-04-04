@@ -1,108 +1,56 @@
+import { Wallet, Ban, ShieldCheck, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Header from '../components/Header';
 
 export default function Onboarding() {
   return (
-    <div className="screen">
-      {/* Decorative blobs */}
-      <div className="blur-blob" style={{ top: -80, left: -80 }} />
-      <div className="blur-blob" style={{ bottom: 160, right: -80 }} />
-
-      {/* Header */}
-      <div className="screen__header">
-        <div className="app-header">
-          <div className="app-header__logo">
-            <iconify-icon icon="lucide:landmark"></iconify-icon>
+    <div className="flex-1 flex flex-col justify-center pb-8 h-full">
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="mb-10 relative">
+          <div className="w-24 h-24 rounded-3xl border border-[#F5A623]/20 rotate-12 absolute -top-4 -left-4"></div>
+          <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#F5A623] to-[#D48A1B] flex items-center justify-center shadow-2xl shadow-[#F5A623]/30 relative z-10">
+            <Wallet className="w-10 h-10 text-[#0A0F1E]" />
           </div>
-          <span className="app-header__brand">TrustLend</span>
+        </div>
+
+        <h1 className="text-[42px] leading-[1.1] font-bold tracking-tight mb-4">
+          Your wallet <br/>
+          <span className="text-[#F5A623] gold-glow">is your bank</span>
+        </h1>
+        
+        <p className="text-gray-400 text-lg leading-relaxed max-w-[280px]">
+          Access borderless credit instantly using your digital reputation.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 py-8 border-t border-white/5">
+        <div className="flex flex-col items-center text-center">
+          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2">
+            <Ban className="text-[#F5A623] w-5 h-5" />
+          </div>
+          <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold leading-tight">No bank required</span>
+        </div>
+        <div className="flex flex-col items-center text-center">
+          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2">
+            <ShieldCheck className="text-[#F5A623] w-5 h-5" />
+          </div>
+          <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold leading-tight">Data stays yours</span>
+        </div>
+        <div className="flex flex-col items-center text-center">
+          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2">
+            <Zap className="text-[#F5A623] w-5 h-5" />
+          </div>
+          <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold leading-tight">Loans in 60s</span>
         </div>
       </div>
 
-      {/* Main content */}
-      <main className="screen__body screen__body--no-tab" style={{ display: 'flex', flexDirection: 'column', padding: '0 32px' }}>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          {/* Hero graphic */}
-          <div className="animate-fade-in" style={{ marginBottom: 40, position: 'relative' }}>
-            <div style={{
-              width: 96, height: 96, borderRadius: 24,
-              border: '1px solid rgba(245,166,35,0.2)',
-              transform: 'rotate(12deg)',
-              position: 'absolute', top: -16, left: -16
-            }} />
-            <div style={{
-              width: 96, height: 96, borderRadius: 24,
-              background: 'linear-gradient(135deg, var(--gold), var(--gold-dark))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 16px 40px rgba(245,166,35,0.3)',
-              position: 'relative', zIndex: 1
-            }}>
-              <iconify-icon icon="lucide:wallet" width="36" height="36" style={{ color: 'var(--navy)' }}></iconify-icon>
-            </div>
-          </div>
-
-          {/* Hero text */}
-          <h1 className="text-display animate-fade-in-up animate-delay-1" style={{ marginBottom: 16 }}>
-            Your wallet <br />
-            <span className="text-gold gold-glow">is your bank</span>
-          </h1>
-          <p className="animate-fade-in-up animate-delay-2" style={{
-            color: 'var(--text-secondary)', fontSize: 18,
-            lineHeight: 1.6, maxWidth: 280
-          }}>
-            Access borderless credit instantly using your digital reputation.
-          </p>
-        </div>
-
-        {/* Trust indicators */}
-        <div className="animate-fade-in-up animate-delay-3" style={{
-          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 16, padding: '32px 0',
-          borderTop: '1px solid var(--border-subtle)'
-        }}>
-          {[
-            { icon: 'lucide:ban', text: 'No bank required' },
-            { icon: 'lucide:shield-check', text: 'Data stays yours' },
-            { icon: 'lucide:zap', text: 'Loans in 60s' },
-          ].map((item) => (
-            <div key={item.text} className="flex flex-col items-center text-center gap-2">
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.05)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
-                <iconify-icon icon={item.icon} width="18" height="18" style={{ color: 'var(--gold)' }}></iconify-icon>
-              </div>
-              <span className="text-micro" style={{ color: 'var(--text-tertiary)', lineHeight: 1.4 }}>{item.text}</span>
-            </div>
-          ))}
-        </div>
-      </main>
-
-      {/* Footer CTA */}
-      <footer className="screen__footer animate-fade-in-up animate-delay-4">
-        <div className="flex flex-col gap-4">
-          <Link to="/wallet" className="btn-primary" id="connect-wallet-btn">
-            <span style={{ fontWeight: 700, fontSize: 18 }}>Connect Wallet</span>
-            <div className="flex items-center" style={{ marginLeft: 4, gap: 0 }}>
-              <iconify-icon icon="logos:metamask-icon" width="20" height="20"></iconify-icon>
-              <iconify-icon icon="logos:walletconnect" width="16" height="16" style={{
-                background: 'white', borderRadius: '50%', padding: 2,
-                marginLeft: -4
-              }}></iconify-icon>
-            </div>
-          </Link>
-          <p className="text-center" style={{ color: 'var(--text-tertiary)', fontSize: 14 }}>
-            New to DeFi?{' '}
-            <Link to="#" id="learn-more-link" style={{
-              color: 'var(--text-primary)',
-              borderBottom: '1px solid rgba(255,255,255,0.2)',
-              paddingBottom: 2
-            }}>
-              Learn how it works
-            </Link>
-          </p>
-        </div>
-      </footer>
+      <div className="flex flex-col gap-4 mt-8">
+        <Link to="/wallet-selection" className="w-full h-14 bg-[#F5A623] rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all group">
+          <span className="text-[#0A0F1E] font-bold text-lg">Connect Wallet</span>
+        </Link>
+        <p className="text-center text-gray-500 text-sm">
+          New to DeFi? <a href="#" className="text-white border-b border-white/20 pb-0.5">Learn how it works</a>
+        </p>
+      </div>
     </div>
   );
 }
