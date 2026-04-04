@@ -15,9 +15,9 @@ export default function ReputationBreakdown() {
            {[
              { label: 'Financial Fidelity', score: '92/100', status: 'Optimal', sub: 'Based on 14 repayments', color: 'text-[#1D9E75]' },
              { label: 'Social Gravity', score: '64/100', status: 'Expanding', sub: '3 active vouch nodes', color: 'text-[#F5A623]' },
-             { label: 'Identity Density', score: '88/100', status: 'High', sub: 'Biometric & Social verified', color: 'text-[#FAFAF8]' }
+             { label: 'Identity Density', score: '88/100', status: 'High', sub: 'Biometric & Social verified', color: 'text-[#1A1A1A] dark:text-[#FAFAF8]' }
            ].map((f, i) => (
-             <div key={i} className="bg-[#111827] p-10 rounded-[12px] border border-[#1E2A3A] relative group">
+             <div key={i} className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A] relative group">
                 <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.3em] mb-4">{f.label}</p>
                 <div className="flex justify-between items-end mb-6">
                    <p className={`text-4xl font-black font-cabinet ${f.color}`}>{f.score}</p>
@@ -33,9 +33,9 @@ export default function ReputationBreakdown() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
            {/* Recent Impact Feed */}
-           <div className="bg-[#111827] rounded-[12px] border border-[#1E2A3A] overflow-hidden">
-              <div className="p-8 border-b border-[#1E2A3A]">
-                 <h3 className="text-sm font-black font-cabinet text-[#FAFAF8] uppercase tracking-widest">Recent Reputation Events</h3>
+           <div className="bg-white dark:bg-[#111827] rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A] overflow-hidden">
+              <div className="p-8 border-b border-[#E8E8E8] dark:border-[#1E2A3A]">
+                 <h3 className="text-sm font-black font-cabinet text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">Recent Reputation Events</h3>
               </div>
               <div className="divide-y divide-[#1E2A3A]">
                  {[
@@ -44,9 +44,9 @@ export default function ReputationBreakdown() {
                    { action: 'Wallet Inactivity Penalty', impact: '-2 pts', date: '14 days ago', positive: false },
                    { action: 'Governance Voting', impact: '+3 pts', date: '21 days ago', positive: true }
                  ].map((e, i) => (
-                   <div key={i} className="p-8 flex justify-between items-center bg-[#0A0F1E]/30">
+                   <div key={i} className="p-8 flex justify-between items-center bg-[#FAFAF8]/30 dark:bg-[#0A0F1E]/30">
                       <div>
-                         <p className="text-sm font-black text-[#FAFAF8]">{e.action}</p>
+                         <p className="text-sm font-black text-[#1A1A1A] dark:text-[#FAFAF8]">{e.action}</p>
                          <p className="text-[10px] text-[#8C8C8C] uppercase tracking-widest mt-1">{e.date}</p>
                       </div>
                       <span className={`text-sm font-black ${e.positive ? 'text-[#1D9E75]' : 'text-[#EF4444]'}`}>{e.impact}</span>
@@ -57,12 +57,12 @@ export default function ReputationBreakdown() {
 
            {/* AI Projection & Strategy */}
            <div className="space-y-8">
-              <div className="bg-[#111827] p-10 rounded-[12px] border border-[#1E2A3A] relative overflow-hidden">
+              <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A] relative overflow-hidden">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#F5A623] opacity-[0.05] blur-3xl"></div>
                  <h4 className="text-[10px] font-black text-[#F5A623] uppercase tracking-[0.3em] mb-8">AI Strategy Projection</h4>
                  <div className="space-y-6">
-                    <div className="bg-[#0A0F1E] p-6 rounded border border-[#1E2A3A]">
-                       <p className="text-[11px] text-[#FAFAF8] leading-relaxed">Based on your current transaction velocity, your score is projected to hit <span className="text-[#F5A623] font-black">72/100</span> in **14 days**. This will unlock the **Gold Borrower** tier and a **$500.00** limit.</p>
+                    <div className="bg-[#FAFAF8] dark:bg-[#0A0F1E] p-6 rounded border border-[#E8E8E8] dark:border-[#1E2A3A]">
+                       <p className="text-[11px] text-[#1A1A1A] dark:text-[#FAFAF8] leading-relaxed">Based on your current transaction velocity, your score is projected to hit <span className="text-[#F5A623] font-black">72/100</span> in **14 days**. This will unlock the **Gold Borrower** tier and a **$500.00** limit.</p>
                     </div>
                     <div className="space-y-4">
                        <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">Recommended Actions:</p>
@@ -70,8 +70,8 @@ export default function ReputationBreakdown() {
                          { label: 'Maintain Wallet Balance > $50', prize: '+4 pts' },
                          { label: 'Secure 1 more Voucher Node', prize: '+15 pts' }
                        ].map((r, i) => (
-                         <div key={i} className="flex justify-between items-center p-4 rounded border border-[#1E2A3A] bg-[#0A0F1E]/50">
-                            <span className="text-[10px] font-bold text-[#FAFAF8]">{r.label}</span>
+                         <div key={i} className="flex justify-between items-center p-4 rounded border border-[#E8E8E8] dark:border-[#1E2A3A] bg-[#FAFAF8]/50 dark:bg-[#0A0F1E]/50">
+                            <span className="text-[10px] font-bold text-[#1A1A1A] dark:text-[#FAFAF8]">{r.label}</span>
                             <span className="text-[9px] font-black text-[#F5A623] uppercase tracking-widest">{r.prize}</span>
                          </div>
                        ))}
@@ -80,7 +80,7 @@ export default function ReputationBreakdown() {
               </div>
 
               <div className="p-8 rounded-[12px] bg-[#1D9E75]/5 border border-[#1D9E75]/10">
-                 <p className="text-[10px] text-[#FAFAF8] leading-relaxed">Your **"Behavioral Fidelity"** is currently in the 98th percentile. This is your strongest asset for yield discounting.</p>
+                 <p className="text-[10px] text-[#1A1A1A] dark:text-[#FAFAF8] leading-relaxed">Your **"Behavioral Fidelity"** is currently in the 98th percentile. This is your strongest asset for yield discounting.</p>
               </div>
            </div>
         </div>

@@ -13,7 +13,7 @@ export default function TopHeader({ pageTitle = 'Dashboard', pageSubtitle = 'Ove
       <div className="flex items-center gap-6">
         <button 
           onClick={toggleMobile} 
-          className="lg:hidden w-12 h-12 flex items-center justify-center rounded-2xl bg-[#1A1A1A] text-white shadow-xl active:scale-90 transition-transform dark:bg-[#D4AF37] dark:text-black"
+          className="lg:hidden w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-[#E8E8E8] text-[#1A1A1A] shadow-lg active:scale-90 transition-transform dark:bg-[#D4AF37] dark:text-black"
         >
           <iconify-icon icon="lucide:menu" className="text-xl"></iconify-icon>
         </button>
@@ -49,7 +49,7 @@ export default function TopHeader({ pageTitle = 'Dashboard', pageSubtitle = 'Ove
         
         <button 
           id="connect-wallet-btn" 
-          className="flex items-center gap-4 px-6 py-3.5 md:px-10 md:py-4 rounded-full bg-[#1A1A1A] text-white hover:bg-[#D4AF37] transition-all duration-500 font-black text-[10px] md:text-xs tracking-[0.3em] uppercase luxury-shadow active:scale-95 group dark:bg-[#D4AF37] dark:text-black dark:hover:bg-white"
+          className="flex items-center gap-4 px-6 py-2.5 md:px-10 md:py-3.5 rounded-full border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white transition-all duration-500 font-bold text-[10px] md:text-sm tracking-wide uppercase active:scale-95 group dark:text-[#D4AF37]"
         >
           <span className="hidden sm:inline group-hover:translate-x-1 transition-transform">{walletAddress}</span> 
           <iconify-icon icon="lucide:wallet" className="text-xl"></iconify-icon>

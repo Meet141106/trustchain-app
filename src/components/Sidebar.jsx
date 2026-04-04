@@ -15,16 +15,16 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       lg:relative lg:translate-x-0 
       w-80 border-r transition-all duration-500 ease-in-out
       flex flex-col h-screen
-      ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8]'}
+      bg-white dark:bg-[#1A1A1A] border-[#E8E8E8] dark:border-[#333]
     `}>
       <div className="p-10 pb-16 flex justify-between items-center group">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-[1.2rem] bg-[#1A1A1A] flex items-center justify-center shadow-xl group-hover:rotate-12 transition-transform duration-500 dark:bg-[#D4AF37]">
-            <iconify-icon icon="lucide:shield-check" className={`text-2xl animate-pulse ${isDarkMode ? 'text-black' : 'text-[#D4AF37]'}`}></iconify-icon>
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#C9A961] flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-500">
+            <iconify-icon icon="lucide:crown" className="text-2xl text-white animate-pulse"></iconify-icon>
           </div>
           <div>
-            <span className={`text-xl font-black tracking-tighter font-cabinet block leading-none ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
-              TRUSTLEND
+            <span className="text-xl font-bold tracking-tight text-[#1A1A1A] dark:text-white block leading-none">
+              AETHER<span className="font-light opacity-60 ml-1">GOLD</span>
             </span>
             <span className="text-[9px] font-black tracking-[0.3em] text-[#D4AF37] uppercase leading-none mt-1 block">
               DECENTRALIZED CREDIT
@@ -49,13 +49,13 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 key={link.to}
                 to={link.to} 
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-5 px-6 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all group ${
+                className={`flex items-center gap-5 px-6 py-4 rounded-xl font-medium transition-all group ${
                   isActive(link.to) 
-                    ? (isDarkMode ? 'bg-[#D4AF37] text-black luxury-shadow scale-[1.02]' : 'bg-[#1A1A1A] text-white luxury-shadow scale-[1.02]')
-                    : `text-[#8C8C8C] hover:text-[#1A1A1A] hover:bg-[#FAFAF8] ${isDarkMode ? 'hover:text-white hover:bg-[#333]' : ''}`
+                    ? 'text-[#D4AF37] border-r-2 border-[#D4AF37] bg-[#D4AF37]/5'
+                    : 'text-[#8C8C8C] hover:text-[#D4AF37] hover:bg-[#D4AF37]/5'
                 }`}
               >
-                <iconify-icon icon={link.icon} className={`text-xl ${isActive(link.to) ? (isDarkMode ? 'text-black' : 'text-[#D4AF37]') : 'group-hover:text-[#1A1A1A] dark:group-hover:text-white'}`}></iconify-icon>
+                <iconify-icon icon={link.icon} className="text-xl"></iconify-icon>
                 {link.label}
               </Link>
             ))}
@@ -74,13 +74,13 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 key={link.to}
                 to={link.to} 
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-5 px-6 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all group ${
+                className={`flex items-center gap-5 px-6 py-4 rounded-xl font-medium transition-all group ${
                   isActive(link.to) 
-                    ? (isDarkMode ? 'bg-[#D4AF37] text-black luxury-shadow scale-[1.02]' : 'bg-[#1A1A1A] text-white luxury-shadow scale-[1.02]')
-                    : `text-[#8C8C8C] hover:text-[#1A1A1A] hover:bg-[#FAFAF8] ${isDarkMode ? 'hover:text-white hover:bg-[#333]' : ''}`
+                    ? 'text-[#D4AF37] border-r-2 border-[#D4AF37] bg-[#D4AF37]/5'
+                    : 'text-[#8C8C8C] hover:text-[#D4AF37] hover:bg-[#D4AF37]/5'
                 }`}
               >
-                <iconify-icon icon={link.icon} className={`text-xl ${isActive(link.to) ? (isDarkMode ? 'text-black' : 'text-[#D4AF37]') : 'group-hover:text-[#1A1A1A] dark:group-hover:text-white'}`}></iconify-icon>
+                <iconify-icon icon={link.icon} className="text-xl"></iconify-icon>
                 {link.label}
               </Link>
             ))}
@@ -99,13 +99,13 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 key={link.to}
                 to={link.to} 
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-5 px-6 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all group ${
+                className={`flex items-center gap-5 px-6 py-4 rounded-xl font-medium transition-all group ${
                   isActive(link.to) 
-                    ? (isDarkMode ? 'bg-[#D4AF37] text-black luxury-shadow scale-[1.02]' : 'bg-[#1A1A1A] text-white luxury-shadow scale-[1.02]')
-                    : `text-[#8C8C8C] hover:text-[#1A1A1A] hover:bg-[#FAFAF8] ${isDarkMode ? 'hover:text-white hover:bg-[#333]' : ''}`
+                    ? 'text-[#D4AF37] border-r-2 border-[#D4AF37] bg-[#D4AF37]/5'
+                    : 'text-[#8C8C8C] hover:text-[#D4AF37] hover:bg-[#D4AF37]/5'
                 }`}
               >
-                <iconify-icon icon={link.icon} className={`text-xl ${isActive(link.to) ? (isDarkMode ? 'text-black' : 'text-[#D4AF37]') : 'group-hover:text-[#1A1A1A] dark:group-hover:text-white'}`}></iconify-icon>
+                <iconify-icon icon={link.icon} className="text-xl"></iconify-icon>
                 {link.label}
               </Link>
             ))}
@@ -113,12 +113,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         </div>
       </nav>
       
-      <div className={`p-8 lg:p-10 border-t ${isDarkMode ? 'border-[#333]' : 'border-[#F5F3F0]'}`}>
-        <div className="p-8 rounded-[2.5rem] bg-[#1A1A1A] border border-[#D4AF37]/20 text-center relative overflow-hidden group/footer dark:bg-black">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/10 blur-[40px] group-hover/footer:scale-150 duration-700"></div>
-          <p className="text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.4em] mb-3">Sovereign Tier</p>
-          <h4 className="text-xl font-black font-cabinet tracking-tight text-white">
-            NOIR ELITE
+      <div className="p-8 lg:p-10 border-t border-[#E8E8E8] dark:border-[#333]">
+        <div className="p-6 rounded-3xl bg-[#FAFAF8] dark:bg-[#1A1A1A] border border-[#E8E8E8] dark:border-[#333] text-center">
+          <p className="text-xs font-semibold text-[#8C8C8C] uppercase tracking-widest mb-2">Tier Status</p>
+          <h4 className="text-lg font-bold bg-gradient-to-br from-[#D4AF37] to-[#8A6E2F] bg-clip-text text-transparent">
+            PREMIUM NOIR
           </h4>
         </div>
       </div>
