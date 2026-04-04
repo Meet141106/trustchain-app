@@ -20,14 +20,14 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       <div className="p-10 pb-16 flex justify-between items-center group">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-[1.2rem] bg-[#1A1A1A] flex items-center justify-center shadow-xl group-hover:rotate-12 transition-transform duration-500 dark:bg-[#D4AF37]">
-            <iconify-icon icon="lucide:crown" className={`text-2xl animate-pulse ${isDarkMode ? 'text-black' : 'text-[#D4AF37]'}`}></iconify-icon>
+            <iconify-icon icon="lucide:shield-check" className={`text-2xl animate-pulse ${isDarkMode ? 'text-black' : 'text-[#D4AF37]'}`}></iconify-icon>
           </div>
           <div>
             <span className={`text-xl font-black tracking-tighter font-cabinet block leading-none ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
-              AETHERFI
+              TRUSTLEND
             </span>
             <span className="text-[9px] font-black tracking-[0.3em] text-[#D4AF37] uppercase leading-none mt-1 block">
-              PRIVATE WEALTH
+              DECENTRALIZED CREDIT
             </span>
           </div>
         </div>
@@ -39,11 +39,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       <nav className="flex-1 px-8 space-y-4 overflow-y-auto hide-scrollbar">
         <div className="mb-10">
           <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Main Terminal</p>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[
               { to: '/dashboard', label: 'Solvent Terminal', icon: 'lucide:layout-grid' },
               { to: '/borrow', label: 'Credit Drawdown', icon: 'lucide:landmark' },
-              { to: '/group', label: 'Syndicate Circles', icon: 'lucide:users-2' }
+              { to: '/marketplace', label: 'Liquidity Archway', icon: 'lucide:shopping-bag' }
             ].map((link) => (
               <Link 
                 key={link.to}
@@ -51,7 +51,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-5 px-6 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all group ${
                   isActive(link.to) 
-                    ? (isDarkMode ? 'bg-[#D4AF37] text-black luxury-shadow scale-105' : 'bg-[#1A1A1A] text-white luxury-shadow scale-105')
+                    ? (isDarkMode ? 'bg-[#D4AF37] text-black luxury-shadow scale-[1.02]' : 'bg-[#1A1A1A] text-white luxury-shadow scale-[1.02]')
                     : `text-[#8C8C8C] hover:text-[#1A1A1A] hover:bg-[#FAFAF8] ${isDarkMode ? 'hover:text-white hover:bg-[#333]' : ''}`
                 }`}
               >
@@ -63,11 +63,12 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         </div>
 
         <div className="mb-10">
-          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Capital Command</p>
-          <div className="space-y-4">
+          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Capital Operations</p>
+          <div className="space-y-3">
             {[
-              { to: '/marketplace', label: 'Liquidity Archway', icon: 'lucide:shopping-bag' },
-              { to: '/portfolio', label: 'Liquidity Inventory', icon: 'lucide:briefcase' }
+              { to: '/loan/1', label: 'Active Lifecycle', icon: 'lucide:activity' },
+              { to: '/portfolio', label: 'Liquidity Inventory', icon: 'lucide:briefcase' },
+              { to: '/ledger', label: 'Ledger of Trust', icon: 'lucide:scroll' }
             ].map((link) => (
               <Link 
                 key={link.to}
@@ -75,7 +76,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-5 px-6 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all group ${
                   isActive(link.to) 
-                    ? (isDarkMode ? 'bg-[#D4AF37] text-black luxury-shadow scale-105' : 'bg-[#1A1A1A] text-white luxury-shadow scale-105')
+                    ? (isDarkMode ? 'bg-[#D4AF37] text-black luxury-shadow scale-[1.02]' : 'bg-[#1A1A1A] text-white luxury-shadow scale-[1.02]')
                     : `text-[#8C8C8C] hover:text-[#1A1A1A] hover:bg-[#FAFAF8] ${isDarkMode ? 'hover:text-white hover:bg-[#333]' : ''}`
                 }`}
               >
@@ -86,11 +87,13 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           </div>
         </div>
 
-        <div>
-          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Identity Hub</p>
-          <div className="space-y-4">
+        <div className="pb-10">
+          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Sovereign Identity</p>
+          <div className="space-y-3">
             {[
-              { to: '/settings', label: 'Sovereign Audit', icon: 'lucide:shield-check' }
+              { to: '/audit', label: 'Sovereign Audit', icon: 'lucide:shield-check' },
+              { to: '/reputation', label: 'Reputation Synthesis', icon: 'lucide:award' },
+              { to: '/network', label: 'Topology Graph', icon: 'lucide:network' }
             ].map((link) => (
               <Link 
                 key={link.to}
@@ -98,7 +101,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-5 px-6 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all group ${
                   isActive(link.to) 
-                    ? (isDarkMode ? 'bg-[#D4AF37] text-black luxury-shadow scale-105' : 'bg-[#1A1A1A] text-white luxury-shadow scale-105')
+                    ? (isDarkMode ? 'bg-[#D4AF37] text-black luxury-shadow scale-[1.02]' : 'bg-[#1A1A1A] text-white luxury-shadow scale-[1.02]')
                     : `text-[#8C8C8C] hover:text-[#1A1A1A] hover:bg-[#FAFAF8] ${isDarkMode ? 'hover:text-white hover:bg-[#333]' : ''}`
                 }`}
               >

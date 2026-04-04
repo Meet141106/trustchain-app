@@ -1,37 +1,14 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Onboarding from './pages/Onboarding';
-import WalletSelection from './pages/WalletSelection';
-import CreditAssessment from './pages/CreditAssessment';
-import BorrowerDashboard from './pages/BorrowerDashboard';
+import Dashboard from './pages/Dashboard';
 import Borrow from './pages/Borrow';
-import GroupLending from './pages/GroupLending';
-import Repayment from './pages/Repayment';
-import LenderDashboard from './pages/LenderDashboard';
-import Marketplace from './pages/Marketplace';
-import TransactionHistory from './pages/TransactionHistory';
-import NftShowcase from './pages/NftShowcase';
-
-// NEW 20 FILES
-import OnboardingWalkthrough from './pages/OnboardingWalkthrough';
-import NewUserSetup from './pages/NewUserSetup';
-import LoanConfirmation from './pages/LoanConfirmation';
-import LoanSuccess from './pages/LoanSuccess';
 import ActiveLoanDetail from './pages/ActiveLoanDetail';
-import RepaymentSuccess from './pages/RepaymentSuccess';
-import LiquidationWarning from './pages/LiquidationWarning';
-import CreateGroup from './pages/CreateGroup';
-import VouchForMember from './pages/VouchForMember';
-import GroupLoanRequest from './pages/GroupLoanRequest';
+import Marketplace from './pages/Marketplace';
 import LoanRequestDetail from './pages/LoanRequestDetail';
 import LenderPortfolio from './pages/LenderPortfolio';
-import YieldWithdrawal from './pages/YieldWithdrawal';
-import ScoreBreakdown from './pages/ScoreBreakdown';
-import TierUpgrade from './pages/TierUpgrade';
-import ShareableLoanRequest from './pages/ShareableLoanRequest';
-import Notifications from './pages/Notifications';
-import DisputeScreen from './pages/DisputeScreen';
-import Settings from './pages/Settings';
-import InviteFriends from './pages/InviteFriends';
+import SovereignAudit from './pages/SovereignAudit';
+import ReputationBreakdown from './pages/ReputationBreakdown';
+import TransactionHistory from './pages/TransactionHistory';
+import TrustNetworkGraph from './pages/TrustNetworkGraph';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { AnimatePresence } from 'framer-motion';
@@ -42,51 +19,20 @@ export default function App() {
       <HashRouter>
         <AnimatePresence mode="wait">
           <Routes>
-        {/* Onboarding flow (no bottom nav) */}
-        <Route path="/" element={<Onboarding />} />
-        <Route path="/walkthrough" element={<OnboardingWalkthrough />} />
-        <Route path="/wallet" element={<WalletSelection />} />
-        <Route path="/setup" element={<NewUserSetup />} />
-
-        {/* Borrower flow */}
-        <Route path="/dashboard" element={<BorrowerDashboard />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/borrow" element={<Borrow />} />
-        <Route path="/loan-confirm" element={<LoanConfirmation />} />
-        <Route path="/loan-success" element={<LoanSuccess />} />
-        <Route path="/active-loan" element={<ActiveLoanDetail />} />
-        <Route path="/repay" element={<Repayment />} />
-        <Route path="/repay-success" element={<RepaymentSuccess />} />
-        <Route path="/liquidation" element={<LiquidationWarning />} />
-
-        {/* Group Lending flow */}
-        <Route path="/group" element={<GroupLending />} />
-        <Route path="/create-group" element={<CreateGroup />} />
-        <Route path="/vouch" element={<VouchForMember />} />
-        <Route path="/group-vote" element={<GroupLoanRequest />} />
-
-        {/* Lender flow */}
-        <Route path="/lender" element={<LenderDashboard />} />
+        <Route path="/loan/:id" element={<ActiveLoanDetail />} />
         <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/loan-detail" element={<LoanRequestDetail />} />
+        <Route path="/request/:id" element={<LoanRequestDetail />} />
         <Route path="/portfolio" element={<LenderPortfolio />} />
-        <Route path="/withdraw" element={<YieldWithdrawal />} />
-
-        {/* Identity & Reputation */}
-        <Route path="/credit" element={<CreditAssessment />} />
-        <Route path="/profile" element={<NftShowcase />} />
-        <Route path="/score-breakdown" element={<ScoreBreakdown />} />
-        <Route path="/tier-upgrade" element={<TierUpgrade />} />
-
-        {/* Utility & Settings */}
-        <Route path="/history" element={<TransactionHistory />} />
-        <Route path="/share" element={<ShareableLoanRequest />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/dispute" element={<DisputeScreen />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/invite" element={<InviteFriends />} />
+        <Route path="/audit" element={<SovereignAudit />} />
+        <Route path="/reputation" element={<ReputationBreakdown />} />
+        <Route path="/ledger" element={<TransactionHistory />} />
+        <Route path="/network" element={<TrustNetworkGraph />} />
 
         {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
         </AnimatePresence>
       </HashRouter>

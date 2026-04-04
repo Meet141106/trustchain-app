@@ -9,13 +9,13 @@ export default function Borrow() {
   const [pathway, setPathway] = useState('trust');
 
   const pathways = [
-    { id: 'trust', label: "Sovereign Trust Line", desc: "No collateral, no vouches. Purely reputation-based.", icon: "lucide:crown", rate: "4.2%", limit: "$5,000" },
-    { id: 'vouch', label: "Syndicate Vouching", desc: "Backed by 3+ circle members with 800+ score.", icon: "lucide:users-2", rate: "2.8%", limit: "$25,000" },
-    { id: 'collateral', label: "Asset-Backed Line", desc: "Instantly unlock liquidity against real assets.", icon: "lucide:landmark", rate: "1.5%", limit: "$150,000" }
+    { id: 'trust', label: "Sovereign Trust Line", desc: "No collateral, no vouches. Purely reputation-based.", icon: "lucide:crown", rate: "4.2%", limit: "$5,000", vouchers: 0 },
+    { id: 'vouch', label: "Syndicate Vouching", desc: "Backed by 3+ circle members with 800+ score.", icon: "lucide:users-2", rate: "2.8%", limit: "$25,000", vouchers: 14 },
+    { id: 'collateral', label: "Asset-Backed Line", desc: "Instantly unlock liquidity against real assets.", icon: "lucide:landmark", rate: "1.5%", limit: "$150,000", vouchers: 0 }
   ];
 
   return (
-    <AppShell title="Credit Drawdown" subtitle="Initialize Capital Request">
+    <AppShell pageTitle="Borrow" pageSubtitle="Loan Creation">
       <div className="max-w-6xl mx-auto grid grid-cols-12 gap-10 lg:gap-16">
         
         {/* Left Column: Request Configuration */}
@@ -23,7 +23,7 @@ export default function Borrow() {
           
           <div className={`p-12 rounded-[3.5rem] border transition-all duration-500 relative overflow-hidden group
             ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
-            <h4 className={`text-2xl font-black font-cabinet tracking-tighter mb-12 ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>Configure Drawdown</h4>
+            <h4 className={`text-2xl font-black font-cabinet tracking-tighter mb-12 ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>Configure Facility</h4>
             
             <div className="space-y-12">
               <div className="space-y-4">
@@ -43,7 +43,7 @@ export default function Borrow() {
               </div>
 
               <div className="space-y-4">
-                <label className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-4 block">Select Verification Pathway</label>
+                <label className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-4 block">Select Trust Pathway</label>
                 <div className="grid grid-cols-1 gap-6">
                   {pathways.map((p) => (
                     <motion.div 
@@ -68,6 +68,9 @@ export default function Borrow() {
                         <div>
                           <p className={`text-lg font-black font-cabinet tracking-tight ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>{p.label}</p>
                           <p className="text-[11px] font-medium text-[#8C8C8C] mt-1">{p.desc}</p>
+                          {p.vouchers > 0 && (
+                            <p className="text-[9px] font-black text-[#10B981] uppercase tracking-widest mt-2">Vouched by {p.vouchers} Members</p>
+                          )}
                         </div>
                       </div>
                       <iconify-icon icon={pathway === p.id ? "lucide:check-circle-2" : "lucide:circle"} className={`text-2xl ${pathway === p.id ? 'text-[#D4AF37]' : 'text-[#8C8C8C]'}`}></iconify-icon>
@@ -92,7 +95,8 @@ export default function Borrow() {
                 { label: "Reputation Impact", val: "+24 Points (QP)" },
                 { label: "Settlement Buffer", val: "7 Days" }
               ].map(item => (
-                <div key={item.label} className="flex justify-between items-center py-4 border-b border-[#F5F3F0] dark:border-[#333] last:border-none">
+                <div key={item.label} className={`flex justify-between items-center py-4 border-b last:border-none
+                  ${isDarkMode ? 'border-[#333]' : 'border-[#F5F3F0]'}`}>
                   <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em]">{item.label}</span>
                   <span className={`text-sm font-black ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>{item.val}</span>
                 </div>
@@ -101,18 +105,18 @@ export default function Borrow() {
 
             <div className="mt-12 space-y-4">
               <p className="text-[11px] text-[#8C8C8C] font-medium italic leading-relaxed text-center px-6">
-                "By initializing this drawdown, you are committing your on-chain reputation. Timely repayment is critical for tier progression."
+                "By executing this drawdown, you are committing your on-chain reputation. Timely repayment is critical for protocol fidelity."
               </p>
               <button className="w-full py-6 rounded-full bg-[#1A1A1A] text-white hover:bg-[#D4AF37] hover:text-black transition-all font-black text-[12px] tracking-[0.3em] uppercase luxury-shadow dark:bg-[#D4AF37] dark:text-black active:scale-95 group">
-                Initialize Drawdown <iconify-icon icon="lucide:arrow-right" className="ml-3 group-hover:translate-x-2 transition-transform"></iconify-icon>
+                Execute Drawdown <iconify-icon icon="lucide:arrow-right" className="ml-3 group-hover:translate-x-2 transition-transform"></iconify-icon>
               </button>
             </div>
           </div>
 
-          <div className="p-8 rounded-[2rem] bg-[#10B981]/5 border border-[#10B981]/10 flex items-center gap-6">
-            <iconify-icon icon="lucide:shield-check" className="text-3xl text-[#10B981]"></iconify-icon>
-            <p className="text-[10px] font-black text-[#10B981] uppercase tracking-[0.2em] leading-relaxed">
-              Your score is sufficient for the **Sovereign Trust Line**. Instant approval is guaranteed.
+          <div className="p-8 rounded-[2rem] bg-[#10B981]/5 border border-[#10B981]/10 flex items-center gap-6 text-[#10B981]">
+            <iconify-icon icon="lucide:shield-check" className="text-3xl"></iconify-icon>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed">
+              Fidelity Audit: Sufficient for **Sovereign Trust**. Instant approval guaranteed.
             </p>
           </div>
         </div>

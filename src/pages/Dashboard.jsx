@@ -6,11 +6,11 @@ import HealthIndicator from '../components/HealthIndicator';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 
-export default function BorrowerDashboard() {
+export default function Dashboard() {
   const { isDarkMode } = useTheme();
 
   return (
-    <AppShell title="Solvent Terminal" subtitle="Sovereign Credit Control">
+    <AppShell pageTitle="Solvent Terminal" pageSubtitle="Dashboard">
       <div className="grid grid-cols-12 gap-10 lg:gap-16">
         
         {/* Left Column: Reputation & Health */}
@@ -20,6 +20,9 @@ export default function BorrowerDashboard() {
           <div className={`p-12 rounded-[3.5rem] border transition-all duration-500 relative overflow-hidden group
             ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
             <div className="relative z-10 flex flex-col items-center">
+              <div className="absolute top-0 right-0 p-4">
+                <span className="text-[#10B981] font-black text-xs animate-bounce">+12 QP</span>
+              </div>
               <TrustScoreMeter score={842} />
               
               <div className="mt-12 text-center">
@@ -65,14 +68,27 @@ export default function BorrowerDashboard() {
                 Real-time Lifecycle Status
               </p>
             </div>
-            <button className="px-8 py-4 rounded-full border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:bg-[#D4AF37] hover:text-white active:scale-95">
-              Drawdown Request
-            </button>
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 rounded-full border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:bg-[#D4AF37] hover:text-white active:scale-95">
+              Initialize Drawdown
+            </motion.button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <LoanCard amount="$12,500" label="Tier II Liquidity Circle" status="Active" reputationGain="+18 QP" dueDate="Dec 12, 2026" />
-            <LoanCard amount="$4,200" label="Sovereign Merit Loan" status="Active" reputationGain="+8 QP" dueDate="Jan 05, 2027" />
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-10 px-3 py-1 bg-[#1A1A1A] text-white text-[8px] font-black uppercase tracking-widest rounded-full border border-[#D4AF37]/50 dark:bg-[#D4AF37] dark:text-black">
+                Vouched by 8 Nodes
+              </div>
+              <LoanCard amount="$12,500" label="Tier II Liquidity Circle" status="Active" reputationGain="+18 QP" dueDate="Dec 12, 2026" />
+            </div>
+            <div className="relative group">
+              <div className="absolute -top-3 -right-3 z-10 px-3 py-1 bg-[#1A1A1A] text-white text-[8px] font-black uppercase tracking-widest rounded-full border border-[#D4AF37]/50 dark:bg-[#D4AF37] dark:text-black">
+                Vouched by 12 Nodes
+              </div>
+              <LoanCard amount="$4,200" label="Sovereign Merit Loan" status="Active" reputationGain="+8 QP" dueDate="Jan 05, 2027" />
+            </div>
           </div>
 
           {/* Protocol Intelligence Row */}

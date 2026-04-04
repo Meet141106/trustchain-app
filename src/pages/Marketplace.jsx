@@ -7,14 +7,14 @@ export default function Marketplace() {
   const { isDarkMode } = useTheme();
 
   const requests = [
-    { id: 1, borrower: "Sovereign Node 452", amount: "$5,000", score: 842, rate: "2.4% APR", term: "90 Days", status: "Open" },
-    { id: 2, borrower: "Reputation Circle Beta", amount: "$12,400", score: 790, rate: "3.1% APR", term: "180 Days", status: "Open" },
-    { id: 3, borrower: "Archway Verified Individual", amount: "$2,800", score: 620, rate: "4.5% APR", term: "30 Days", status: "Open" },
-    { id: 4, borrower: "Syndicate Genesis Pool", amount: "$45,000", score: 910, rate: "1.9% APR", term: "365 Days", status: "Open" }
+    { id: 1, borrower: "Sovereign Node 452", amount: "$5,000", score: 842, rate: "2.4% APR", term: "90 Days", status: "Open", vouchers: 12 },
+    { id: 2, borrower: "Reputation Circle Beta", amount: "$12,400", score: 790, rate: "3.1% APR", term: "180 Days", status: "Open", vouchers: 8 },
+    { id: 3, borrower: "Archway Verified Individual", amount: "$2,800", score: 620, rate: "4.5% APR", term: "30 Days", status: "Open", vouchers: 5 },
+    { id: 4, borrower: "Syndicate Genesis Pool", amount: "$45,000", score: 910, rate: "1.9% APR", term: "365 Days", status: "Open", vouchers: 24 }
   ];
 
   return (
-    <AppShell title="Liquidity Archway" subtitle="Premium Capital Deployment Opportunities">
+    <AppShell pageTitle="Liquidity Archway" pageSubtitle="Marketplace">
       <div className="max-w-7xl mx-auto space-y-12">
         
         {/* Marketplace Header Stats */}
@@ -38,25 +38,6 @@ export default function Marketplace() {
           ))}
         </div>
 
-        {/* Filter Toolbar */}
-        <div className={`p-6 rounded-full border flex flex-col md:flex-row items-center justify-between gap-6 px-12
-          ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
-          <div className="flex items-center gap-10">
-            <div className="flex items-center gap-4 cursor-pointer group">
-              <iconify-icon icon="lucide:filter" className="text-lg text-[#8C8C8C] group-hover:text-[#D4AF37]"></iconify-icon>
-              <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] group-hover:text-[#D4AF37]">Filter Risk</span>
-            </div>
-            <div className="flex items-center gap-4 cursor-pointer group">
-              <iconify-icon icon="lucide:arrow-down-wide-narrow" className="text-lg text-[#8C8C8C] group-hover:text-[#D4AF37]"></iconify-icon>
-              <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] group-hover:text-[#D4AF37]">Sort by Yield</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 bg-[#FAFAF8] dark:bg-[#333] px-8 py-3 rounded-full border border-[#E8E8E8] dark:border-[#444] min-w-[300px]">
-            <iconify-icon icon="lucide:search" className="text-[#8C8C8C]"></iconify-icon>
-            <input type="text" placeholder="Search archway nodes..." className="bg-transparent border-none outline-none text-xs font-medium w-full text-[#1A1A1A] dark:text-white" />
-          </div>
-        </div>
-
         {/* Request List Table */}
         <div className={`rounded-[3rem] border overflow-hidden ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
           <table className="w-full text-left border-collapse">
@@ -64,24 +45,29 @@ export default function Marketplace() {
               <tr className={`${isDarkMode ? 'bg-black/20' : 'bg-[#FAFAF8]'} border-b border-[#E8E8E8] dark:border-[#333]`}>
                 <th className="px-12 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Archway Member</th>
                 <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Capital Request</th>
-                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Risk Score</th>
-                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Target Yield</th>
-                <th className="px-12 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] text-right">Audit Status</th>
+                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Trust Level</th>
+                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Social Vouch</th>
+                <th className="px-12 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] text-right">Audit</th>
               </tr>
             </thead>
             <tbody className={`divide-y ${isDarkMode ? 'divide-[#333]' : 'divide-[#F5F3F0]'}`}>
               {requests.map((req, idx) => (
                 <motion.tr 
                   key={req.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05 }}
                   className="group hover:bg-[#FAFAF8] dark:hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   <td className="px-12 py-10">
                     <div className="flex items-center gap-6">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FAFAF8] to-[#E8E8E8] dark:from-[#333] dark:to-[#444] flex items-center justify-center text-xs font-black shadow-inner">
-                        {req.borrower.charAt(0)}
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#8A6E2F] flex items-center justify-center text-white text-xs font-black shadow-xl">
+                          {req.borrower.charAt(0)}
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#10B981] rounded-full border-2 border-white dark:border-[#1A1A1A] flex items-center justify-center">
+                          <iconify-icon icon="lucide:check" className="text-[10px] text-white"></iconify-icon>
+                        </div>
                       </div>
                       <span className={`text-sm font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
                         {req.borrower}
@@ -90,16 +76,21 @@ export default function Marketplace() {
                   </td>
                   <td className="px-8 py-10">
                     <p className={`text-lg font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-[#D4AF37]' : 'text-[#1A1A1A]'}`}>{req.amount}</p>
-                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] mt-1">{req.term}</p>
+                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] mt-1">{req.term} @ {req.rate}</p>
                   </td>
                   <td className="px-8 py-10">
                     <div className="flex items-center gap-3">
-                      <span className={`w-2 h-2 rounded-full ${req.score > 800 ? 'bg-[#10B981]' : req.score > 700 ? 'bg-[#F59E0B]' : 'bg-[#EF4444]'}`}></span>
-                      <span className={`text-sm font-black ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>{req.score}</span>
+                      <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
+                        ${req.score > 800 ? 'bg-[#10B981]/10 text-[#10B981]' : 'bg-[#D4AF37]/10 text-[#D4AF37]'}`}>
+                        {req.score} QP
+                      </div>
                     </div>
                   </td>
                   <td className="px-8 py-10">
-                    <span className="text-sm font-black text-[#10B981]">{req.rate}</span>
+                    <div className="flex items-center gap-2">
+                      <iconify-icon icon="lucide:users-2" className="text-[#8C8C8C]"></iconify-icon>
+                      <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">{req.vouchers} Vouchers</span>
+                    </div>
                   </td>
                   <td className="px-12 py-10 text-right">
                     <button className="px-8 py-4 rounded-full bg-[#1A1A1A] text-white group-hover:bg-[#D4AF37] group-hover:text-black transition-all font-black text-[10px] tracking-[0.2em] uppercase dark:bg-[#D4AF37] dark:text-black dark:group-hover:bg-white active:scale-95">
