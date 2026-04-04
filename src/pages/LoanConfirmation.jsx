@@ -1,65 +1,64 @@
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useStore } from '../store';
-import { ArrowLeft, ShieldCheck, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import AppShell from '../components/AppShell';
 
 export default function LoanConfirmation() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const borrowFunds = useStore(state => state.borrowFunds);
-  
-  const { amount = 0, duration = 0 } = location.state || {};
-
-  const handleConfirm = () => {
-    borrowFunds(amount, duration);
-    navigate('/borrower-dashboard');
-  };
-
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full glass-card flex items-center justify-center">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-2xl font-bold">Review Request</h1>
-      </div>
+    <AppShell backTo="/borrow" backLabel="Edit Loan" showNav={false}>
+      <h1 className="text-h2" style={{ marginBottom: 24 }}>Confirm Loan</h1>
 
-      <div className="glass-card p-6 rounded-3xl mb-4 text-center">
-        <p className="text-sm text-gray-400 mb-2 uppercase tracking-widest font-bold">You are borrowing</p>
-        <h1 className="text-5xl font-bold text-white mb-2">${amount}</h1>
-        <p className="text-[#F5A623] font-bold text-sm">~ {duration} Days Duration</p>
-      </div>
-
-      <div className="glass-card p-4 rounded-3xl mb-8 space-y-4">
-        <div className="flex justify-between items-center border-b border-white/5 pb-4">
-          <span className="text-gray-400">Interest (5.5%)</span>
-          <span className="font-bold text-white">${(amount * 0.055).toFixed(2)}</span>
+      <div style={{
+        background: 'var(--navy-panel)', borderRadius: 'var(--radius-2xl)',
+        padding: 24, border: '1px solid var(--border-subtle)', marginBottom: 24,
+        position: 'relative', overflow: 'hidden'
+      }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: 'linear-gradient(90deg, var(--gold), var(--gold-dark))' }} />
+        
+        <p className="text-micro text-center" style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>Requesting</p>
+        <div className="text-center" style={{ marginBottom: 24 }}>
+          <span style={{ fontSize: 42, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--gold)' }}>$2,500</span>
+          <span style={{ fontSize: 16, color: 'var(--text-tertiary)', marginLeft: 4 }}>USD</span>
         </div>
-        <div className="flex justify-between items-center border-b border-white/5 pb-4">
-          <span className="text-gray-400">Total Repayment</span>
-          <span className="font-bold text-white">${(amount * 1.055).toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-400">Network Fee</span>
-          <span className="font-bold text-white">0.002 ETH</span>
+
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+             <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Duration</span>
+             <span style={{ fontWeight: 600 }}>12 Weeks (3 Months)</span>
+          </div>
+          <div className="flex justify-between items-center">
+             <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Interest Rate (APY)</span>
+             <span style={{ fontWeight: 600, color: 'var(--emerald)' }}>4.2%</span>
+          </div>
+          <div className="flex justify-between items-center">
+             <span style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Required Collateral</span>
+             <span style={{ fontWeight: 600 }}>Reputation Only <iconify-icon icon="lucide:shield-check" style={{ color: 'var(--gold)', verticalAlign: 'middle', marginLeft: 4 }} /></span>
+          </div>
+          <div className="divider" />
+          <div className="flex justify-between items-center">
+             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Total Repayment</span>
+             <span style={{ fontSize: 20, fontWeight: 700 }}>$2,605.00</span>
+          </div>
         </div>
       </div>
 
-      <div className="flex bg-blue-500/10 p-4 rounded-2xl gap-3 mb-8 border border-blue-500/20">
-        <Info className="text-blue-400 w-6 h-6 shrink-0 mt-0.5" />
-        <p className="text-sm text-blue-200">
-          This loan is based on your TrustLend reputation. Ensure timely repayment to maintain your score and avoid liquidation.
-        </p>
+      <div style={{
+        background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)',
+        borderRadius: 'var(--radius-lg)', padding: 16, marginBottom: 32
+      }}>
+        <div className="flex gap-3">
+          <iconify-icon icon="lucide:alert-triangle" width="20" height="20" style={{ color: 'var(--red)', flexShrink: 0, marginTop: 2 }}></iconify-icon>
+          <div>
+             <p style={{ color: 'var(--red)', fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Risk Acknowledgment</p>
+             <p style={{ color: 'var(--text-secondary)', fontSize: 12, lineHeight: 1.6 }}>
+               Failure to repay this loan by the due date will severely impact your TrustScore and may result in partial liquidation of your profile rewards.
+             </p>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-auto pb-4">
-        <button 
-          onClick={handleConfirm}
-          className="w-full h-14 bg-[#F5A623] rounded-2xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-        >
-          <ShieldCheck className="w-5 h-5 text-[#0A0F1E]" />
-          <span className="text-[#0A0F1E] font-bold text-lg">Confirm & Sign</span>
-        </button>
-      </div>
-    </div>
+      <Link to="/loan-success" className="btn-primary btn-primary--lg" style={{ boxShadow: 'var(--shadow-gold)' }}>
+        <iconify-icon icon="lucide:pen-tool" width="20" height="20"></iconify-icon>
+        <span style={{ fontWeight: 700, fontSize: 18 }}>Sign Transaction</span>
+      </Link>
+    </AppShell>
   );
 }

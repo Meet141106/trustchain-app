@@ -1,82 +1,111 @@
-import { Search, ShieldCheck, ChevronRight } from 'lucide-react';
-import { useStore } from '../store';
 import { useState } from 'react';
+import AppShell from '../components/AppShell';
+import FilterChips from '../components/FilterChips';
 
-const MOCK_LOANS = [
-  { id: '1', borrower: '0x32A...18C', amount: 500, duration: 30, apy: 6.5, health: 150, score: 720 },
-  { id: '2', borrower: '0x99B...44D', amount: 1200, duration: 60, apy: 8.0, health: 125, score: 610 },
-  { id: '3', borrower: '0x10C...99F', amount: 200, duration: 15, apy: 5.0, health: 200, score: 810 },
+const filters = ['All Requests', 'Low Risk', 'High Yield', 'Group Loans'];
+
+const loanRequests = [
+  {
+    id: 'TR-9421', risk: 'Low Risk', riskColor: 'var(--emerald)', borderColor: 'var(--emerald)',
+    riskIcon: 'lucide:shield-check', stars: 4.5, amount: '$1,200', currency: 'USDT',
+    desc: 'Verified Personal Loan', apy: '8.5%', apyColor: 'var(--emerald)',
+    term: '3 mo', collateral: 'Reputation', primary: true
+  },
+  {
+    id: 'TR-8820', risk: 'Medium Risk', riskColor: '#FBBF24', borderColor: '#F59E0B',
+    riskIcon: 'lucide:alert-circle', stars: 3, amount: '$3,500', currency: 'USDT',
+    desc: 'Micro-Entrepreneurial Credit', apy: '14.2%', apyColor: '#FBBF24',
+    term: '6 mo', collateral: 'ETH', primary: false
+  },
+  {
+    id: 'TR-1255', risk: 'High Yield', riskColor: '#FB7185', borderColor: '#F43F5E',
+    riskIcon: 'lucide:trending-up', stars: 2, amount: '$8,200', currency: 'USDT',
+    desc: 'Mumbai Circle #4 (Group Loan)', apy: '22.5%', apyColor: '#FB7185',
+    term: '12 mo', collateral: 'Group', primary: false
+  },
 ];
 
-export default function Marketplace() {
-  const fundMarketplaceLoan = useStore(state => state.fundMarketplaceLoan);
-  const [funded, setFunded] = useState({});
+function StarRating({ rating }) {
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5;
+  const empty = 5 - full - (half ? 1 : 0);
+  return (
+    <div className="flex gap-1">
+      {Array(full).fill(0).map((_, i) => <iconify-icon key={`f${i}`} icon="mdi:star" width="14" height="14" style={{ color: 'var(--gold)' }} />)}
+      {half && <iconify-icon icon="mdi:star-half-full" width="14" height="14" style={{ color: 'var(--gold)' }} />}
+      {Array(empty).fill(0).map((_, i) => <iconify-icon key={`e${i}`} icon="mdi:star-outline" width="14" height="14" style={{ color: 'var(--text-muted)' }} />)}
+    </div>
+  );
+}
 
-  const handleFund = (loanId, amount) => {
-    fundMarketplaceLoan(loanId, amount);
-    setFunded(prev => ({ ...prev, [loanId]: true }));
-  };
+export default function Marketplace() {
+  const [activeFilter, setActiveFilter] = useState('All Requests');
 
   return (
-    <>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Marketplace</h1>
-        <div className="w-10 h-10 rounded-full glass-card flex items-center justify-center">
-          <Search className="w-5 h-5" />
-        </div>
+    <AppShell>
+      {/* Title */}
+      <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
+        <h1 className="text-h2">Marketplace</h1>
+        <button className="flex items-center gap-1" style={{ color: 'var(--gold)', fontSize: 14, fontWeight: 700 }}>
+          <iconify-icon icon="lucide:sliders-horizontal" width="18" height="18"></iconify-icon>
+          Sort
+        </button>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-4 mb-4 hide-scrollbar">
-        <button className="whitespace-nowrap px-4 py-2 bg-[#F5A623] text-[#0A0F1E] font-bold rounded-full text-sm">All Loans</button>
-        <button className="whitespace-nowrap px-4 py-2 glass-card font-bold rounded-full text-sm">High Yield</button>
-        <button className="whitespace-nowrap px-4 py-2 glass-card font-bold rounded-full text-sm">Low Risk</button>
+      {/* Filters */}
+      <div style={{ marginBottom: 24 }}>
+        <FilterChips items={filters} active={activeFilter} onSelect={setActiveFilter} />
       </div>
 
+      {/* Loan cards */}
       <div className="flex flex-col gap-4">
-        {MOCK_LOANS.map((loan) => (
-          <div key={loan.id} className="glass-card p-5 rounded-3xl">
-            <div className="flex justify-between items-start mb-4">
+        {loanRequests.map((loan) => (
+          <div key={loan.id} className="loan-card loan-card--bordered" style={{ borderLeftColor: loan.borderColor }}>
+            <div className="flex justify-between items-start" style={{ marginBottom: 16 }}>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500"></div>
-                  <span className="font-bold text-sm">{loan.borrower}</span>
-                </div>
-                <div className="flex items-center gap-1 mt-2 bg-white/5 rounded-full px-2 py-0.5 w-fit">
-                  <ShieldCheck className="w-3 h-3 text-[#f5a623]" />
-                  <span className="text-[10px] font-bold text-[#f5a623]">Score: {loan.score}</span>
+                <span className="text-micro" style={{ color: 'var(--text-tertiary)', display: 'block', marginBottom: 4 }}>Request ID: #{loan.id}</span>
+                <div className="flex items-center gap-1" style={{ color: loan.riskColor, fontWeight: 700, fontSize: 12 }}>
+                  <iconify-icon icon={loan.riskIcon} width="14" height="14"></iconify-icon>
+                  {loan.risk}
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-400 uppercase tracking-widest font-bold">Request</p>
-                <p className="text-lg font-bold">${loan.amount}</p>
+              <StarRating rating={loan.stars} />
+            </div>
+
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>
+                {loan.amount} <span style={{ fontSize: 14, color: 'var(--text-tertiary)', fontWeight: 400 }}>{loan.currency}</span>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{loan.desc}</div>
+            </div>
+
+            <div className="stats-grid--3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 24, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>
+              <div>
+                <div className="text-micro" style={{ color: 'var(--text-tertiary)', marginBottom: 4 }}>APY</div>
+                <div style={{ fontWeight: 700, color: loan.apyColor }}>{loan.apy}</div>
+              </div>
+              <div>
+                <div className="text-micro" style={{ color: 'var(--text-tertiary)', marginBottom: 4 }}>Term</div>
+                <div style={{ fontWeight: 700 }}>{loan.term}</div>
+              </div>
+              <div>
+                <div className="text-micro" style={{ color: 'var(--text-tertiary)', marginBottom: 4 }}>Collateral</div>
+                <div style={{ fontWeight: 700 }}>{loan.collateral}</div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 mb-4 bg-black/20 rounded-2xl p-3">
-              <div className="text-center">
-                <p className="text-[10px] text-gray-400 uppercase font-bold">Duration</p>
-                <p className="font-bold text-sm">{loan.duration}d</p>
-              </div>
-              <div className="text-center border-x border-white/10">
-                <p className="text-[10px] text-gray-400 uppercase font-bold">Yield</p>
-                <p className="font-bold text-sm text-[#10B981]">{loan.apy}% APY</p>
-              </div>
-              <div className="text-center">
-                <p className="text-[10px] text-gray-400 uppercase font-bold">Health</p>
-                <p className={`font-bold text-sm ${loan.health >= 150 ? 'text-[#10B981]' : 'text-[#F5A623]'}`}>{loan.health}%</p>
-              </div>
-            </div>
-
-            <button 
-              onClick={() => handleFund(loan.id, loan.amount)}
-              disabled={funded[loan.id]}
-              className={`w-full py-3 rounded-xl flex justify-center items-center gap-2 font-bold transition-all ${funded[loan.id] ? 'bg-white/10 text-gray-400 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20 active:scale-95 text-white'}`}
-            >
-              {funded[loan.id] ? 'Funded' : 'Fund Loan'}
-            </button>
+            {loan.primary ? (
+              <button className="btn-primary" style={{ height: 48, fontSize: 14, borderRadius: 'var(--radius-md)' }} id={`fund-loan-${loan.id}`}>
+                Fund This Loan
+              </button>
+            ) : (
+              <button className="btn-outline-gold" id={`fund-loan-${loan.id}`}>
+                Fund This Loan
+              </button>
+            )}
           </div>
         ))}
       </div>
-    </>
+    </AppShell>
   );
 }

@@ -109,7 +109,7 @@ export default function Repayment() {
 
       {/* CTA */}
       <div className="flex flex-col gap-4">
-        <Link to="/history" className="btn-primary" id="repay-now-btn" style={{ boxShadow: 'var(--shadow-gold)' }}>
+        <Link to="/repay-success" className="btn-primary" id="repay-now-btn" style={{ boxShadow: 'var(--shadow-gold)' }}>
           <span style={{ fontWeight: 700, fontSize: 18 }}>Repay Now</span>
           <iconify-icon icon="lucide:arrow-right" width="20" height="20"></iconify-icon>
         </Link>

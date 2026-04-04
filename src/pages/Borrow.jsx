@@ -113,7 +113,7 @@ export default function Borrow() {
         </div>
 
         {/* CTA */}
-        <Link to="/repay" className="btn-primary btn-primary--lg" id="request-loan-btn">
+        <Link to="/loan-confirm" className="btn-primary btn-primary--lg" id="request-loan-btn">
           <span>Request Loan</span>
           <iconify-icon icon="lucide:arrow-right" width="20" height="20"></iconify-icon>
         </Link>
