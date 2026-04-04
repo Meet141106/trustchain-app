@@ -6,20 +6,24 @@ import { useVouchSystem } from '../hooks/useVouchSystem';
 import { useWallet } from '../context/WalletContext';
 import Skeleton from '../components/Skeleton';
 import { useReputationNFT } from '../hooks/useReputationNFT';
+import { useTrustToken } from '../hooks/useTrustToken';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 
 const shortAddr = (a = '') => a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—';
 
 export default function VouchInvite() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { address } = useWallet();
+  const { walletAddress: address } = useWallet();
   const { vouchRequests, createVouchRequest, stakeForBorrower, isLoading } = useVouchSystem();
   const { trustScore } = useReputationNFT();
+  const { isApproved, approvePool, trustBalance } = useTrustToken();
 
   const [voucherAddr, setVoucherAddr] = useState('');
   const [stakeAmt, setStakeAmt] = useState(50);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authRequestId, setAuthRequestId] = useState(null); // id of request being authorized
 
   const sentRequests = vouchRequests.filter(r => r.borrower.toLowerCase() === address.toLowerCase());
   const receivedRequests = vouchRequests.filter(r => r.voucher.toLowerCase() === address.toLowerCase());
@@ -33,10 +37,25 @@ export default function VouchInvite() {
   };
 
   const handleAccept = async (req) => {
+    if (Number(trustBalance) < req.amount) {
+        toast.error(`Insufficient TRUST. You have ${trustBalance}, need ${req.amount}.`);
+        return;
+    }
+
+    setAuthRequestId(req.id);
     try {
+        const approved = await isApproved(req.amount);
+        if (!approved) {
+            const ok = await approvePool(req.amount);
+            if (!ok) return;
+        }
         await stakeForBorrower(req.borrower, req.amount, req.id);
+        toast.success("Vouch established and stake locked!");
     } catch (err) {
         console.error("Failed to accept vouch", err);
+        toast.error("Process failed.");
+    } finally {
+        setAuthRequestId(null);
     }
   };
 
@@ -117,9 +136,10 @@ export default function VouchInvite() {
                                     </div>
                                     <button 
                                         onClick={() => handleAccept(req)}
-                                        className="bg-[#1D9E75] text-white px-6 py-3 rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all"
+                                        disabled={authRequestId === req.id}
+                                        className="bg-[#1D9E75] text-white px-6 py-3 rounded-lg text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50"
                                     >
-                                        Attest & Stake
+                                        {authRequestId === req.id ? 'Processing...' : 'Attest & Stake'}
                                     </button>
                                 </div>
                             </div>

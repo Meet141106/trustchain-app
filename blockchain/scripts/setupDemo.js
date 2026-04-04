@@ -53,27 +53,50 @@ async function main() {
   await trustToken.connect(lender).approve(lendingPoolAddr, trustUnits(8000));
   await lendingPool.connect(lender).depositToPool(trustUnits(8000));
 
-  console.log("5. Call lendingPool.updateTrustScore(BORROWER, 68)...");
-  await lendingPool.connect(deployer).updateTrustScore(borrower.address, 68);
-
-  console.log("6. Mint ReputationNFT for BORROWER (if not already minted)...");
+  // 5. Initialize Identity for BORROWER (Protocol Node)
+  console.log("5. Initializing SOR (Sovereign On-Chain Reputation) for BORROWER...");
   try {
-    await lendingPool.connect(deployer).mintReputationNFT(borrower.address);
-    console.log("   ✓ NFT minted");
+    await lendingPool.connect(borrower).initializeUser();
+    console.log("   ✓ Protocol Node established");
   } catch (e) {
-    console.log("   ⏭ NFT already exists, skipping mint");
+    console.log("   ⏭ Node already active");
   }
-  // Re-sync score to 68 since mint defaults to 30
+
+  // 6. Setup Vouching Relationship (Voucher -> Borrower)
+  console.log("6. Establishing Vouching Link (VOUCHER -> BORROWER)...");
+  try {
+    // Borrower requests a vouch
+    await vouchSystem.connect(borrower).requestVouch(voucher.address);
+    // Voucher accepts the request
+    await vouchSystem.connect(voucher).acceptVouch(borrower.address);
+    console.log("   ✓ Social Link established (1/3)");
+  } catch (e) {
+    console.log("   ⏭ Vouch link already exists or failed:", e.message);
+  }
+
+  // 7. Update Trust Score to 68
+  console.log("7. Calibrating AI Score for BORROWER to 68...");
   await lendingPool.connect(deployer).updateTrustScore(borrower.address, 68);
 
-  // 7. Log final state
+  // 8. Submit an Open Loan Request into the Marketplace
+  console.log("8. BORROWER: Submitting P2P Loan Request (120 TRUST, Vouch-Backed)...");
+  try {
+    // pathway 0 = VouchBacked
+    await lendingPool.connect(borrower).submitLoanRequest(trustUnits(120), 30, 0);
+    console.log("   ✓ Loan Request broadcast to Marketplace");
+  } catch (e) {
+    console.log("   ⏭ Loan request submission skipped:", e.message);
+  }
+
+  // 9. Log final state
   console.log("──────────────────────────────────────────────────");
-  console.log("DEMO STATE READY");
-  console.log("- Pool Liquidity: 508,000 TRUST (500k seed + 8k lender)");
+  console.log("DEMO MISSION CONTROL READY");
+  console.log("- Protocol Seed: 500,000 TRUST");
   console.log("- Borrower Address:", borrower.address);
-  console.log("- Borrower Score: 68 (Silver Tier)");
-  console.log("- Borrower Limit: $200");
-  console.log("- Lender Deposit: 8,000 TRUST");
+  console.log("- Borrower Score: 42 (Silver Node)");
+  console.log("- Social Connections: 1/3 Active");
+  console.log("- Active Requests: 1 Open in Marketplace");
+  console.log("- Lender Liquidity: 8,000 TRUST");
   console.log("──────────────────────────────────────────────────");
 }
 

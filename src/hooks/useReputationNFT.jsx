@@ -48,20 +48,20 @@ export function useReputationNFT() {
         setTokenId(id.toString());
         const data = await contract.getReputation(walletAddress);
         setReputationData({
-          trustScore: data.trustScore,
+          trustScore: Number(data.trustScore),
           tier: data.tier,
           loansRepaid: data.loansRepaid.toString(),
           totalBorrowed: ethers.formatUnits(data.totalBorrowed, 18),
           totalRepaid: ethers.formatUnits(data.totalRepaid, 18),
           memberSince: new Date(Number(data.memberSince) * 1000).toISOString(),
-          repaymentStreak: data.repaymentStreak,
+          repaymentStreak: Number(data.repaymentStreak),
           earningArchetype: data.earningArchetype,
         });
       } else {
         setReputationData(null);
       }
     } catch (err) {
-      console.warn("Reputation fetch error:", err);
+      console.warn("[useReputationNFT] error:", err.message);
     } finally {
       setIsLoading(false);
     }

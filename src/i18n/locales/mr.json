@@ -234,7 +234,18 @@
     "repaymentHistory": "परतफेड इतिहास",
     "vouchQuality": "वाउच गुणवत्ता",
     "loanRatio": "कर्ज प्रमाण",
-    "networkDensity": "नेटवर्क घनता"
+    "networkDensity": "नेटवर्क घनता",
+    "tenure": {
+      "days": "दिवस",
+      "months": "महिने",
+      "years": "वर्षे"
+    },
+    "pathways": {
+      "reputation": "प्रतिष्ठा",
+      "social": "सामाजिक समर्थन",
+      "collateral": "मालमत्ता तारण"
+    },
+    "duration": "कालावधी"
   },
   "repay": {
     "title": "तुमचे कर्ज परत करा",
@@ -317,7 +328,7 @@
     "yourProfile": "तुमची प्रोफाइल",
     "creditProfile": "क्रेडिट प्रोफाइल",
     "trustScore": "ट्रस्ट स्कोर",
-    "vouchNetwork": "वाउच नेटवर्क",
+    "vouchNetwork": "सिंडिकेट मेश",
     "yourLevel": "तुमची पातळी"
   }
 }

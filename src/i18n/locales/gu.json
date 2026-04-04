@@ -234,7 +234,18 @@
     "repaymentHistory": "પુનઃચુકવણી ઇતિહાસ",
     "vouchQuality": "વાઉચ ગુણવત્તા",
     "loanRatio": "લોન રેશિયો",
-    "networkDensity": "નેટવર્ક ડેન્સિટી"
+    "networkDensity": "નેટવર્ક ડેન્સિટી",
+    "tenure": {
+      "days": "દિવસ",
+      "months": "મહિના",
+      "years": "વર્ષ"
+    },
+    "pathways": {
+      "reputation": "પ્રતિષ્ઠા",
+      "social": "સામાજિક સમર્થન",
+      "collateral": "સંપત્તિ ગીરો"
+    },
+    "duration": "ગાળો"
   },
   "repay": {
     "title": "તમારી લોન પરત કરો",
@@ -317,7 +328,7 @@
     "yourProfile": "તમારી પ્રોફાઇલ",
     "creditProfile": "ક્રેડિટ પ્રોફાઇલ",
     "trustScore": "ટ્રસ્ટ સ્કોર",
-    "vouchNetwork": "વાઉચ નેટવર્ક",
+    "vouchNetwork": "સિન્ડિકેટ મેશ",
     "yourLevel": "તમારું સ્તર"
   }
 }

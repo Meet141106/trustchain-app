@@ -20,40 +20,12 @@ const daysLeft = (due, t) => {
 
 function StatCard({ label, value, sub, subColor = '#8C8C8C', accent = false, children }) {
   return (
-    <div className={`bg-white dark:bg-[#111827] p-8 rounded-[12px] border
-      ${accent ? 'border-[#F5A623]/40' : 'border-[#E8E8E8] dark:border-[#1E2A3A]'}
-      flex flex-col justify-center group transition-all hover:border-[#F5A623]/50`}>
+    <div className={`bg-white dark:bg-[#111827] p-8 rounded-[24px] border transition-all hover:border-[#F5A623]/50
+      ${accent ? 'border-[#F5A623]/40 shadow-[0_0_30px_rgba(245,166,35,0.05)]' : 'border-[#E8E8E8] dark:border-[#1E2A3A]'}`}>
       {children}
-      {label && <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest mb-3">{label}</p>}
-      {value !== undefined && <h3 className="text-4xl font-black tracking-tighter text-[#1A1A1A] dark:text-[#FAFAF8] font-cabinet">{value}</h3>}
+      {label && <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.3em] mb-4">{label}</p>}
+      {value !== undefined && <h3 className="text-3xl font-black tracking-tighter text-[#1A1A1A] dark:text-[#FAFAF8] font-cabinet">{value}</h3>}
       {sub && <p className="text-[10px] font-bold mt-2 uppercase tracking-widest" style={{ color: subColor }}>{sub}</p>}
-    </div>
-  );
-}
-
-function LoanHealthBar({ loan }) {
-  const { t } = useTranslation();
-  const total = Number(loan.amount);
-  const due = loan.dueDate;
-  const now = Date.now();
-  const start = loan.startTime;
-  const pct = Math.min(100, Math.max(0, ((now - start) / (due - start)) * 100));
-  const urgency = pct < 50 ? '#1D9E75' : pct < 80 ? '#F59E0B' : '#EF4444';
-
-  return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
-        <span className="text-[#8C8C8C]">{t('dashboard.timeElapsed')}</span>
-        <span style={{ color: urgency }}>{t('dashboard.termUsed', { pct: Math.round(pct || 0) })}</span>
-      </div>
-      <div className="h-2 w-full bg-[#1E2A3A] rounded-full overflow-hidden">
-        <motion.div className="h-full rounded-full" style={{ background: urgency }}
-           initial={{ width: 0 }} animate={{ width: `${pct || 0}%` }} transition={{ duration: 1 }} />
-      </div>
-      <div className="flex justify-between text-[9px] text-[#8C8C8C] font-bold">
-        <span>{t('dashboard.borrowed')}</span>
-        <span>{t('dashboard.dueIn', { time: daysLeft(due, t) })}</span>
-      </div>
     </div>
   );
 }
@@ -61,266 +33,181 @@ function LoanHealthBar({ loan }) {
 export default function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { address } = useWallet();
+  const { walletAddress: address } = useWallet();
 
   const { trustScore, isLoading: isRepLoading } = useReputationNFT();
-  const { borrowLimit, userLoan, poolStats, isLoading: isPoolLoading } = useLendingPool();
+  const { borrowLimit, userLoan, pendingRequest, isRequestPending, poolStats, isLoading: isPoolLoading } = useLendingPool();
   const { vouches, isLoading: isVouchLoading } = useVouchSystem();
   const { transactions, isLoading: isTxLoading } = useTransactionHistory();
 
-  const loading = isRepLoading || isPoolLoading || isVouchLoading || isTxLoading;
-
-  const score = Number(trustScore) || 30; // fallback default
-  const tier = getTier(score);
-  const tierColor = TIER_COLORS[tier];
+  const score = Number(trustScore);
+  const isInitialized = score >= 30;
+  const tierName = getTier(isInitialized ? score : 30);
+  const tierColor = TIER_COLORS[tierName];
   const hasLoan = !!userLoan && userLoan?.amount > 0;
   
-  const getPathName = (pathInt) => {
-      if (pathInt === 0) return 'Vouch-Backed';
-      if (pathInt === 1) return 'Collateral';
-      return 'Trust-Only';
+  const handleInitialize = async () => {
+    const { initializeOnChainScore, parseBlockchainError } = await import('../lib/blockchain');
+    const toast = (await import('react-hot-toast')).default;
+    const id = toast.loading("Initializing on-chain identity...");
+    try {
+      await initializeOnChainScore();
+      toast.success("Identity initialized! Starting trust score: 30.", { id });
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err) {
+      toast.error(parseBlockchainError(err), { id });
+    }
   };
 
   return (
-    <AppShell pageTitle={address ? t('dashboard.welcome') : t('common.dashboard')}
-              pageSubtitle={address ? `${shortAddr(address)}` : t('common.connectWallet')}>
-      <div className="max-w-7xl mx-auto space-y-10 pb-24">
+    <AppShell pageTitle="System Dashboard" pageSubtitle={address ? shortAddr(address) : "Unconnected Node"}>
+      <div className="max-w-7xl mx-auto space-y-12 pb-24">
 
-        {/* ── TOP ROW: stats ── */}
+        {/* ── TOP ROW ── */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <StatCard>
-            {isRepLoading ? (
-               <div className="flex flex-col items-center py-4"><Skeleton w="80px" h="80px" r="50%" /><div className="mt-4 w-full flex flex-col items-center gap-2"><Skeleton w="60%" h="12px" /><Skeleton w="40%" h="10px" /></div></div>
-            ) : (
+            {isRepLoading ? <Skeleton h="140px" /> : (
                 <div className="flex flex-col items-center">
-                  <div className="relative w-36 h-36">
+                  <div className="relative w-32 h-32">
                     <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
                       <circle cx="18" cy="18" r="15.8" fill="transparent" stroke="#1E2A3A" strokeWidth="3" />
                       <motion.circle cx="18" cy="18" r="15.8" fill="transparent" strokeWidth="3"
-                        style={{ stroke: tierColor }}
-                        strokeDasharray={`${score} 100`}
+                        style={{ stroke: isInitialized ? tierColor : '#8C8C8C' }}
+                        strokeDasharray={`${isInitialized ? score : 0} 100`}
                         initial={{ strokeDasharray: '0 100' }}
-                        animate={{ strokeDasharray: `${score} 100` }}
+                        animate={{ strokeDasharray: `${isInitialized ? score : 0} 100` }}
                         transition={{ duration: 1.5, ease: 'easeOut' }} />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-4xl font-black font-cabinet text-[#1A1A1A] dark:text-[#FAFAF8]">{score}</span>
-                      <span className="text-[10px] text-[#8C8C8C] font-black uppercase tracking-widest mt-1">/ 100</span>
+                      <span className="text-3xl font-black font-cabinet text-[#FAFAF8]">{isInitialized ? score : '—'}</span>
+                      <span className="text-[9px] text-[#8C8C8C] font-black uppercase tracking-widest mt-1">Trust</span>
                     </div>
                   </div>
-                  <div className="text-center mt-4">
-                    <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border"
-                      style={{ color: tierColor, borderColor: tierColor + '40', background: tierColor + '15' }}>
-                      {tier} Tier
-                    </span>
-                  </div>
+                  <p className="mt-4 text-[9px] font-black uppercase tracking-widest" style={{ color: tierColor }}>{tierName} TIER</p>
                 </div>
             )}
           </StatCard>
 
-          {isPoolLoading ? <div className="space-y-4 pt-12"><Skeleton w="40%" h="10px" /><Skeleton w="70%" h="32px" /><Skeleton w="80%" h="10px" /></div> : (
-              <StatCard label="Borrow Limit"
-                value={`$${Number(borrowLimit).toLocaleString()}`}
-                sub={score >= 40 ? `You're at ${tier} level — repay to grow` : 'Repay loans to increase your limit'}
-                subColor={score >= 40 ? '#1D9E75' : '#F5A623'} />
-          )}
+          <StatCard label="Direct Limit"
+            value={isInitialized ? `$${Number(borrowLimit).toLocaleString()}` : '$0'}
+            sub={isInitialized ? "Authorized Protocol Risk" : "Initialize ID to unlock"}
+            subColor={isInitialized ? '#1D9E75' : '#8C8C8C'} />
 
-          {isPoolLoading ? <div className="space-y-4 pt-12"><Skeleton w="40%" h="10px" /><Skeleton w="70%" h="32px" /><Skeleton w="80%" h="10px" /></div> : (
-              <StatCard label="Pool Balance"
-                value={`${Number(poolStats?.totalLiquidity || 0).toLocaleString()} TRUST`}
-                sub="Community Liquidity Pool"
-                subColor="#1D9E75" />
-          )}
+          <StatCard label="Marketplace Action"
+            value={poolStats.openRequests}
+            sub="Live Requests Waiting"
+            subColor="#F5A623" />
 
-          {isPoolLoading ? <div className="space-y-4 pt-12"><Skeleton w="40%" h="10px" /><Skeleton w="70%" h="32px" /><Skeleton w="80%" h="10px" /></div> : (
-              hasLoan ? (
-                <div className="bg-white dark:bg-[#111827] p-8 rounded-[12px] border border-[#F59E0B]/40
-                                flex flex-col justify-center group transition-all">
-                  <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest mb-3">Active Loan</p>
-                  <h3 className="text-4xl font-black tracking-tighter text-[#1A1A1A] dark:text-[#FAFAF8] font-cabinet mb-4">
-                    {userLoan.amount} TRUST
-                  </h3>
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="w-2 h-2 rounded-full bg-[#F59E0B] animate-pulse" />
-                    <p className="text-[10px] font-black text-[#F59E0B] uppercase tracking-widest">
-                      Due {daysLeft(userLoan?.dueDate, t)}
-                    </p>
-                  </div>
-                  <button id="btn-repay-now" onClick={() => navigate(`/repay?loanId=active`)}
-                    className="w-full py-3 rounded-xl bg-[#1D9E75] text-white text-[11px] font-black
-                               uppercase tracking-widest hover:bg-[#13C296] transition-all active:scale-[0.98]">
-                    ⚡ Repay Now
-                  </button>
+          {/* Dynamic Action Card */}
+          {hasLoan ? (
+             <div className="bg-[#111827] border border-[#1D9E75]/30 p-8 rounded-[24px] flex flex-col justify-between shadow-[0_0_30px_rgba(29,158,117,0.1)]">
+                <div>
+                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.3em] mb-4">Active Loan</p>
+                    <h3 className="text-3xl font-black font-cabinet text-[#FAFAF8]">{userLoan.amount} TRUST</h3>
                 </div>
-              ) : (
-                <div className="bg-white dark:bg-[#111827] p-8 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]
-                                flex flex-col justify-center items-center text-center group transition-all hover:border-[#F5A623]/40">
-                  <div className="text-4xl mb-4">💸</div>
-                  <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2">{t('dashboard.noActiveLoan')}</p>
-                  <p className="text-[#8C8C8C] text-xs mb-6 leading-relaxed">{t('dashboard.creditReady')}</p>
-                  <button id="btn-get-first-loan" onClick={() => navigate('/borrow')}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F5A623] to-[#D4AF37]
-                               text-black text-[11px] font-black uppercase tracking-widest
-                               hover:opacity-90 active:scale-[0.98] transition-all
-                               shadow-[0_0_20px_rgba(245,166,35,0.25)]">
-                    Borrow →
-                  </button>
+                <div className="mt-6 space-y-4">
+                    <p className="text-[9px] font-black text-[#1D9E75] uppercase tracking-widest">On Track — Due {daysLeft(userLoan.dueDate, t)}</p>
+                    <button onClick={() => navigate('/repay')} className="w-full py-4 bg-[#1D9E75] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">Settle Debt</button>
                 </div>
-              )
+             </div>
+          ) : isRequestPending ? (
+             <div className="bg-[#111827] border border-[#F5A623]/30 p-8 rounded-[24px] flex flex-col justify-between shadow-[0_0_30px_rgba(245,166,35,0.1)]">
+                <div>
+                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.3em] mb-4">Pending Request</p>
+                    <h3 className="text-3xl font-black font-cabinet text-[#FAFAF8]">{pendingRequest.amount} TRUST</h3>
+                </div>
+                <div className="mt-6 space-y-4">
+                    <p className="text-[9px] font-black text-[#F5A623] uppercase tracking-widest">Live in Marketplace</p>
+                    <button onClick={() => navigate('/request-pending')} className="w-full py-4 bg-[#F5A623] text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">View Status</button>
+                </div>
+             </div>
+          ) : (
+             <div className="bg-[#111827] border border-[#1E2A3A] p-8 rounded-[24px] flex flex-col items-center justify-center text-center group hover:border-[#D4AF37]/40 transition-all">
+                <div className="text-4xl mb-4 opacity-50 group-hover:opacity-100 transition-opacity">💸</div>
+                <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2">No Active Position</p>
+                {isInitialized ? (
+                    <button onClick={() => navigate('/borrow')} className="w-full mt-4 py-4 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#F5A623] transition-all">Submit Request →</button>
+                ) : (
+                    <button onClick={handleInitialize} className="w-full mt-4 py-4 border border-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-white hover:text-black transition-all">Initialize ID</button>
+                )}
+             </div>
           )}
         </div>
 
-        {/* ── ACTIVE LOAN HEALTH ── */}
-        <AnimatePresence>
-          {hasLoan && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#F59E0B]/20 dark:border-[#F59E0B]/20">
-              <div className="flex justify-between items-center mb-8">
-                <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">
-                  {t('dashboard.activeLoan')}
-                </h4>
-                <span className="px-3 py-1 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/20
-                                 text-[9px] font-black uppercase text-[#F59E0B] tracking-widest">
-                  Active
-                </span>
-              </div>
-              <div className="space-y-8">
-                <LoanHealthBar loan={userLoan} />
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { l: t('dashboard.borrowed'),  v: `$${userLoan.amount}`,           c: '#FAFAF8' },
-                    { l: t('dashboard.repay'),    v: `$${userLoan.repaidAmount}`,     c: '#1D9E75' },
-                    { l: t('dashboard.loanPath'), v: getPathName(userLoan.path),      c: '#F5A623' },
-                  ].map(({ l, v, c }, i) => (
-                    <div key={i} className="text-center p-4 bg-[#FAFAF8] dark:bg-[#0A0F1E] rounded-xl border border-[#E8E8E8] dark:border-[#1E2A3A]">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-[#8C8C8C] mb-2">{l}</p>
-                      <p className="font-black font-cabinet text-[15px] capitalize truncate" style={{ color: c }}>{v}</p>
+        {/* ── MIDDLE ROW: P2P Interaction ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 bg-[#111827] border border-[#1E2A3A] rounded-[32px] p-10 flex flex-col md:flex-row items-center gap-10">
+                <div className="flex-1 space-y-6">
+                    <div className="flex items-center gap-3">
+                        <iconify-icon icon="lucide:shopping-bag" className="text-3xl text-[#1D9E75]"></iconify-icon>
+                        <h4 className="text-2xl font-black font-cabinet text-[#FAFAF8] uppercase tracking-tighter">Marketplace Opportunity</h4>
                     </div>
-                  ))}
+                    <p className="text-sm text-[#8C8C8C] leading-relaxed">There are currently <span className="text-[#FAFAF8] font-black">{poolStats.openRequests} open requests</span> at an average of <span className="text-[#1D9E75] font-black">{poolStats.avgInterestRate}% APR</span>. Start funding peers to grow your capital.</p>
+                    <button onClick={() => navigate('/marketplace')} className="px-10 py-4 bg-[#1D9E75] text-black text-[11px] font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all">Open Marketplace →</button>
                 </div>
-                <button id="btn-health-repay" onClick={() => navigate(`/repay?loanId=active`)}
-                  className="w-full py-4 rounded-xl bg-[#1D9E75] text-white font-black text-[12px]
-                             uppercase tracking-widest hover:bg-[#13C296] transition-all active:scale-[0.98]
-                             shadow-[0_0_25px_rgba(29,158,117,0.2)]">
-                  {t('dashboard.repayNow')}
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── MIDDLE ROW ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
-            <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] mb-8 uppercase tracking-widest">
-              {t('dashboard.vouchNetwork', { count: vouches.length })}
-            </h4>
-            
-            {vouches.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-6 text-center border border-[#E8E8E8] dark:border-[#1E2A3A] rounded-lg mb-8">
-                  <p className="text-[#8C8C8C] text-sm font-bold mb-2">{t('dashboard.noVouches')}</p>
-                  <p className="text-[#8C8C8C] text-[10px] leading-relaxed">{t('dashboard.vouchDesc')}</p>
-              </div>
-            ) : (
-              <div className="space-y-4 mb-8">
-                {vouches.slice(0, 3).map((v, i) => (
-                  <div key={i} className="flex items-center justify-between bg-[#FAFAF8]/50 dark:bg-[#0A0F1E]/50 p-3 rounded-lg border border-[#E8E8E8]/50 dark:border-[#1E2A3A]/50">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-[#FAFAF8] dark:bg-[#0A0F1E] border border-[#F5A623]/20 flex items-center justify-center text-[10px] font-bold text-[#F5A623]">
-                        {v.voucher.slice(2, 3).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm text-[#1A1A1A] dark:text-[#FAFAF8]">{shortAddr(v.voucher)}</p>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-[#1D9E75]">
-                            {v.slashed ? 'Slashed' : v.released ? 'Released' : 'Active'}
-                        </p>
-                      </div>
+                <div className="w-full md:w-64 aspect-square bg-[#0A0B14] rounded-3xl border border-[#1E2A3A] p-6 flex flex-col justify-between overflow-hidden relative group">
+                    <div className="absolute inset-0 bg-[#1D9E75]/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">Protocol Staking</p>
+                    <div className="text-center">
+                        <p className="text-5xl font-black font-cabinet text-[#FAFAF8]">{poolStats.avgInterestRate}%</p>
+                        <p className="text-[9px] font-black text-[#1D9E75] uppercase tracking-widest mt-2">Target Yield</p>
                     </div>
-                    <span className="text-[11px] font-black text-[#1A1A1A] dark:text-[#FAFAF8] font-mono">${v.amount} Backed</span>
-                  </div>
-                ))}
-              </div>
-            )}
+                    <div className="w-full h-1 bg-[#1E2A3A] rounded-full overflow-hidden">
+                        <div className="w-2/3 h-full bg-[#1D9E75]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-[#111827] border border-[#1E2A3A] rounded-[32px] p-10">
+                <h4 className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-8">Syndicate Mesh</h4>
+                <div className="space-y-6 mb-10">
+                    <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                        <p className="text-[11px] font-black text-[#FAFAF8] uppercase tracking-widest">{vouches.length} Social Backers</p>
+                        <span className="text-[10px] text-[#1D9E75] font-black">Verified</span>
+                    </div>
+                </div>
+                <div className="flex gap-4">
+                    <button onClick={() => navigate('/invite-vouch')} className="flex-1 py-4 bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-[#FAFAF8] rounded-xl hover:bg-white/10 transition-all">+ Invite</button>
+                    <button onClick={() => navigate('/network')} className="flex-1 py-4 border border-[#D4AF37]/40 text-[#D4AF37] text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-[#D4AF37]/10 transition-all">Graph</button>
+                </div>
+            </div>
+        </div>
+
+        {/* ── LOWER ROW: Ledger ── */}
+        <div className="bg-[#111827] border border-[#1E2A3A] rounded-[32px] p-10">
+            <div className="flex justify-between items-center mb-10">
+                <h4 className="text-xl font-black font-cabinet text-[#FAFAF8] uppercase tracking-tighter">Recent Ledger Activity</h4>
+                <button onClick={() => navigate('/ledger')} className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest hover:text-[#FAFAF8] transition-all">View All Activity →</button>
+            </div>
             
-            <div className="flex gap-3 mt-2">
-              <button onClick={() => navigate('/invite-vouch')}
-                id="btn-invite-voucher"
-                className="flex-1 py-4 rounded-[8px] bg-gradient-to-r from-[#F5A623] to-[#D4AF37]
-                           text-black text-[10px] font-black uppercase tracking-widest
-                           hover:opacity-90 active:scale-[0.98] transition-all">
-                + {t('dashboard.inviteVoucher')}
-              </button>
-              <button onClick={() => navigate('/network')}
-                className="flex-1 py-4 border border-[#F5A623] text-[#F5A623] rounded-[8px]
-                           text-[10px] font-black uppercase tracking-widest hover:bg-[#F5A623] hover:text-black transition-all">
-                View Network
-              </button>
+            <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                    <thead className="border-b border-white/5 pb-4">
+                        <tr>
+                            <th className="pb-4 text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">Event</th>
+                            <th className="pb-4 text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">Impact</th>
+                            <th className="pb-4 text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">Status</th>
+                            <th className="pb-4 text-right text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">Hash</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                        {transactions.length === 0 ? (
+                            <tr><td colSpan="4" className="py-10 text-center text-[10px] font-black text-[#555] uppercase tracking-widest">No protocol activity detected</td></tr>
+                        ) : transactions.slice(0, 4).map((tx, i) => (
+                            <tr key={i} className="group hover:bg-white/5 transition-all">
+                                <td className="py-5 text-sm font-black text-[#FAFAF8]">{tx.type}</td>
+                                <td className={`py-5 text-sm font-black font-cabinet ${tx.positive ? 'text-[#1D9E75]' : 'text-[#EF4444]'}`}>{tx.value}</td>
+                                <td className="py-5">
+                                    <span className="px-3 py-1 rounded-full bg-[#1D9E75]/10 text-[#1D9E75] text-[9px] font-black uppercase tracking-widest">{tx.status}</span>
+                                </td>
+                                <td className="py-5 text-right font-mono text-[10px] text-[#8C8C8C]">{tx.hash ? `${tx.hash.slice(0, 8)}...` : '0x...'}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
-          </div>
-
-          <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
-            <div className="flex justify-between items-start mb-8">
-              <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">
-                Reputation Identity
-              </h4>
-            </div>
-
-            <div className="flex flex-col items-center justify-center h-48 text-center border border-[#E8E8E8] dark:border-[#1E2A3A] rounded-lg">
-                <div className="text-5xl mb-4">🎭</div>
-                <p className="text-[#8C8C8C] text-sm font-bold mb-2">On-Chain Credit Profile</p>
-                <p className="text-[#8C8C8C] text-xs leading-relaxed max-w-[200px] mx-auto">
-                    Manage your Soulbound Reputation NFT unlocking capital paths.
-                </p>
-                <button onClick={() => navigate('/audit')} className="mt-4 px-6 py-2 border border-[#8C8C8C] text-[#8C8C8C] hover:text-white hover:border-white transition-all text-[10px] rounded uppercase font-black tracking-widest">
-                    Run Sovereign Audit
-                </button>
-            </div>
-          </div>
         </div>
 
-        {/* ── RECENT ACTIVITY ── */}
-        <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
-          <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest mb-8">
-            Recent Ledger Activity
-          </h4>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-[#E8E8E8] dark:border-[#1E2A3A]">
-                <tr>
-                  {['Event', 'Amount/Impact', 'Date', 'Status', 'Tx Hash'].map(h => (
-                    <th key={h} className="pb-5 text-left text-[10px] font-black uppercase tracking-widest text-[#8C8C8C]">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E2A3A]">
-                {transactions.slice(0, 4).map((l, i) => (
-                  <tr key={i} className="hover:bg-white/[0.02] transition-all duration-300">
-                    <td className="py-5 text-sm font-bold text-[#1A1A1A] dark:text-[#FAFAF8]">
-                      {l.type}
-                    </td>
-                    <td className={`py-5 font-mono font-black text-sm ${l.positive ? 'text-[#1D9E75]' : 'text-[#EF4444]'}`}>
-                      {l.value}
-                    </td>
-                    <td className="py-5 text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest">
-                      {new Date(l.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="py-5">
-                      <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-[#1D9E75]/10 text-[#1D9E75]`}>
-                        {l.status}
-                      </span>
-                    </td>
-                    <td className="py-5">
-                      {l.hash && <span className="font-mono text-[10px] text-[#8C8C8C]">{l.hash}</span>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <button onClick={() => navigate('/ledger')} className="w-full text-center text-[#8C8C8C] hover:text-white transition-all text-[10px] uppercase font-black pt-6 tracking-widest">
-              View Complete Ledger →
-          </button>
-        </div>
       </div>
     </AppShell>
   );

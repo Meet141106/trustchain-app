@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 export default function RepayLoan() {
   const navigate = useNavigate();
-  const { address } = useWallet();
+  const { walletAddress: address } = useWallet();
 
   const { userLoan, makeRepayment, isLoading: isLoanLoading } = useLendingPool();
   const { trustScore, isLoading: isRepLoading } = useReputationNFT();
@@ -159,6 +159,10 @@ export default function RepayLoan() {
                     <span className="font-black text-sm" style={{ color: c }}>{v}</span>
                   </div>
                 ))}
+                <div className="pt-4 mt-2 border-t border-[#1E2A3A] text-center">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-[#8C8C8C]">Recipient Node</p>
+                    <p className="text-[11px] font-mono font-black text-[#FAFAF8] mt-1">{userLoan?.lender}</p>
+                </div>
               </div>
 
               {/* blockchain flow indicator */}
@@ -192,23 +196,26 @@ export default function RepayLoan() {
               </div>
 
               <AnimatePresence mode="wait">
-                {phase === 'idle' && needsApproval && (
-                  <motion.button key="approve" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    onClick={handleApprove}
-                    className="w-full py-5 rounded-2xl bg-[#F5A623] text-black font-black text-[13px] uppercase tracking-widest hover:opacity-90 transition-all">
-                    Authorize TRUST Spending
-                  </motion.button>
-                )}
-
-                {phase === 'idle' && !needsApproval && (
-                  <motion.button key="repay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    onClick={handleRepay}
-                    className="w-full py-5 rounded-2xl bg-gradient-to-r from-[#1D9E75] to-[#13C296]
-                               text-white font-black text-[13px] uppercase tracking-widest
-                               hover:opacity-90 active:scale-[0.98] transition-all
-                               shadow-[0_0_30px_rgba(29,158,117,0.25)]">
-                    ⚡ Authorize Settlement {Number(userLoan.totalOwed).toFixed(2)} TRUST
-                  </motion.button>
+                {phase === 'idle' && (
+                  <>
+                    {needsApproval ? (
+                      <motion.button key="approve" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        onClick={handleApprove}
+                        className="w-full py-5 rounded-2xl bg-[#F5A623] text-black font-black text-[13px] uppercase tracking-widest hover:opacity-90 transition-all">
+                        Authorize TRUST Spending
+                      </motion.button>
+                    ) : (
+                      <motion.button key="repay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        onClick={handleRepay}
+                        className="w-full py-5 rounded-2xl bg-gradient-to-r from-[#1D9E75] to-[#13C296]
+                                   text-white font-black text-[13px] uppercase tracking-widest
+                                   hover:opacity-90 active:scale-[0.98] transition-all
+                                   shadow-[0_0_30px_rgba(29,158,117,0.25)] flex flex-col items-center">
+                        <span>⚡ Authorize Settlement {Number(userLoan?.totalOwed || 0).toFixed(2)} TRUST</span>
+                        <span className="text-[8px] opacity-70 mt-1 uppercase">Direct Transfer to Peer Lender</span>
+                      </motion.button>
+                    )}
+                  </>
                 )}
 
                 {(phase === 'blockchain' || phase === 'approving') && (

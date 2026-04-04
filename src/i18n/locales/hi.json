@@ -234,7 +234,18 @@
     "repaymentHistory": "पुनर्भुगतान इतिहास",
     "vouchQuality": "वाउच गुणवत्ता",
     "loanRatio": "ऋण अनुपात",
-    "networkDensity": "नेटवर्क घनत्व"
+    "networkDensity": "नेटवर्क घनत्व",
+    "tenure": {
+      "days": "दिन",
+      "months": "महीने",
+      "years": "साल"
+    },
+    "pathways": {
+      "reputation": "प्रतिष्ठा",
+      "social": "सामाजिक समर्थन",
+      "collateral": "संपत्ति गिरवी"
+    },
+    "duration": "अवधि"
   },
   "repay": {
     "title": "अपना ऋण चुकाएं",
@@ -317,7 +328,7 @@
     "yourProfile": "आपकी प्रोफ़ाइल",
     "creditProfile": "क्रेडिट प्रोफ़ाइल",
     "trustScore": "ट्रस्ट स्कोर",
-    "vouchNetwork": "वाउच नेटवर्क",
+    "vouchNetwork": "सिंडिकेट मेश",
     "yourLevel": "आपका स्तर"
   }
 }

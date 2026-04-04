@@ -7,6 +7,8 @@ import { useVouchSystem } from '../hooks/useVouchSystem';
 import { motion } from 'framer-motion';
 import Skeleton, { SkeletonCard } from '../components/Skeleton';
 
+const shortAddr = (a = '') => (a && typeof a === 'string') ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—';
+
 const daysLeft = (dueTime) => {
   if (!dueTime) return '—';
   const d = Math.ceil((dueTime - Date.now()) / 86400000);
@@ -14,7 +16,7 @@ const daysLeft = (dueTime) => {
 };
 
 export default function ActiveLoanDetail() {
-  const { address } = useWallet();
+  const { walletAddress: address } = useWallet();
   const navigate = useNavigate();
   
   const { userLoan, isLoading: isLoanLoading } = useLendingPool();
@@ -68,10 +70,10 @@ export default function ActiveLoanDetail() {
           <div>
             <div className="flex items-center gap-4 mb-4">
               <span className="font-mono text-xs text-[#8C8C8C] tracking-widest uppercase">
-                  TL-HASH-{address.slice(-6).toUpperCase()}
+                  TL-HASH-{address?.slice(-6)?.toUpperCase() || '??????'}
               </span>
               <span className="px-3 py-1 rounded-full bg-[#1D9E75]/10 border border-[#1D9E75]/20 text-[9px] font-black uppercase text-[#1D9E75] tracking-[0.2em]">
-                  Active — On Track
+                  Active — Funded by {shortAddr(userLoan?.lender)}
               </span>
             </div>
             <h2 className="text-5xl font-black font-cabinet text-[#1A1A1A] dark:text-[#FAFAF8] tracking-tighter mb-2">
@@ -98,7 +100,7 @@ export default function ActiveLoanDetail() {
           </div>
           <div className="flex flex-col items-end">
             <span className="px-4 py-2 rounded-xl bg-[#1D9E75]/10 border border-[#1D9E75]/20 text-[10px] font-black uppercase text-[#1D9E75] tracking-widest mb-4">
-                Total Owed: ${Number(userLoan.totalOwed).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                Total Owed: ${Number(userLoan?.totalOwed || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}
             </span>
             <div className="text-right">
               <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest mb-1">Current Balance Repaid</p>
@@ -146,7 +148,7 @@ export default function ActiveLoanDetail() {
           </div>
         </div>
 
-        {/* TIMELINE - Note this is a simplistic mapping purely for visual tracking of fractional repayments */}
+        {/* REPAYMENT PROGRESS */}
         <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
           <div className="flex justify-between items-center mb-12">
             <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">Repayment Progress</h4>
@@ -178,11 +180,36 @@ export default function ActiveLoanDetail() {
           </div>
         </div>
 
+        {/* ESCALATION MATRIX */}
+        <div className="bg-[#EF4444]/5 p-10 rounded-[12px] border border-[#EF4444]/20">
+            <div className="flex items-center gap-3 mb-8">
+                <iconify-icon icon="lucide:alert-triangle" className="text-2xl text-[#EF4444]"></iconify-icon>
+                <h5 className="text-[11px] font-black text-[#FAFAF8] uppercase tracking-[0.3em]">Protocol Escalation Matrix</h5>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                    { label: 'Grace Period', days: 'Days 1-7', desc: 'Automated reminders. No penalties.', active: pct <= 25, color: '#1D9E75' },
+                    { label: 'Score Drop', days: 'Days 8-30', desc: 'Trust score erosion begins.', active: pct > 25 && pct <= 100, color: '#F5A623' },
+                    { label: 'Voucher Slashing', days: 'Days 31-60', desc: 'Liquidating social stakes.', active: pct > 100, color: '#EF4444' }
+                ].map((s, i) => (
+                    <div key={i} className={`p-6 rounded-2xl border transition-all ${s.active ? 'bg-white/5 border-white/20' : 'opacity-30 border-transparent grayscale'}`}>
+                        <div className="flex justify-between items-start mb-4">
+                            <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: s.color }}>{s.label}</p>
+                            {s.active && <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>}
+                        </div>
+                        <p className="text-sm font-black text-[#FAFAF8] uppercase mb-1">{s.days}</p>
+                        <p className="text-[9px] text-[#8C8C8C] uppercase font-bold leading-relaxed">{s.desc}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+
         <div className="flex gap-4">
             <button 
                 onClick={() => navigate('/repay')}
                 className="flex-1 py-5 bg-[#F5A623] text-black rounded-[8px] text-[11px] font-black uppercase tracking-widest hover:bg-white transition-all active:scale-[0.98]">
               Make Settlement Repayment
+              <span className="block text-[8px] opacity-70 mt-1 uppercase">Direct Transfer to {shortAddr(userLoan?.lender)}</span>
             </button>
             <button 
                 onClick={() => navigate('/dashboard')}

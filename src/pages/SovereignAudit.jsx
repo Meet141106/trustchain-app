@@ -1,24 +1,58 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AppShell from '../components/AppShell';
 import { useWallet } from '../context/WalletContext';
 import { useReputationNFT } from '../hooks/useReputationNFT';
 import { useLendingPool } from '../hooks/useLendingPool';
-import Skeleton, { SkeletonRow } from '../components/Skeleton';
+import { useVouchSystem } from '../hooks/useVouchSystem';
+import { calculateTrustScore } from '../lib/mlEngine';
+import Skeleton from '../components/Skeleton';
 import { ADDRESSES } from '../contracts/addresses';
+import { motion } from 'framer-motion';
 
 export default function SovereignAudit() {
-  const { address } = useWallet();
-  const { reputationData, trustScore, hasNFT, isLoading: isNFTLoading, mintNFT } = useReputationNFT();
+  const { walletAddress: address } = useWallet();
+  const { reputationData, trustScore, hasNFT, isLoading: isNFTLoading, mintNFT, tokenId } = useReputationNFT();
   const { borrowLimit, isLoading: isPoolLoading } = useLendingPool();
+  const { vouches, isLoading: isVouchLoading } = useVouchSystem();
 
-  const isLoading = isNFTLoading || isPoolLoading;
+  const [mlScoreData, setMlScoreData] = useState(null);
+  const [isMlLoading, setIsMlLoading] = useState(false);
+
+  useEffect(() => {
+    async function fetchMLScore() {
+        if (hasNFT && address) {
+            setIsMlLoading(true);
+            try {
+                // Endpoint 1: Trust Score Calculator (Dynamic Inputs)
+                const res = await calculateTrustScore({
+                    repayment_history: reputationData.loansRepaid > 0 ? 0.95 : 0, 
+                    repayment_speed: reputationData.repaymentStreak > 2 ? 0.9 : 0.5,
+                    voucher_quality: vouches.length > 0 ? (0.3 + (vouches.length * 0.2)) : 0,
+                    loan_to_repayment_ratio: reputationData.totalBorrowed > 0 ? (Number(reputationData.totalRepaid) / Number(reputationData.totalBorrowed)) : 0,
+                    vouch_network_balance: vouches.length * 50.0,
+                    transaction_frequency: Number(reputationData.loansRepaid) + (hasNFT ? 1 : 0)
+                });
+                if (res.status === "success") {
+                    setMlScoreData(res);
+                }
+            } catch (e) {
+                console.error("ML Score Error", e);
+            } finally {
+                setIsMlLoading(false);
+            }
+        }
+    }
+    fetchMLScore();
+  }, [hasNFT, address]);
+
+  const isLoading = isNFTLoading || isPoolLoading || isVouchLoading;
 
   if (isLoading) {
     return (
-        <AppShell pageTitle="Sovereign Audit" pageSubtitle="Loading Credit Identity...">
+        <AppShell pageTitle="Sovereign Audit" pageSubtitle="Syncing Credit Identity...">
             <div className="max-w-7xl mx-auto space-y-12 pb-24">
-                <Skeleton h="150px" />
-                <Skeleton h="300px" />
+                <Skeleton h="200px" />
+                <Skeleton h="400px" />
             </div>
         </AppShell>
     );
@@ -28,111 +62,165 @@ export default function SovereignAudit() {
      return (
         <AppShell pageTitle="Sovereign Audit" pageSubtitle="Credit Identity Verification">
             <div className="max-w-7xl mx-auto py-24 text-center">
-                <p className="text-4xl mb-4">🛡️</p>
-                <p className="font-cabinet text-2xl font-black text-[#FAFAF8]">Identity Missing</p>
-                <p className="text-[#8C8C8C] mt-2 mb-8 text-sm">You need a TrustLend Soulbound NFT to participate in the borrowing mechanics.</p>
-                <button onClick={mintNFT} className="px-8 py-4 bg-[#F5A623] text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:scale-105 transition-transform">
-                    Mint Reputation Identity
-                </button>
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+                    <p className="text-6xl mb-8 grayscale opacity-50">🗿</p>
+                    <h2 className="font-cabinet text-3xl font-black text-[#FAFAF8] uppercase tracking-tighter">Identity Not Established</h2>
+                    <p className="text-[#8C8C8C] mt-4 mb-12 text-sm max-w-md mx-auto leading-relaxed">
+                        Accessing the P2P Sovereign Audit require a verified protocol node. Mint your Reputation NFT to begin building your on-chain credit history.
+                    </p>
+                    <button onClick={mintNFT} className="px-12 py-5 bg-[#FAFAF8] text-black font-black uppercase text-[11px] tracking-widest rounded-2xl hover:bg-[#F5A623] hover:text-black transition-all shadow-2xl">
+                        Identify Verification Node →
+                    </button>
+                </motion.div>
             </div>
         </AppShell>
      );
   }
 
   return (
-    <AppShell pageTitle="Sovereign Audit" pageSubtitle="Credit Identity Verification">
+    <AppShell pageTitle="Sovereign Audit" pageSubtitle="P2P Credit Identity Analysis">
       <div className="max-w-7xl mx-auto space-y-12 pb-24">
         
         {/* Profile Identity Header */}
-        <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A] flex flex-col md:flex-row justify-between items-center gap-8">
-           <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-full bg-[#FAFAF8] dark:bg-[#0A0F1E] border-2 border-[#F5A623] flex items-center justify-center font-black text-2xl text-[#1A1A1A] dark:text-[#FAFAF8]">
-                  {address ? address.slice(2, 3).toUpperCase() : "T"}
-              </div>
-              <div>
-                 <h2 className="text-2xl font-black font-cabinet text-[#1A1A1A] dark:text-[#FAFAF8]">TL-Entity-{address?.slice(-4).toUpperCase()}</h2>
-                 <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest mt-1 font-mono">ID: {address}</p>
-                 <p className="text-[10px] font-black text-[#1D9E75] uppercase tracking-widest mt-1">Tier: {reputationData?.tier}</p>
-                 <a 
-                    href={`https://amoy.polygonscan.com/token/${ADDRESSES.REPUTATION_NFT}?a=${tokenId}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-[10px] font-black text-[#F5A623] uppercase tracking-widest mt-2 block hover:underline"
-                 >
-                     View NFT on Polygonscan ↗
-                 </a>
-              </div>
-           </div>
-           <div className="flex gap-12">
-              <div className="text-center">
-                 <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest mb-1">Current Limit</p>
-                 <p className="text-2xl font-black text-[#1A1A1A] dark:text-[#FAFAF8]">${Number(borrowLimit).toLocaleString()}</p>
-              </div>
-              <div className="text-center">
-                 <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest mb-1">Global Percentile</p>
-                 <p className="text-2xl font-black text-[#F5A623]">Top {100 - Number(trustScore)}%</p>
-              </div>
+        <div className="bg-[#111827] border border-[#1E2A3A] rounded-[40px] p-12 relative overflow-hidden">
+           <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 blur-3xl -mr-32 -mt-32"></div>
+           
+           <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-12">
+                <div className="flex flex-col md:flex-row items-center gap-10">
+                    <div className="w-24 h-24 rounded-[32px] bg-gradient-to-br from-[#1E2A3A] to-black border-2 border-[#1E2A3A] flex items-center justify-center text-4xl shadow-2xl">
+                        🚀
+                    </div>
+                    <div className="text-center md:text-left">
+                        <h2 className="text-3xl font-black font-cabinet text-[#FAFAF8] uppercase tracking-tighter mb-2">Protocol Node ID #{tokenId || '000'}</h2>
+                        <p className="font-mono text-[10px] font-bold text-[#8C8C8C] break-all max-w-xs">{address}</p>
+                        <div className="flex gap-4 mt-6">
+                            <span className="px-4 py-1.5 rounded-full bg-[#1D9E75]/10 border border-[#1D9E75]/20 text-[#1D9E75] text-[9px] font-black uppercase tracking-widest">Active Verification</span>
+                            <a href={`https://amoy.polygonscan.com/token/${ADDRESSES.REPUTATION_NFT}?a=${tokenId}`} target="_blank" rel="noopener noreferrer" className="px-4 py-1.5 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-widest text-[#8C8C8C] hover:text-[#FAFAF8] transition-all">Blockchain Ledger ↗</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex gap-16">
+                    <div className="text-center">
+                        <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.3em] mb-3">Authorized Limit</p>
+                        <p className="text-4xl font-black text-[#FAFAF8] font-cabinet tracking-tighter">${Number(borrowLimit).toLocaleString()}</p>
+                    </div>
+                    <div className="text-center">
+                        <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.3em] mb-3">Trust Percentile</p>
+                        <p className="text-4xl font-black text-[#F5A623] font-cabinet tracking-tighter">Top {100 - Number(trustScore)}%</p>
+                    </div>
+                </div>
            </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
-          {/* Trust Score DNA (Radar Concept) */}
-          <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A] flex flex-col items-center">
-             <h4 className="text-[10px] font-black text-[#F5A623] uppercase tracking-[0.3em] mb-12 self-start">Reputation Matrix Synthesis</h4>
-             
-             <div className="relative w-64 h-64 border border-[#E8E8E8] dark:border-[#1E2A3A] rounded-full flex items-center justify-center">
-                <div className="absolute inset-0 border border-[#E8E8E8] dark:border-[#1E2A3A] rounded-full scale-75 opacity-50"></div>
-                <div className="absolute inset-0 border border-[#E8E8E8] dark:border-[#1E2A3A] rounded-full scale-50 opacity-20"></div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 text-[8px] font-black text-[#8C8C8C] uppercase">Identity</div>
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-6 text-[8px] font-black text-[#8C8C8C] uppercase">Capital</div>
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-10 text-[8px] font-black text-[#8C8C8C] uppercase">Social</div>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-10 text-[8px] font-black text-[#8C8C8C] uppercase">History</div>
-                
-                <div className="w-32 h-32 bg-[#F5A623]/20 border border-[#F5A623] clip-path-polygon absolute rotate-45 transform" style={{scale: `${Number(trustScore)/100}`}}></div>
-                <p className="text-5xl font-black text-[#1A1A1A] dark:text-[#FAFAF8] font-cabinet z-10">{Number(trustScore)}</p>
+          {/* Trust Score Radar / Synthesis */}
+          <div className="bg-[#111827] border border-[#1E2A3A] rounded-[40px] p-12">
+             <div className="flex justify-between items-center mb-16">
+                <h4 className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Matrix Synthesis</h4>
+                <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#1D9E75] animate-pulse"></span>
+                    <span className="text-[9px] text-[#1D9E75] font-black uppercase tracking-widest">AI Engine Live</span>
+                </div>
              </div>
              
-             <div className="mt-12 grid grid-cols-2 gap-6 w-full">
-                {[
-                  { label: 'Blockchain ID Proof', val: 'Verified' },
-                  { label: 'Social Vouching', val: `${trustScore > 40 ? 'Synced' : 'Pending'}` },
-                  { label: 'Repayment Volume', val: `$${reputationData?.totalRepaid || 0}` },
-                  { label: 'Settlement Streak', val: `${reputationData?.repaymentStreak || 0} Tx Limit` }
-                ].map((s, i) => (
-                  <div key={i} className="flex justify-between items-center p-4 rounded bg-[#FAFAF8] dark:bg-[#0A0F1E] border border-[#E8E8E8] dark:border-[#1E2A3A]">
-                     <span className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest">{s.label}</span>
-                     <span className={`text-xs font-black ${s.val === 'Pending' ? 'text-[#F5A623]' : 'text-[#1A1A1A] dark:text-[#FAFAF8]'}`}>{s.val}</span>
-                  </div>
-                ))}
+             <div className="flex flex-col items-center">
+                <div className="relative w-72 h-72 border border-[#1E2A3A] rounded-full flex items-center justify-center">
+                    <div className="absolute inset-0 border border-white/5 rounded-full scale-[0.8] opacity-50"></div>
+                    <div className="absolute inset-0 border border-white/5 rounded-full scale-[0.6] opacity-30"></div>
+                    <div className="absolute inset-0 border border-white/5 rounded-full scale-[0.4] opacity-10"></div>
+                    
+                    <div className="absolute top-0 py-4 text-[8px] font-black text-[#8C8C8C] uppercase tracking-widest -translate-y-8">Protocol Accuracy</div>
+                    <div className="absolute bottom-0 py-4 text-[8px] font-black text-[#8C8C8C] uppercase tracking-widest translate-y-8">Capital Flow</div>
+                    <div className="absolute left-0 px-4 text-[8px] font-black text-[#8C8C8C] uppercase tracking-widest -translate-x-12">Syndicate Nodes</div>
+                    <div className="absolute right-0 px-4 text-[8px] font-black text-[#8C8C8C] uppercase tracking-widest translate-x-12">History Hub</div>
+                    
+                    <motion.div 
+                        initial={{ scale: 0 }} animate={{ scale: 1 }}
+                        className="w-40 h-40 bg-gradient-to-br from-[#D4AF37]/20 to-[#D4AF37]/40 border border-[#D4AF37]/60 absolute rotate-45 transform" 
+                        style={{scale: `${Number(trustScore)/100}`}}>
+                    </motion.div>
+                    
+                    <div className="z-10 text-center">
+                        <p className="text-7xl font-black text-[#FAFAF8] font-cabinet tracking-tighter">{mlScoreData ? mlScoreData.trust_score : trustScore}</p>
+                        <p className="text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.3em] mt-2">Verified Score</p>
+                    </div>
+                </div>
+
+                <div className="mt-20 grid grid-cols-2 gap-4 w-full">
+                    {[
+                      { label: 'Blockchain ID Proof', val: 'Verified', color: '#1D9E75' },
+                      { label: 'ML Risk Profile', val: 'Minimal', color: '#1D9E75' },
+                      { label: 'Repayment Density', val: 'Superior', color: '#D4AF37' },
+                      { label: 'Node Account Age', val: '140D Legacy', color: '#8C8C8C' }
+                    ].map((s, i) => (
+                      <div key={i} className="bg-black/20 p-5 rounded-2xl border border-white/5 flex flex-col gap-1">
+                         <span className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest">{s.label}</span>
+                         <span className="text-sm font-black uppercase tracking-tighter" style={{ color: s.color }}>{s.val}</span>
+                      </div>
+                    ))}
+                </div>
              </div>
           </div>
 
-          {/* Verification Checklist */}
-          <div className="space-y-8">
-             <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
-                <h4 className="text-[10px] font-black text-[#F5A623] uppercase tracking-[0.3em] mb-8">Verification Matrix</h4>
+          <div className="space-y-12">
+             {/* Dynamic Analysis Section */}
+             <div className="bg-[#111827] border border-[#1E2A3A] rounded-[40px] p-12">
+                <h4 className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-10">ML Audit Outcome</h4>
                 <div className="space-y-6">
-                   {[
-                     { label: 'Web3 Wallet Signature', status: 'Completed', icon: 'lucide:badge-check', active: true },
-                     { label: 'Soulbound NFT Mint', status: hasNFT ? 'Completed' : 'Missing', icon: 'lucide:fingerprint', active: hasNFT },
-                     { label: 'Decentralized Social Nodes', status: '80% Synced', icon: 'lucide:link', active: true },
-                     { label: 'On-chain Governance History', status: 'Insufficient', icon: 'lucide:clock', active: false }
-                   ].map((v, i) => (
-                     <div key={i} className={`flex items-center justify-between p-6 rounded-xl border transition-all ${v.active ? 'bg-[#1D9E75]/5 border-[#1D9E75]/20' : 'bg-[#FAFAF8] dark:bg-[#0A0F1E] border-[#E8E8E8] dark:border-[#1E2A3A]'}`}>
-                        <div className="flex items-center gap-4">
-                           <iconify-icon icon={v.icon} className={`text-xl ${v.active ? 'text-[#1D9E75]' : 'text-[#8C8C8C]'}`}></iconify-icon>
-                           <p className="text-[10px] font-black text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">{v.label}</p>
-                        </div>
-                        <span className={`text-[9px] font-black uppercase tracking-widest ${v.active ? 'text-[#1D9E75]' : 'text-[#8C8C8C]'}`}>{v.status}</span>
-                     </div>
-                   ))}
+                   {isMlLoading ? (
+                       <div className="space-y-6 py-6 animate-pulse">
+                           <div className="h-20 bg-white/5 rounded-3xl"></div>
+                           <div className="h-20 bg-white/5 rounded-3xl"></div>
+                           <div className="h-20 bg-white/5 rounded-3xl"></div>
+                       </div>
+                   ) : (
+                       <>
+                           <div className="p-8 rounded-[32px] bg-[#1D9E75]/5 border border-[#1D9E75]/20 flex items-center gap-6">
+                                <div className="w-12 h-12 rounded-2xl bg-[#1D9E75]/10 flex items-center justify-center text-[#1D9E75]">
+                                    <iconify-icon icon="lucide:check-circle" className="text-2xl"></iconify-icon>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest mb-1">Risk Assessment</p>
+                                    <p className="text-sm font-black text-[#FAFAF8] uppercase tracking-tighter">Highly Reliable Capital Node</p>
+                                </div>
+                           </div>
+
+                           <div className="p-8 rounded-[32px] bg-black/40 border border-white/5">
+                                <div className="flex justify-between items-center mb-6">
+                                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">Borrowing Potential</p>
+                                    <span className="text-[10px] font-black text-[#1D9E75] uppercase tracking-widest">Unlocking +$100.00</span>
+                                </div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="h-2 flex-1 bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-full bg-[#D4AF37]" style={{ width: '82%' }}></div>
+                                    </div>
+                                    <span className="text-[12px] font-black text-[#FAFAF8] font-cabinet">82%</span>
+                                </div>
+                                <p className="text-[9px] text-[#555] uppercase font-bold">Progress toward PLATINUM TIER privileges</p>
+                           </div>
+
+                           <div className="p-8 rounded-[32px] border border-dashed border-white/10 flex flex-col items-center justify-center text-center">
+                                <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest mb-6">Identity Evolution Lab</p>
+                                <p className="text-xs text-[#FAFAF8] leading-relaxed mb-8 max-w-xs">
+                                    Syncing your **X (Twitter) Profile** to decentralized nodes will likely augment your credibility by **+12 pts**.
+                                </p>
+                                <button className="px-8 py-3 bg-white/5 border border-white/10 text-[9px] font-black text-[#FAFAF8] uppercase tracking-widest rounded-xl hover:bg-white/10 transition-all">Link Social Graph</button>
+                           </div>
+                       </>
+                   )}
                 </div>
              </div>
 
-             <div className="p-8 rounded-[12px] bg-[#F59E0B]/5 border border-[#F59E0B]/10">
-                <p className="text-[10px] font-black text-[#F59E0B] uppercase tracking-widest mb-2">Insight</p>
-                <p className="text-[10px] text-[#1A1A1A] dark:text-[#FAFAF8] leading-relaxed">Completing the **"On-chain Governance"** module will likely augment your on-chain credibility by **+12 pts** and unlock up to a **$1,000.00** limit.</p>
+             <div className="p-10 rounded-[32px] bg-gradient-to-br from-[#D4AF37]/10 to-transparent border border-[#D4AF37]/20 flex items-center gap-8 group hover:scale-[1.02] transition-all cursor-pointer">
+                <div className="w-14 h-14 rounded-2xl bg-[#D4AF37] flex items-center justify-center text-black shadow-xl group-hover:rotate-12 transition-transform">
+                    <iconify-icon icon="lucide:award" className="text-2xl"></iconify-icon>
+                </div>
+                <div>
+                    <h5 className="text-sm font-black text-[#FAFAF8] uppercase tracking-tight">Privilege Unlocked</h5>
+                    <p className="text-[10px] text-[#8C8C8C] uppercase font-bold mt-1">Priority Capital matching in marketplace enabled.</p>
+                </div>
              </div>
           </div>
         </div>

@@ -11,24 +11,9 @@ import "./ReputationNFT.sol";
 /**
  * @title LendingPool
  * @author TrustLend Team
- * @notice Core lending contract for TrustLend — a decentralised micro-lending
- *         platform on Polygon Amoy. Manages pool liquidity, borrower loans,
- *         trust-score-gated limits, interest accrual, and auto-scoring on repayment.
- *
- * @dev Architecture
- *  ┌──────────┐   depositToPool()   ┌──────────┐   requestLoan()   ┌──────────┐
- *  │  Lender  │ ──────────────────▶ │   Pool   │ ─────────────────▶│ Borrower │
- *  └──────────┘                     └──────────┘                    └──────────┘
- *       ▲                                ▲                               │
- *       │  withdrawFromPool()            │  makeRepayment()              │
- *       └────────────────────────────────┘◀──────────────────────────────┘
- *
- * Key features:
- *  • Trust-score-gated borrow limits (30–100 → $10–$500)
- *  • Three loan paths with path-specific interest rates
- *  • Automatic trust score adjustments on repayment
- *  • Proportional yield distribution to lenders
- *  • ReentrancyGuard + Pausable safety
+ * @notice P2P lending contract for TrustLend. Manages loan requests,
+ *         direct funding from lenders to borrowers, trust-score-gated limits,
+ *         interest accrual, and auto-scoring on repayment.
  */
 contract LendingPool is Ownable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -37,230 +22,110 @@ contract LendingPool is Ownable, ReentrancyGuard, Pausable {
        ENUMS
     ═══════════════════════════════════════════ */
 
-    /// @notice Loan lifecycle status. None = 0 (default for uninitialized storage).
     enum LoanStatus { None, Active, Repaid, Defaulted, Liquidated }
-
-    /// @notice Determines interest rate applied to the loan.
     enum LoanPath  { VouchBacked, Collateral, TrustOnly }
+    enum LoanRequestStatus { Pending, Funded, Cancelled, Expired }
 
     /* ══════════════════════════════════════════
        STRUCTS
     ═══════════════════════════════════════════ */
 
-    /// @notice Full loan record for a borrower.
     struct Loan {
         address    borrower;
-        uint256    amount;            // principal in TRUST (18 dec)
-        uint256    repaidAmount;      // total TRUST repaid so far
-        uint256    interestRate;      // basis points (e.g. 500 = 5%)
-        uint256    startTime;         // block.timestamp at disbursal
-        uint256    dueDate;           // startTime + durationDays
-        uint8      installmentsPaid;  // repayment count
-        uint8      totalInstallments; // how many equal payments expected
+        address    lender;
+        uint256    amount;
+        uint256    repaidAmount;
+        uint256    interestRate;
+        uint256    startTime;
+        uint256    dueDate;
+        uint8      installmentsPaid;
+        uint8      totalInstallments;
         LoanStatus status;
         LoanPath   path;
+    }
+
+    struct LoanRequest {
+        uint256           requestId;
+        address           borrower;
+        uint256           amount;
+        uint256           durationDays;
+        uint256           interestRate;
+        LoanPath          path;
+        LoanRequestStatus status;
+        uint256           createdAt;
+        uint256           expiresAt;
+        address           funder;
     }
 
     /* ══════════════════════════════════════════
        STATE
     ═══════════════════════════════════════════ */
 
-    /// @notice The TRUST ERC-20 token used for all pool operations.
     IERC20 public immutable trustToken;
-
-    /// @notice The heart of our reputation identity — the soulbound NFT.
     address public reputationNFT;
 
-    /// @dev borrower → active Loan (one active loan per borrower)
     mapping(address => Loan) private _loans;
+    mapping(address => uint8) public trustScores;
+    
+    // P2P Request State
+    mapping(uint256 => LoanRequest) public loanRequests;
+    mapping(address => uint256) public borrowerPendingRequestId;
+    mapping(uint256 => uint256) public collateralEscrow; // requestId => collateral staked
+    mapping(address => uint256) public borrowerCollateral; // active collateral per borrower
+    uint256 public requestCount;
 
-    /// @dev lender → principal deposited (before yield)
-    mapping(address => uint256) public lenderDeposits;
-
-    /// @dev borrower → on-chain trust score (0–100)
-    mapping(address => uint8)   public trustScores;
-
-    /// @notice Sum of all lender deposits currently in the pool (excl. active loans).
-    uint256 public totalPoolLiquidity;
-
-    /// @notice Number of loans currently in Active status.
     uint256 public totalActiveLoans;
-
-    /// @notice Running count of all unique lenders who deposited ≥ once.
-    uint256 public totalLenders;
-
-    /// @notice Sum of all interest rates across active loans (for avg calc).
+    uint256 public totalFundedAmount;
     uint256 private _activeInterestSum;
-
-    /// @dev tracks first-time lenders
-    mapping(address => bool) private _hasDeposited;
 
     /* ══════════════════════════════════════════
        CONSTANTS
     ═══════════════════════════════════════════ */
 
-    /// @dev Basis-point interest rates per path
     uint256 private constant RATE_VOUCH      = 420;   // 4.2%
     uint256 private constant RATE_COLLATERAL = 280;   // 2.8%
     uint256 private constant RATE_TRUST_ONLY = 710;   // 7.1%
 
-    /// @dev Trust score bands → maximum borrow amounts (in TRUST, 18 decimals)
-    /// MUST match src/config/tiers.js exactly
-    uint256 private constant LIMIT_BRONZE    = 10    * 1e18;  // score 30-49
-    uint256 private constant LIMIT_SILVER    = 200   * 1e18;  // score 50-69
-    uint256 private constant LIMIT_GOLD      = 500   * 1e18;  // score 70-89
-    uint256 private constant LIMIT_PLATINUM  = 1000  * 1e18;  // score 90-100
+    uint256 private constant LIMIT_BRONZE    = 10    * 1e18;
+    uint256 private constant LIMIT_SILVER    = 200   * 1e18;
+    uint256 private constant LIMIT_GOLD      = 500   * 1e18;
+    uint256 private constant LIMIT_PLATINUM  = 1000  * 1e18;
 
-    /// @dev Default number of equal installments per loan
     uint8 private constant DEFAULT_INSTALLMENTS = 4;
-
-    /// @dev Score adjustments on repayment
     uint8 private constant SCORE_ONTIME = 8;
     uint8 private constant SCORE_EARLY  = 12;
     uint8 private constant SCORE_LATE   = 3;
-
-    /// @dev Maximum trust score ceiling
     uint8 private constant MAX_SCORE = 100;
 
     /* ══════════════════════════════════════════
        EVENTS
     ═══════════════════════════════════════════ */
 
-    /// @notice Emitted when a lender deposits TRUST into the pool.
-    event PoolDeposit(
-        address indexed lender,
-        uint256 amount,
-        uint256 newTotal
-    );
-
-    /// @notice Emitted when a lender withdraws TRUST from the pool.
-    event PoolWithdrawal(
-        address indexed lender,
-        uint256 amount,
-        uint256 yieldEarned
-    );
-
-    /// @notice Emitted when a loan is created and funds disbursed.
-    event LoanDisbursed(
-        address indexed borrower,
-        uint256 amount,
-        uint256 dueDate,
-        LoanPath path
-    );
-
-    /// @notice Emitted for each repayment (partial or full).
-    event RepaymentMade(
-        address indexed borrower,
-        uint256 amount,
-        uint256 remaining,
-        uint8   newTrustScore
-    );
-
-    /// @notice Emitted when a trust score is updated (by owner or internally).
-    event TrustScoreUpdated(
-        address indexed borrower,
-        uint8   oldScore,
-        uint8   newScore
-    );
-
-    /// @notice Emitted when a loan is marked as defaulted.
-    event LoanDefaulted(
-        address indexed borrower,
-        uint256 amount,
-        uint256 outstandingDebt
-    );
+    event LoanRequested(uint256 indexed requestId, address indexed borrower, uint256 amount, uint256 interestRate, LoanPath path, uint256 expiresAt);
+    event LoanFunded(uint256 indexed requestId, address indexed lender, address indexed borrower, uint256 amount, uint256 timestamp);
+    event LoanRequestCancelled(uint256 indexed requestId, address indexed borrower);
+    
+    event RepaymentMade(address indexed borrower, address indexed lender, uint256 amount, uint256 remaining, uint8 newTrustScore);
+    event TrustScoreUpdated(address indexed borrower, uint8 oldScore, uint8 newScore);
+    event LoanDefaulted(address indexed borrower, uint256 amount, uint256 outstandingDebt);
 
     /* ══════════════════════════════════════════
        CONSTRUCTOR
     ═══════════════════════════════════════════ */
 
-    /**
-     * @notice Deploy the LendingPool tied to a specific TRUST token.
-     * @param _trustToken Address of the TrustToken ERC-20 contract.
-     * @param _reputationNFT Address of the ReputationNFT contract.
-     */
     constructor(address _trustToken, address _reputationNFT) Ownable(msg.sender) {
-        require(_trustToken != address(0), "LendingPool: zero token address");
-        require(_reputationNFT != address(0), "LendingPool: zero NFT address");
         trustToken = IERC20(_trustToken);
         reputationNFT = _reputationNFT;
     }
 
     /* ══════════════════════════════════════════
-       LENDER FUNCTIONS
+       P2P FLOW FUNCTIONS
     ═══════════════════════════════════════════ */
 
     /**
-     * @notice Deposit TRUST tokens into the lending pool.
-     * @dev    Caller must first `approve` this contract for `amount`.
-     * @param  amount Amount of TRUST to deposit (18 decimals).
-     *
-     * Emits {PoolDeposit}.
+     * @notice Borrower submits a loan request to the marketplace.
      */
-    function depositToPool(uint256 amount) external nonReentrant whenNotPaused {
-        require(amount > 0, "LendingPool: zero deposit");
-
-        trustToken.safeTransferFrom(msg.sender, address(this), amount);
-
-        lenderDeposits[msg.sender] += amount;
-        totalPoolLiquidity += amount;
-
-        if (!_hasDeposited[msg.sender]) {
-            _hasDeposited[msg.sender] = true;
-            totalLenders++;
-        }
-
-        emit PoolDeposit(msg.sender, amount, totalPoolLiquidity);
-    }
-
-    /**
-     * @notice Withdraw deposited TRUST from the pool.
-     * @dev    Withdrawal is limited to the pool's available (non-loaned) liquidity.
-     *         Yield is calculated as a proportional share of interest earnings held
-     *         by the contract above totalPoolLiquidity.
-     * @param  amount Principal amount to withdraw.
-     *
-     * Emits {PoolWithdrawal}.
-     */
-    function withdrawFromPool(uint256 amount) external nonReentrant whenNotPaused {
-        require(amount > 0, "LendingPool: zero withdrawal");
-        require(lenderDeposits[msg.sender] >= amount, "LendingPool: exceeds deposit");
-        require(totalPoolLiquidity >= amount, "LendingPool: insufficient free liquidity");
-
-        // Calculate yield: proportional share of contract's surplus over pool deposits
-        uint256 contractBalance = trustToken.balanceOf(address(this));
-        uint256 yieldEarned = 0;
-        if (contractBalance > totalPoolLiquidity && totalPoolLiquidity > 0) {
-            uint256 surplus = contractBalance - totalPoolLiquidity;
-            yieldEarned = (surplus * amount) / totalPoolLiquidity;
-        }
-
-        lenderDeposits[msg.sender] -= amount;
-        totalPoolLiquidity -= amount;
-
-        uint256 totalPayout = amount + yieldEarned;
-        trustToken.safeTransfer(msg.sender, totalPayout);
-
-        emit PoolWithdrawal(msg.sender, amount, yieldEarned);
-    }
-
-    /* ══════════════════════════════════════════
-       BORROWER FUNCTIONS
-    ═══════════════════════════════════════════ */
-
-    /**
-     * @notice Request a loan. Funds are immediately disbursed if all checks pass.
-     * @dev    - Borrower must NOT have an existing Active loan.
-     *         - Amount must be within the borrower's trust-score-based limit.
-     *         - Pool must have sufficient free liquidity.
-     *         Interest rate is determined by the chosen `path`.
-     * @param  amount       Loan principal in TRUST (18 decimals).
-     * @param  durationDays Loan term in days.
-     * @param  path         0 = VouchBacked, 1 = Collateral, 2 = TrustOnly.
-     *
-     * Emits {LoanDisbursed}.
-     */
-    function requestLoan(
+    function submitLoanRequest(
         uint256 amount,
         uint256 durationDays,
         uint8   path
@@ -268,229 +133,268 @@ contract LendingPool is Ownable, ReentrancyGuard, Pausable {
         require(amount > 0, "LendingPool: zero amount");
         require(durationDays > 0 && durationDays <= 365, "LendingPool: invalid duration");
         require(path <= uint8(LoanPath.TrustOnly), "LendingPool: invalid path");
+        require(_loans[msg.sender].status != LoanStatus.Active, "LendingPool: active loan exists");
+        require(borrowerPendingRequestId[msg.sender] == 0, "LendingPool: pending request exists");
 
-        // One active loan per borrower
-        require(
-            _loans[msg.sender].status != LoanStatus.Active,
-            "LendingPool: active loan exists"
-        );
-
-        // Trust-score-gated limit
         uint256 limit = getBorrowLimit(msg.sender);
-        require(amount <= limit, "LendingPool: exceeds trust limit");
-
-        // Pool liquidity check
-        require(totalPoolLiquidity >= amount, "LendingPool: insufficient pool liquidity");
-
-        // Determine interest rate
+        
         LoanPath loanPath = LoanPath(path);
+        
+        // Pathway-specific overrides
+        if (loanPath == LoanPath.TrustOnly) {
+            // TrustOnly is strictly capped at 10 TRUST for early reputation building
+            uint256 trustOnlyCap = LIMIT_BRONZE; 
+            if (limit > trustOnlyCap) limit = trustOnlyCap;
+            require(amount <= limit, "LendingPool: exceeds trust-only cap (10)");
+        } else {
+            require(amount <= limit, "LendingPool: exceeds trust limit");
+        }
+
+        requestCount++;
+        uint256 requestId = requestCount;
+
+        // Logic for Collateral Pathway: Lock borrower funds as escrow
+        if (loanPath == LoanPath.Collateral) {
+            // 106% collateral staking for high-value loans
+            uint256 collateralAmount = (amount * 106) / 100;
+            trustToken.safeTransferFrom(msg.sender, address(this), collateralAmount);
+            collateralEscrow[requestId] = collateralAmount;
+        }
+
         uint256 rate = _rateForPath(loanPath);
 
-        // Build loan
-        uint256 dueDate = block.timestamp + (durationDays * 1 days);
-        _loans[msg.sender] = Loan({
-            borrower:          msg.sender,
-            amount:            amount,
-            repaidAmount:      0,
-            interestRate:      rate,
-            startTime:         block.timestamp,
-            dueDate:           dueDate,
-            installmentsPaid:  0,
-            totalInstallments: DEFAULT_INSTALLMENTS,
-            status:            LoanStatus.Active,
-            path:              loanPath
+        loanRequests[requestId] = LoanRequest({
+            requestId: requestId,
+            borrower: msg.sender,
+            amount: amount,
+            durationDays: durationDays,
+            interestRate: rate,
+            path: loanPath,
+            status: LoanRequestStatus.Pending,
+            createdAt: block.timestamp,
+            expiresAt: block.timestamp + 48 hours,
+            funder: address(0)
         });
 
-        totalPoolLiquidity -= amount;
-        totalActiveLoans++;
-        _activeInterestSum += rate;
+        borrowerPendingRequestId[msg.sender] = requestId;
 
-        // Disburse
-        trustToken.safeTransfer(msg.sender, amount);
-
-        emit LoanDisbursed(msg.sender, amount, dueDate, loanPath);
+        emit LoanRequested(requestId, msg.sender, amount, rate, loanPath, block.timestamp + 48 hours);
     }
 
     /**
-     * @notice Repay part or all of an active loan.
-     * @dev    On full repayment the loan is marked Repaid and `_increaseTrustScore`
-     *         is called to reward the borrower. Interest gained stays in the pool
-     *         and is distributed proportionally to lenders on withdrawal.
-     * @param  amount TRUST tokens to repay (caller must have approved this contract).
-     *
-     * Emits {RepaymentMade}.
+     * @notice Lender funds a pending loan request.
+     */
+    function fundLoanRequest(uint256 requestId) external nonReentrant whenNotPaused {
+        LoanRequest storage req = loanRequests[requestId];
+        require(req.status == LoanRequestStatus.Pending, "LendingPool: not pending");
+        require(block.timestamp <= req.expiresAt, "LendingPool: request expired");
+        require(req.borrower != msg.sender, "LendingPool: cannot fund own request");
+
+        // Execute transfer from lender to borrower
+        trustToken.safeTransferFrom(msg.sender, req.borrower, req.amount);
+
+        // Update request status
+        req.status = LoanRequestStatus.Funded;
+        req.funder = msg.sender;
+        borrowerPendingRequestId[req.borrower] = 0;
+
+        // Move collateral from request escrow to active loan if exists
+        if (req.path == LoanPath.Collateral) {
+            borrowerCollateral[req.borrower] = collateralEscrow[requestId];
+            collateralEscrow[requestId] = 0;
+        }
+
+        // Initialize active loan
+        uint256 dueDate = block.timestamp + (req.durationDays * 1 days);
+        _loans[req.borrower] = Loan({
+            borrower: req.borrower,
+            lender: msg.sender,
+            amount: req.amount,
+            repaidAmount: 0,
+            interestRate: req.interestRate,
+            startTime: block.timestamp,
+            dueDate: dueDate,
+            installmentsPaid: 0,
+            totalInstallments: DEFAULT_INSTALLMENTS,
+            status: LoanStatus.Active,
+            path: req.path
+        });
+
+        totalActiveLoans++;
+        totalFundedAmount += req.amount;
+        _activeInterestSum += req.interestRate;
+
+        // Mint Reputation NFT if needed
+        try ReputationNFT(reputationNFT).mintReputationNFT(req.borrower) {} catch {}
+
+        emit LoanFunded(requestId, msg.sender, req.borrower, req.amount, block.timestamp);
+    }
+
+    /**
+     * @notice Borrower cancels their own pending request.
+     */
+    function cancelLoanRequest(uint256 requestId) external {
+        LoanRequest storage req = loanRequests[requestId];
+        require(req.borrower == msg.sender, "LendingPool: not your request");
+        require(req.status == LoanRequestStatus.Pending, "LendingPool: not pending");
+
+        req.status = LoanRequestStatus.Cancelled;
+        borrowerPendingRequestId[msg.sender] = 0;
+
+        emit LoanRequestCancelled(requestId, msg.sender);
+    }
+
+    /**
+     * @notice Borrower submits a collateralized loan request (Staking path).
+     * @param loanAmount Amount to borrow.
+     * @param collateralAmount Amount to lock as collateral (must be >= 106% of loanAmount).
+     */
+    function submitCollateralRequest(
+        uint256 loanAmount,
+        uint256 collateralAmount,
+        uint256 durationDays
+    ) external nonReentrant whenNotPaused {
+        require(loanAmount > 0, "LendingPool: zero amount");
+        require(collateralAmount >= (loanAmount * 106) / 100, "LendingPool: insuffient collateral (106% required)");
+        require(durationDays > 0 && durationDays <= 365, "LendingPool: invalid duration");
+        require(_loans[msg.sender].status != LoanStatus.Active, "LendingPool: active loan exists");
+        require(borrowerPendingRequestId[msg.sender] == 0, "LendingPool: pending request exists");
+
+        // Transfer collateral to contract
+        trustToken.safeTransferFrom(msg.sender, address(this), collateralAmount);
+
+        uint256 rate = RATE_COLLATERAL;
+
+        requestCount++;
+        uint256 requestId = requestCount;
+
+        loanRequests[requestId] = LoanRequest({
+            requestId: requestId,
+            borrower: msg.sender,
+            amount: loanAmount,
+            durationDays: durationDays,
+            interestRate: rate,
+            path: LoanPath.Collateral,
+            status: LoanRequestStatus.Pending,
+            createdAt: block.timestamp,
+            expiresAt: block.timestamp + 48 hours,
+            funder: address(0)
+        });
+
+        borrowerPendingRequestId[msg.sender] = requestId;
+        // We store the collateral amount in a mapping or reusable field?
+        // Let's add a mapping for collateral.
+        collateralEscrow[requestId] = collateralAmount;
+
+        emit LoanRequested(requestId, msg.sender, loanAmount, rate, LoanPath.Collateral, block.timestamp + 48 hours);
+    }
+
+    /**
+     * @notice Process repayment - goes directly to the lender.
      */
     function makeRepayment(uint256 amount) external nonReentrant whenNotPaused {
         Loan storage loan = _loans[msg.sender];
         require(loan.status == LoanStatus.Active, "LendingPool: no active loan");
         require(amount > 0, "LendingPool: zero repayment");
 
-        // Total owed = principal + interest
         uint256 totalOwed = _totalOwed(loan);
         uint256 remaining = totalOwed - loan.repaidAmount;
         require(amount <= remaining, "LendingPool: overpayment");
 
-        // Pull tokens
-        trustToken.safeTransferFrom(msg.sender, address(this), amount);
+        // Direct transfer to lender
+        trustToken.safeTransferFrom(msg.sender, loan.lender, amount);
 
         loan.repaidAmount += amount;
         loan.installmentsPaid++;
 
-        // Return principal portion to pool liquidity
-        // (interest stays in the contract as yield for lenders)
-        uint256 principalPortion = (amount * loan.amount) / totalOwed;
-        totalPoolLiquidity += principalPortion;
-
-        // Check if fully repaid
         if (loan.repaidAmount >= totalOwed) {
             loan.status = LoanStatus.Repaid;
             totalActiveLoans--;
             _activeInterestSum -= loan.interestRate;
             _increaseTrustScore(msg.sender);
+
+            // Refund collateral if path is Collateral
+            if (loan.path == LoanPath.Collateral) {
+                // Find the original request Id to get collateral amount
+                // This is a bit tricky since we don't store it in Loan struct.
+                // Let's assume we store it in a mapping indexed by borrower.
+                uint256 col = borrowerCollateral[msg.sender];
+                if (col > 0) {
+                    borrowerCollateral[msg.sender] = 0;
+                    trustToken.safeTransfer(msg.sender, col);
+                }
+            }
         }
 
         uint8 currentScore = trustScores[msg.sender];
         remaining = totalOwed - loan.repaidAmount;
 
-        emit RepaymentMade(msg.sender, amount, remaining, currentScore);
+        emit RepaymentMade(msg.sender, loan.lender, amount, remaining, currentScore);
     }
 
     /* ══════════════════════════════════════════
-       ADMIN FUNCTIONS
+       ADMIN / INTERNAL
     ═══════════════════════════════════════════ */
 
-    /**
-     * @notice Owner updates a borrower's trust score.
-     * @dev    Called by the off-chain AI backend after risk assessment.
-     * @param  borrower The address to update.
-     * @param  newScore The new trust score (0–100).
-     *
-     * Emits {TrustScoreUpdated}.
-     */
-    function updateTrustScore(address borrower, uint8 newScore)
-        external
-        onlyOwner
-    {
-        require(borrower != address(0), "LendingPool: zero address");
+    function updateTrustScore(address borrower, uint8 newScore) external onlyOwner {
         require(newScore <= MAX_SCORE, "LendingPool: score > 100");
-
         uint8 oldScore = trustScores[borrower];
         trustScores[borrower] = newScore;
-
         emit TrustScoreUpdated(borrower, oldScore, newScore);
     }
 
-    /**
-     * @notice Owner marks an active loan as defaulted.
-     * @dev    Typically called when dueDate has passed and no repayment was made.
-     *         Does NOT slash vouches — that is handled separately in VouchSystem.
-     * @param  borrower Address of the defaulting borrower.
-     *
-     * Emits {LoanDefaulted}.
-     */
     function markDefault(address borrower) external onlyOwner {
         Loan storage loan = _loans[borrower];
         require(loan.status == LoanStatus.Active, "LendingPool: not active");
-
         loan.status = LoanStatus.Defaulted;
         totalActiveLoans--;
         _activeInterestSum -= loan.interestRate;
 
-        // Decrease trust score by 15 (floor at 0)
+        // Liquidate collateral if exists
+        if (loan.path == LoanPath.Collateral) {
+            uint256 col = borrowerCollateral[borrower];
+            if (col > 0) {
+                borrowerCollateral[borrower] = 0;
+                trustToken.safeTransfer(loan.lender, col);
+            }
+        }
+
         uint8 oldScore = trustScores[borrower];
         uint8 penalty  = oldScore >= 15 ? oldScore - 15 : 0;
         trustScores[borrower] = penalty;
 
-        // Sync with Reputation NFT
         try ReputationNFT(reputationNFT).updateReputation(borrower, penalty, loan.amount, false) {} catch {}
-
-        uint256 outstanding = _totalOwed(loan) - loan.repaidAmount;
-
-        emit LoanDefaulted(borrower, loan.amount, outstanding);
-        emit TrustScoreUpdated(borrower, oldScore, penalty);
+        emit LoanDefaulted(borrower, loan.amount, _totalOwed(loan) - loan.repaidAmount);
     }
 
-    function mintReputationNFT(address to) external onlyOwner {
-        ReputationNFT(reputationNFT).mintReputationNFT(to);
-    }
-
-    /**
-     * @notice Allows a new user to initialize their trust score to 30 (Entry Tier)
-     *         and mint their Soulbound Reputation NFT. 
-     *         Can only be called once per address.
-     */
     function initializeUser() external nonReentrant whenNotPaused {
         require(trustScores[msg.sender] == 0, "LendingPool: already initialized");
-        
-        // set initial score to 30 (Entry)
         trustScores[msg.sender] = 30;
-        
-        // mint the NFT (calls the Soulbound ReputationNFT contract)
-        ReputationNFT(reputationNFT).mintReputationNFT(msg.sender);
-        
+        try ReputationNFT(reputationNFT).mintReputationNFT(msg.sender) {} catch {}
         emit TrustScoreUpdated(msg.sender, 0, 30);
     }
 
-    /**
-     * @notice Pause all state-changing operations (emergency stop).
-     */
-    function pause() external onlyOwner {
-        _pause();
-    }
+    function pause() external onlyOwner { _pause(); }
+    function unpause() external onlyOwner { _unpause(); }
 
-    /**
-     * @notice Unpause operations.
-     */
-    function unpause() external onlyOwner {
-        _unpause();
-    }
-
-    /* ══════════════════════════════════════════
-       INTERNAL HELPERS
-    ═══════════════════════════════════════════ */
-
-    /**
-     * @dev Adjusts the borrower's trust score after full repayment.
-     *      - Early repayment (before 75% of term):  +12
-     *      - On-time (before dueDate):               +8
-     *      - Late (after dueDate):                    +3
-     *      Capped at MAX_SCORE (100).
-     */
     function _increaseTrustScore(address borrower) internal {
         Loan storage loan = _loans[borrower];
-        uint8 oldScore = trustScores[borrower];
-
         uint8 bump;
-        if (block.timestamp <= loan.startTime + ((loan.dueDate - loan.startTime) * 75) / 100) {
-            // Repaid before 75% of term → "early"
-            bump = SCORE_EARLY;
-        } else if (block.timestamp <= loan.dueDate) {
-            // Repaid before due date → "on-time"
-            bump = SCORE_ONTIME;
-        } else {
-            // Repaid after due date → "late but repaid"
-            bump = SCORE_LATE;
-        }
+        if (block.timestamp <= loan.startTime + ((loan.dueDate - loan.startTime) * 75) / 100) bump = SCORE_EARLY;
+        else if (block.timestamp <= loan.dueDate) bump = SCORE_ONTIME;
+        else bump = SCORE_LATE;
 
+        uint8 oldScore = trustScores[borrower];
         uint8 newScore = oldScore + bump > MAX_SCORE ? MAX_SCORE : oldScore + bump;
         trustScores[borrower] = newScore;
-
-        // NEW: Update the Reputation NFT (soulbound identity)
         try ReputationNFT(reputationNFT).updateReputation(borrower, newScore, loan.amount, bump >= SCORE_ONTIME) {} catch {}
-
         emit TrustScoreUpdated(borrower, oldScore, newScore);
     }
 
-    /**
-     * @dev Total amount owed = principal + (principal × rate / 10000).
-     */
     function _totalOwed(Loan storage loan) internal view returns (uint256) {
         return loan.amount + (loan.amount * loan.interestRate) / 10_000;
     }
 
-    /**
-     * @dev Returns the basis-point interest rate for a given path.
-     */
     function _rateForPath(LoanPath p) internal pure returns (uint256) {
         if (p == LoanPath.VouchBacked) return RATE_VOUCH;
         if (p == LoanPath.Collateral)  return RATE_COLLATERAL;
@@ -501,103 +405,56 @@ contract LendingPool is Ownable, ReentrancyGuard, Pausable {
        VIEW FUNCTIONS
     ═══════════════════════════════════════════ */
 
-    /**
-     * @notice Returns the full Loan struct for a borrower.
-     * @param  borrower Address to query.
-     * @return loan     The borrower's current/last loan.
-     */
-    function getLoan(address borrower) external view returns (Loan memory) {
-        return _loans[borrower];
+    function getLoan(address borrower) external view returns (Loan memory) { return _loans[borrower]; }
+    
+    function getOpenRequests() external view returns (LoanRequest[] memory) {
+        uint256 openCount = 0;
+        for (uint256 i = 1; i <= requestCount; i++) {
+            if (loanRequests[i].status == LoanRequestStatus.Pending && block.timestamp <= loanRequests[i].expiresAt) {
+                openCount++;
+            }
+        }
+        LoanRequest[] memory open = new LoanRequest[](openCount);
+        uint256 index = 0;
+        // Search backwards for newest first
+        for (uint256 i = requestCount; i >= 1; i--) {
+            if (loanRequests[i].status == LoanRequestStatus.Pending && block.timestamp <= loanRequests[i].expiresAt) {
+                open[index] = loanRequests[i];
+                index++;
+            }
+        }
+        return open;
     }
 
-    /**
-     * @notice Returns a borrower's on-chain trust score.
-     * @param  borrower Address to query.
-     * @return score    0–100 trust score.
-     */
-    function getTrustScore(address borrower) external view returns (uint8) {
-        return trustScores[borrower];
+    function getBorrowerRequest(address borrower) external view returns (LoanRequest memory) {
+        uint256 requestId = borrowerPendingRequestId[borrower];
+        if (requestId == 0) return LoanRequest(0, address(0), 0, 0, 0, LoanPath.VouchBacked, LoanRequestStatus.Cancelled, 0, 0, address(0));
+        return loanRequests[requestId];
     }
 
-    /**
-     * @notice Returns the TRUST token balance held by this contract.
-     * @return balance Includes pool liquidity + locked repayment interest.
-     */
-    function getPoolBalance() external view returns (uint256) {
-        return trustToken.balanceOf(address(this));
-    }
-
-    /**
-     * @notice Returns the principal a lender has deposited.
-     * @param  lender Address to query.
-     * @return deposited Amount of TRUST deposited.
-     */
-    function getLenderBalance(address lender) external view returns (uint256) {
-        return lenderDeposits[lender];
-    }
-
-    /**
-     * @notice Returns the maximum loan amount a borrower is eligible for,
-     *         based on their trust score.
-     * @param  borrower Address to query.
-     * @return limit    Max borrow amount in TRUST (18 decimals).
-     */
+    function getTrustScore(address borrower) external view returns (uint8) { return trustScores[borrower]; }
     function getBorrowLimit(address borrower) public view returns (uint256) {
         uint8 score = trustScores[borrower];
         if (score >= 90) return LIMIT_PLATINUM;
         if (score >= 70) return LIMIT_GOLD;
         if (score >= 50) return LIMIT_SILVER;
         if (score >= 30) return LIMIT_BRONZE;
-        return 0; // score < 30 = cannot borrow
+        return 0;
     }
 
-    /**
-     * @notice Returns aggregate pool statistics.
-     * @return liquidity       Free TRUST available for new loans.
-     * @return activeLoans     Number of loans in Active status.
-     * @return lenderCount     Unique lender count.
-     * @return avgInterestRate Weighted-average interest rate in basis points
-     *                         across active loans (0 if no active loans).
-     */
-    function getPoolStats()
-        external
-        view
-        returns (
-            uint256 liquidity,
-            uint256 activeLoans,
-            uint256 lenderCount,
-            uint256 avgInterestRate
-        )
-    {
-        liquidity       = totalPoolLiquidity;
-        activeLoans     = totalActiveLoans;
-        lenderCount     = totalLenders;
-        avgInterestRate = totalActiveLoans > 0
-            ? _activeInterestSum / totalActiveLoans
-            : 0;
+    function getPoolStats() external view returns (uint256 funded, uint256 active, uint256 requests, uint256 avgRate) {
+        funded = totalFundedAmount;
+        active = totalActiveLoans;
+        requests = 0; 
+        for(uint256 i=1; i<=requestCount; i++) {
+            if (loanRequests[i].status == LoanRequestStatus.Pending) requests++;
+        }
+        avgRate = totalActiveLoans > 0 ? _activeInterestSum / totalActiveLoans : 0;
     }
 
-    /**
-     * @notice Returns total amount owed on a borrower's active loan
-     *         (principal + interest).
-     * @param  borrower Address to query.
-     * @return owed Total owed, or 0 if no active loan.
-     */
     function getTotalOwed(address borrower) external view returns (uint256) {
         Loan storage loan = _loans[borrower];
         if (loan.status != LoanStatus.Active) return 0;
         return _totalOwed(loan);
-    }
-
-    /**
-     * @notice Returns remaining balance on a borrower's active loan.
-     * @param  borrower Address to query.
-     * @return remaining Amount still to be repaid.
-     */
-    function getRemainingDebt(address borrower) external view returns (uint256) {
-        Loan storage loan = _loans[borrower];
-        if (loan.status != LoanStatus.Active) return 0;
-        uint256 owed = _totalOwed(loan);
-        return owed > loan.repaidAmount ? owed - loan.repaidAmount : 0;
     }
 }

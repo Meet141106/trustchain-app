@@ -93,9 +93,10 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">{t('sidebar.yourProfile')}</p>
           <div className="space-y-3">
             {[
-              { to: '/audit',      label: t('sidebar.creditProfile'),  icon: 'lucide:shield-check' },
-              { to: '/reputation', label: t('sidebar.trustScore'),      icon: 'lucide:award' },
-              { to: '/network',    label: t('sidebar.vouchNetwork'),    icon: 'lucide:network' }
+              { to: '/profile',    label: 'My Profile',                  icon: 'lucide:user-circle-2' },
+              { to: '/audit',      label: t('sidebar.creditProfile'),    icon: 'lucide:shield-check' },
+              { to: '/reputation', label: t('sidebar.trustScore'),       icon: 'lucide:award' },
+              { to: '/network',    label: t('sidebar.vouchNetwork'),     icon: 'lucide:network' }
             ].map((link) => (
               <Link 
                 key={link.to}
@@ -115,14 +116,6 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         </div>
       </nav>
       
-      <div className="p-8 lg:p-10 border-t border-[#E8E8E8] dark:border-[#333]">
-        <div className="p-6 rounded-3xl bg-[#FAFAF8] dark:bg-[#1A1A1A] border border-[#E8E8E8] dark:border-[#333] text-center">
-          <p className="text-xs font-semibold text-[#8C8C8C] uppercase tracking-widest mb-2">{t('sidebar.yourLevel')}</p>
-          <h4 className="text-lg font-bold bg-gradient-to-br from-[#D4AF37] to-[#8A6E2F] bg-clip-text text-transparent">
-            PREMIUM NOIR
-          </h4>
-        </div>
-      </div>
     </aside>
   );
 }

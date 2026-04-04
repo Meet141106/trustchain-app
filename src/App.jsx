@@ -12,16 +12,18 @@ import VouchInvite         from './pages/VouchInvite';
 import Borrow              from './pages/Borrow';
 import ActiveLoanDetail    from './pages/ActiveLoanDetail';
 import Marketplace         from './pages/Marketplace';
-import LoanRequestDetail   from './pages/LoanRequestDetail';
+import RequestPending     from './pages/RequestPending';
 import LenderPortfolio     from './pages/LenderPortfolio';
 import SovereignAudit      from './pages/SovereignAudit';
 import ReputationBreakdown from './pages/ReputationBreakdown';
 import TransactionHistory  from './pages/TransactionHistory';
 import TrustNetworkGraph   from './pages/TrustNetworkGraph';
+import UserProfile         from './pages/UserProfile';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { WalletProvider } from './context/WalletContext';
 import { DemoProvider } from './context/DemoContext';
+import { NotificationProvider } from './context/NotificationContext';
 import DemoHealthCheck from './components/DemoHealthCheck';
 import DemoMode from './components/DemoMode';
 import { AnimatePresence } from 'framer-motion';
@@ -31,6 +33,7 @@ export default function App() {
     <ThemeProvider>
       <DemoProvider>
         <WalletProvider>
+          <NotificationProvider>
           <Toaster
             position="bottom-right"
             toastOptions={{
@@ -63,16 +66,18 @@ export default function App() {
                 <Route path="/borrow"       element={<ProtectedRoute><Borrow /></ProtectedRoute>} />
                 <Route path="/loan/:id"     element={<ProtectedRoute><ActiveLoanDetail /></ProtectedRoute>} />
                 <Route path="/marketplace"  element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
-                <Route path="/request/:id"  element={<ProtectedRoute><LoanRequestDetail /></ProtectedRoute>} />
+                <Route path="/request-pending" element={<ProtectedRoute><RequestPending /></ProtectedRoute>} />
                 <Route path="/portfolio"    element={<ProtectedRoute><LenderPortfolio /></ProtectedRoute>} />
                 <Route path="/audit"        element={<ProtectedRoute><SovereignAudit /></ProtectedRoute>} />
                 <Route path="/reputation"   element={<ProtectedRoute><ReputationBreakdown /></ProtectedRoute>} />
                 <Route path="/ledger"       element={<ProtectedRoute><TransactionHistory /></ProtectedRoute>} />
                 <Route path="/network"      element={<ProtectedRoute><TrustNetworkGraph /></ProtectedRoute>} />
+                <Route path="/profile"      element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </AnimatePresence>
           </HashRouter>
+          </NotificationProvider>
         </WalletProvider>
       </DemoProvider>
     </ThemeProvider>

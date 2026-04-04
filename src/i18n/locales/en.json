@@ -110,7 +110,7 @@
     "repay": "Repay",
     "loanPath": "Loan Path",
     "repayEarnTrust": "Repay Loan — Earn +10 Trust Score",
-    "vouchNetwork": "Vouch Network",
+    "vouchNetwork": "Syndicate Mesh",
     "activeVoucher": "Active Voucher",
     "pendingVerification": "Pending Verification",
     "inviteVoucher": "+ Invite Voucher",
@@ -281,7 +281,18 @@
     "repaymentHistory": "Repayment History",
     "vouchQuality": "Vouch Quality",
     "loanRatio": "Loan Ratio",
-    "networkDensity": "Network Density"
+    "networkDensity": "Network Density",
+    "tenure": {
+      "days": "Days",
+      "months": "Months",
+      "years": "Years"
+    },
+    "pathways": {
+      "reputation": "Reputation",
+      "social": "Social Backed",
+      "collateral": "Asset Staked"
+    },
+    "duration": "Duration"
   },
   "repay": {
     "title": "Repay Your Loan",
@@ -364,7 +375,7 @@
     "yourProfile": "Your Profile",
     "creditProfile": "Credit Profile",
     "trustScore": "Trust Score",
-    "vouchNetwork": "Vouch Network",
+    "vouchNetwork": "Syndicate Mesh",
     "yourLevel": "Your Level"
   }
 }

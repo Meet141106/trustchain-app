@@ -19,7 +19,7 @@ export default function DemoHealthCheck() {
 
   useEffect(() => {
     const fetchBalance = async () => {
-      if (!walletAddress || !provider) return;
+      if (!walletAddress || !provider || !isDebug) return;
       try {
         const TrustToken = new ethers.Contract(
           ADDRESSES.TRUST_TOKEN,

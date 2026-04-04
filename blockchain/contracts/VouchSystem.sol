@@ -7,16 +7,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /**
  * @title VouchSystem
  * @notice Peer vouching: users stake tokens to back a borrower's credibility.
- *
- * Flow:
- *  1. Voucher approves this contract to spend their tokens.
- *  2. Voucher calls stakeForBorrower() → tokens lock in contract.
- *  3. On repayment → owner calls releaseStake() → tokens returned to voucher.
- *  4. On default   → owner calls slashStake() → tokens sent to treasury.
  */
 contract VouchSystem is Ownable {
     IERC20 public token;
-    address public treasury;     // receives slashed stake
+    address public treasury;
     uint256 public nextVouchId;
 
     struct Vouch {
@@ -29,130 +23,138 @@ contract VouchSystem is Ownable {
     }
 
     mapping(uint256 => Vouch) public vouches;
-    // borrower → all vouch IDs backing them
     mapping(address => uint256[]) public borrowerVouches;
-    // voucher → cumulative staked amount
     mapping(address => uint256) public totalStakedBy;
+    
+    mapping(address => uint8) public vouchGiven;     // max 3
+    mapping(address => uint8) public vouchReceived;  // max 3
+    
+    mapping(address => mapping(address => uint8)) public vouchRequests;
+    mapping(address => mapping(address => bool)) public establishedVouches;
+    
+    mapping(uint256 => uint256) public loanStake;
+    mapping(uint256 => mapping(address => uint256)) public individualLoanStake;
 
     /* ── Events ── */
+    event VouchRequested(address indexed from, address indexed to, uint256 timestamp);
+    event VouchAccepted(address indexed borrower, address indexed voucher);
+    event VouchRejected(address indexed borrower, address indexed voucher);
+    
     event VouchStaked(
         uint256 indexed vouchId,
         address indexed voucher,
         address indexed borrower,
         uint256 amount
     );
+    event StakeCommitted(address indexed voucher, address indexed borrower, uint256 requestId, uint256 stakeAmount, uint256 totalStaked);
     event VouchReleased(uint256 indexed vouchId, address indexed voucher, uint256 amount);
     event VouchSlashed(uint256 indexed vouchId, address indexed voucher, uint256 amount);
 
     constructor(address _token, address _treasury) Ownable(msg.sender) {
-        require(_token    != address(0), "Invalid token address");
-        require(_treasury != address(0), "Invalid treasury address");
-        token    = IERC20(_token);
+        require(_token != address(0), "Invalid token");
+        require(_treasury != address(0), "Invalid treasury");
+        token = IERC20(_token);
         treasury = _treasury;
     }
 
-    /* ──────────────────────────────────────
-       VOUCHER FUNCTIONS
-    ────────────────────────────────────── */
+    /* ── Vouch Network ── */
 
-    /**
-     * @notice Stake tokens on behalf of a borrower.
-     * @param borrower Address of the borrower you are backing.
-     * @param amount   Number of TLD tokens to stake.
-     * @return vouchId The ID of the created vouch record.
-     */
+    function requestVouch(address to) external {
+        require(to != msg.sender, "Cannot vouch for yourself");
+        require(vouchReceived[msg.sender] < 3, "Max 3 vouchers reached");
+        require(vouchGiven[to] < 3, "Target limit reached");
+        require(vouchRequests[msg.sender][to] == 0, "Request exists");
+        require(!establishedVouches[msg.sender][to], "Already vouched");
+
+        vouchRequests[msg.sender][to] = 1;
+        emit VouchRequested(msg.sender, to, block.timestamp);
+    }
+
+    function acceptVouch(address borrower) external {
+        require(vouchRequests[borrower][msg.sender] == 1, "No request");
+        require(vouchGiven[msg.sender] < 3, "You at limit");
+        require(vouchReceived[borrower] < 3, "Borrower at limit");
+
+        vouchRequests[borrower][msg.sender] = 0;
+        establishedVouches[borrower][msg.sender] = true;
+        vouchGiven[msg.sender]++;
+        vouchReceived[borrower]++;
+
+        emit VouchAccepted(borrower, msg.sender);
+    }
+
+    function rejectVouch(address borrower) external {
+        require(vouchRequests[borrower][msg.sender] == 1, "No request");
+        vouchRequests[borrower][msg.sender] = 0;
+        emit VouchRejected(borrower, msg.sender);
+    }
+
+    /* ── Loan Staking ── */
+
+    function stakeForLoan(address borrower, uint256 requestId, uint256 stakeAmount) external {
+        require(establishedVouches[borrower][msg.sender], "Not voucher");
+        require(stakeAmount >= 10 * 10**18, "Min stake 10");
+        
+        require(token.transferFrom(msg.sender, address(this), stakeAmount), "Failed");
+
+        loanStake[requestId] += stakeAmount;
+        individualLoanStake[requestId][msg.sender] += stakeAmount;
+        totalStakedBy[msg.sender] += stakeAmount;
+
+        emit StakeCommitted(msg.sender, borrower, requestId, stakeAmount, loanStake[requestId]);
+    }
+
     function stakeForBorrower(address borrower, uint256 amount) external returns (uint256) {
-        require(amount > 0,                 "Stake must be greater than 0");
-        require(borrower != msg.sender,     "Cannot vouch for yourself");
-        require(borrower != address(0),     "Invalid borrower address");
+        require(amount > 0 && borrower != msg.sender, "Invalid stake");
+        require(token.transferFrom(msg.sender, address(this), amount), "Failed");
 
-        require(token.transferFrom(msg.sender, address(this), amount), "Token transfer failed");
-
-        uint256 vouchId = nextVouchId;
-        nextVouchId++;
-
+        uint256 vouchId = nextVouchId++;
         vouches[vouchId] = Vouch({
-            id:       vouchId,
-            voucher:  msg.sender,
+            id: vouchId,
+            voucher: msg.sender,
             borrower: borrower,
-            amount:   amount,
+            amount: amount,
             released: false,
-            slashed:  false
+            slashed: false
         });
 
         borrowerVouches[borrower].push(vouchId);
         totalStakedBy[msg.sender] += amount;
-
         emit VouchStaked(vouchId, msg.sender, borrower, amount);
         return vouchId;
     }
 
-    /* ──────────────────────────────────────
-       ADMIN FUNCTIONS
-    ────────────────────────────────────── */
+    /* ── Admin ── */
 
-    /**
-     * @notice Release staked tokens back to voucher (called after loan repayment).
-     * @param vouchId Vouch record to release.
-     */
     function releaseStake(uint256 vouchId) external onlyOwner {
-        Vouch storage vouch = vouches[vouchId];
-        require(!vouch.released && !vouch.slashed, "Vouch already settled");
-
-        vouch.released = true;
-        totalStakedBy[vouch.voucher] -= vouch.amount;
-
-        require(token.transfer(vouch.voucher, vouch.amount), "Release transfer failed");
-
-        emit VouchReleased(vouchId, vouch.voucher, vouch.amount);
+        Vouch storage v = vouches[vouchId];
+        require(!v.released && !v.slashed, "Settled");
+        v.released = true;
+        totalStakedBy[v.voucher] -= v.amount;
+        token.transfer(v.voucher, v.amount);
+        emit VouchReleased(vouchId, v.voucher, v.amount);
     }
 
-    /**
-     * @notice Slash staked tokens (called after loan default). Sends to treasury.
-     * @param vouchId Vouch record to slash.
-     */
     function slashStake(uint256 vouchId) external onlyOwner {
-        Vouch storage vouch = vouches[vouchId];
-        require(!vouch.released && !vouch.slashed, "Vouch already settled");
-
-        vouch.slashed = true;
-        totalStakedBy[vouch.voucher] -= vouch.amount;
-
-        require(token.transfer(treasury, vouch.amount), "Slash transfer failed");
-
-        emit VouchSlashed(vouchId, vouch.voucher, vouch.amount);
+        Vouch storage v = vouches[vouchId];
+        require(!v.released && !v.slashed, "Settled");
+        v.slashed = true;
+        totalStakedBy[v.voucher] -= v.amount;
+        token.transfer(treasury, v.amount);
+        emit VouchSlashed(vouchId, v.voucher, v.amount);
     }
 
-    /**
-     * @notice Update treasury address.
-     */
-    function setTreasury(address _treasury) external onlyOwner {
-        require(_treasury != address(0), "Invalid address");
-        treasury = _treasury;
-    }
+    function setTreasury(address _t) external onlyOwner { treasury = _t; }
 
-    /* ──────────────────────────────────────
-       VIEW FUNCTIONS
-    ────────────────────────────────────── */
+    /* ── View ── */
 
-    function getVouch(uint256 vouchId) external view returns (Vouch memory) {
-        return vouches[vouchId];
-    }
-
-    function getBorrowerVouches(address borrower) external view returns (uint256[] memory) {
-        return borrowerVouches[borrower];
-    }
-
-    /**
-     * @notice Total active (unreleased, unslashed) stake backing a borrower.
-     */
-    function getTotalActiveStake(address borrower) external view returns (uint256 total) {
-        uint256[] memory ids = borrowerVouches[borrower];
+    function getVouch(uint256 id) external view returns (Vouch memory) { return vouches[id]; }
+    function getBorrowerVouches(address b) external view returns (uint256[] memory) { return borrowerVouches[b]; }
+    function getTotalActiveStake(address b) external view returns (uint256 total) {
+        uint256[] memory ids = borrowerVouches[b];
         for (uint256 i = 0; i < ids.length; i++) {
             Vouch storage v = vouches[ids[i]];
-            if (!v.released && !v.slashed) {
-                total += v.amount;
-            }
+            if (!v.released && !v.slashed) total += v.amount;
         }
     }
 }
