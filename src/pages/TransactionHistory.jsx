@@ -1,9 +1,12 @@
 import React from 'react';
 import AppShell from '../components/AppShell';
 import { useTheme } from '../context/ThemeContext';
+import { useTransactionHistory } from '../hooks/useTransactionHistory';
+import Skeleton, { SkeletonRow } from '../components/Skeleton';
 
 export default function TransactionHistory() {
   const { isDarkMode } = useTheme();
+  const { transactions, isLoading } = useTransactionHistory();
 
   return (
     <AppShell pageTitle="Transaction History" pageSubtitle="Universal Activity Ledger">
@@ -32,13 +35,11 @@ export default function TransactionHistory() {
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-[#1E2A3A]">
-                    {[
-                      { icon: 'lucide:arrow-up-right', type: 'Loan Drawdown', entity: 'Facility 0x92...f2', val: '$200.00', status: 'Verified', date: 'Oct 24, 14:22', positive: true },
-                      { icon: 'lucide:refresh-ccw', type: 'Repayment #02', entity: 'Active Loan #84', val: '-$47.50', status: 'Verified', date: 'Oct 22, 09:15', positive: false },
-                      { icon: 'lucide:award', type: 'Reputation Gain', entity: 'Trust Network Vouch', val: '+12 QP', status: 'Verified', date: 'Oct 20, 18:40', positive: true },
-                      { icon: 'lucide:trending-up', type: 'Yield Recognition', entity: 'Agri-Credit Node', val: '+$4.20', status: 'Verified', date: 'Oct 18, 11:10', positive: true },
-                      { icon: 'lucide:shield', type: 'Collateral Lock', entity: 'Reserve Pool Alpha', val: '0.4 ETH', status: 'Pending', date: 'Oct 15, 23:05', positive: false }
-                    ].map((tx, i) => (
+                    {isLoading ? (
+                      <tr><td colSpan={5} className="p-8"><SkeletonRow count={4} /></td></tr>
+                    ) : transactions.length === 0 ? (
+                      <tr><td colSpan={5} className="p-12 text-center text-[#8C8C8C] text-sm">No transaction history found for your ledger.</td></tr>
+                    ) : transactions.map((tx, i) => (
                       <tr key={i} className="hover:bg-[#FAFAF8] dark:bg-[#0A0F1E] transition-all group">
                          <td className="px-8 py-8">
                             <div className="flex items-center gap-4">
@@ -52,7 +53,7 @@ export default function TransactionHistory() {
                             <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">{tx.entity}</span>
                          </td>
                          <td className="px-8 py-8">
-                            <span className={`text-sm font-black ${tx.positive ? 'text-[#1D9E75]' : 'text-[#1A1A1A] dark:text-[#FAFAF8]'}`}>{tx.val}</span>
+                            <span className={`text-sm font-black ${tx.positive ? 'text-[#1D9E75]' : 'text-[#1A1A1A] dark:text-[#FAFAF8]'}`}>{tx.value}</span>
                          </td>
                          <td className="px-8 py-8">
                             <span className={`px-3 py-1 rounded text-[8px] font-black uppercase tracking-widest ${tx.status === 'Verified' ? 'bg-[#1D9E75]/10 text-[#1D9E75]' : 'bg-[#F5A623]/10 text-[#F5A623]'}`}>
@@ -60,8 +61,17 @@ export default function TransactionHistory() {
                             </span>
                          </td>
                          <td className="px-8 py-8 text-right">
-                            <p className="text-[10px] font-black text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">{tx.date}</p>
-                            <p className="text-[8px] text-[#8C8C8C] mt-1 font-mono hover:text-[#F5A623] cursor-pointer">hash: 0x82...1e</p>
+                            <p className="text-[10px] font-black text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">
+                               {new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}
+                            </p>
+                            <a 
+                                href={`https://amoy.polygonscan.com/tx/${tx.hash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[8px] text-[#8C8C8C] mt-1 font-mono hover:text-[#F5A623] cursor-pointer block"
+                            >
+                                hash: {tx.hash}
+                            </a>
                          </td>
                       </tr>
                     ))}

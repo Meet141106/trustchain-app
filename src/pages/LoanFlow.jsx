@@ -2,14 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createLoan, updateLoan, getUser, getTier, TIER_LIMITS, TIER_COLORS, nextTierInfo } from '../lib/supabase';
+import {
+  isBlockchainReady,
+  requestLoan as blockchainRequestLoan,
+  parseBlockchainError,
+} from '../lib/blockchain';
 
-/* ── mock blockchain tx ── */
+/* ── demo-mode mock (only used when blockchain not ready) ── */
 async function mockBlockchainCreateLoan(amount) {
   await new Promise(r => setTimeout(r, 2200));
-  const hash = '0x' + Array.from({ length: 40 }, () =>
+  const hash = '0x' + Array.from({ length: 64 }, () =>
     '0123456789abcdef'[Math.floor(Math.random() * 16)]
   ).join('');
-  return { tx_hash: hash, block: Math.floor(Math.random() * 1000000) + 18000000 };
+  return { tx_hash: hash };
 }
 
 /* ── step dot ── */
@@ -141,9 +146,20 @@ function StepConfirm({ wallet, amount, onSuccess }) {
       // 1. Create loan in Supabase → status: pending
       const loan = await createLoan({ walletAddress: wallet, amount, path: 'trust' });
 
-      // 2. Mock blockchain createLoan()
+      // 2. Blockchain: real if MetaMask on correct network, else mock
       setPhase('blockchain');
-      const { tx_hash } = await mockBlockchainCreateLoan(amount);
+      const ready = await isBlockchainReady();
+      let tx_hash;
+
+      if (ready) {
+        // Real blockchain path — one MetaMask popup
+        const { txHash: createHash } = await blockchainRequestLoan(amount, 30, 2);
+        tx_hash = createHash;
+      } else {
+        // Demo fallback — simulated hash, no MetaMask required
+        const result = await mockBlockchainCreateLoan(amount);
+        tx_hash = result.tx_hash;
+      }
 
       // 3. Update Supabase → status: active + tx_hash
       const activeLoan = await updateLoan(loan.id, {
@@ -155,8 +171,8 @@ function StepConfirm({ wallet, amount, onSuccess }) {
       await new Promise(r => setTimeout(r, 800));
       onSuccess(activeLoan, tx_hash);
     } catch (err) {
-      console.error(err);
-      setError(err.message);
+      console.error('[LoanFlow] blockchain error:', err);
+      setError(parseBlockchainError(err));
       setPhase('error');
     }
   };
