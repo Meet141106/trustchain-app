@@ -241,3 +241,14 @@ export async function getPendingLoans() {
   if (error) throw error;
   return data ?? [];
 }
+
+/** Fetch last 10 any-status loans for global activity feed. */
+export async function getRecentActivity() {
+  const { data, error } = await supabase
+    .from('loans')
+    .select('*, users(display_name, trust_score, tier, wallet_address)')
+    .order('created_at', { ascending: false })
+    .limit(10);
+  if (error) throw error;
+  return data ?? [];
+}

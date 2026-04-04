@@ -414,6 +414,23 @@ contract LendingPool is Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
+     * @notice Allows a new user to initialize their trust score to 30 (Entry Tier)
+     *         and mint their Soulbound Reputation NFT. 
+     *         Can only be called once per address.
+     */
+    function initializeUser() external nonReentrant whenNotPaused {
+        require(trustScores[msg.sender] == 0, "LendingPool: already initialized");
+        
+        // set initial score to 30 (Entry)
+        trustScores[msg.sender] = 30;
+        
+        // mint the NFT (calls the Soulbound ReputationNFT contract)
+        ReputationNFT(reputationNFT).mintReputationNFT(msg.sender);
+        
+        emit TrustScoreUpdated(msg.sender, 0, 30);
+    }
+
+    /**
      * @notice Pause all state-changing operations (emergency stop).
      */
     function pause() external onlyOwner {

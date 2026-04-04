@@ -59,6 +59,7 @@ function LoanHealthBar({ loan }) {
 }
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { address } = useWallet();
 
@@ -142,7 +143,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2 mb-6">
                     <div className="w-2 h-2 rounded-full bg-[#F59E0B] animate-pulse" />
                     <p className="text-[10px] font-black text-[#F59E0B] uppercase tracking-widest">
-                      Due {daysLeft(userLoan.dueDate)}
+                      Due {daysLeft(userLoan?.dueDate, t)}
                     </p>
                   </div>
                   <button id="btn-repay-now" onClick={() => navigate(`/repay?loanId=active`)}
@@ -156,7 +157,7 @@ export default function Dashboard() {
                                 flex flex-col justify-center items-center text-center group transition-all hover:border-[#F5A623]/40">
                   <div className="text-4xl mb-4">💸</div>
                   <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2">{t('dashboard.noActiveLoan')}</p>
-                  <p className="text-[#8C8C8C] text-xs mb-6 leading-relaxed">{t('dashboard.limitReady')}</p>
+                  <p className="text-[#8C8C8C] text-xs mb-6 leading-relaxed">{t('dashboard.creditReady')}</p>
                   <button id="btn-get-first-loan" onClick={() => navigate('/borrow')}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F5A623] to-[#D4AF37]
                                text-black text-[11px] font-black uppercase tracking-widest
@@ -188,7 +189,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-3 gap-4">
                   {[
                     { l: t('dashboard.borrowed'),  v: `$${userLoan.amount}`,           c: '#FAFAF8' },
-                    { l: t('dashboard.repaid'),    v: `$${userLoan.repaidAmount}`,     c: '#1D9E75' },
+                    { l: t('dashboard.repay'),    v: `$${userLoan.repaidAmount}`,     c: '#1D9E75' },
                     { l: t('dashboard.loanPath'), v: getPathName(userLoan.path),      c: '#F5A623' },
                   ].map(({ l, v, c }, i) => (
                     <div key={i} className="text-center p-4 bg-[#FAFAF8] dark:bg-[#0A0F1E] rounded-xl border border-[#E8E8E8] dark:border-[#1E2A3A]">
@@ -201,7 +202,7 @@ export default function Dashboard() {
                   className="w-full py-4 rounded-xl bg-[#1D9E75] text-white font-black text-[12px]
                              uppercase tracking-widest hover:bg-[#13C296] transition-all active:scale-[0.98]
                              shadow-[0_0_25px_rgba(29,158,117,0.2)]">
-                  {t('dashboard.repayBalance')}
+                  {t('dashboard.repayNow')}
                 </button>
               </div>
             </motion.div>

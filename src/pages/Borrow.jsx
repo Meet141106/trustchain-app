@@ -7,16 +7,20 @@ import { useLendingPool } from '../hooks/useLendingPool';
 import { useTranslation } from 'react-i18next';
 import Skeleton from '../components/Skeleton';
 import toast from 'react-hot-toast';
+import { createLoan, updateLoan } from '../lib/supabase';
 
 export default function Borrow() {
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
-  const { address } = useWallet();
+  const { walletAddress: address } = useWallet();
   const navigate = useNavigate();
 
-  const { borrowLimit, requestLoan, isLoading } = useLendingPool();
+  const { borrowLimit, requestLoan, userLoan, isLoading, refresh } = useLendingPool();
+  
+  // NUCLEAR CHECK: If userLoan exists OR totalOwed > 0, they cannot borrow again.
+  const hasActiveLoan = userLoan && (Number(userLoan.totalOwed) > 0 || Number(userLoan.status) === 1);
 
-  const [amount, setAmount] = useState(50);
+  const [amount, setAmount] = useState(10); // Fixed for demo
   // Paths: 0 = VouchBacked, 1 = Collateral, 2 = TrustOnly
   const [pathway, setPathway] = useState(2); 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +52,21 @@ export default function Borrow() {
     setIsSubmitting(true);
     try {
       // 30 days, 4 installments for simple demo
-      await requestLoan(safeAmount, 30, pathway);
+      const tx = await requestLoan(safeAmount, 30, pathway);
+      
+      // Sync to Supabase for global visibility
+      try {
+        await createLoan({ 
+          walletAddress: address, 
+          amount: safeAmount, 
+          path: pathway === 0 ? 'vouch' : pathway === 1 ? 'collateral' : 'trust',
+          loan_status: 'active', // Since it's a Pool loan, it's disbursed immediately
+          tx_hash: tx.hash 
+        });
+      } catch (dbErr) {
+        console.warn("DB Sync failed (on-chain was successful):", dbErr);
+      }
+
       toast.success(`Loan approved! ${safeAmount} TRUST sent to wallet`, { duration: 4000 });
       
       // Auto redirect after 2 seconds
@@ -72,6 +90,25 @@ export default function Borrow() {
     <AppShell pageTitle={t('borrow.title')} pageSubtitle={t('borrow.subtitle')}>
       <div className="max-w-7xl mx-auto space-y-12 pb-24">
         
+        {hasActiveLoan && (
+           <div className="bg-[#F5A623]/20 border border-[#F5A623]/30 p-6 rounded-2xl flex items-center justify-center gap-6 mb-12 shadow-[0_0_40px_rgba(245,166,35,0.1)]">
+              <div className="w-12 h-12 rounded-full bg-[#F5A623] flex items-center justify-center text-black shrink-0">
+                 <iconify-icon icon="lucide:shield-alert" className="text-2xl"></iconify-icon>
+              </div>
+              <div className="flex-1">
+                 <h4 className="text-[12px] font-black text-[#F5A623] uppercase tracking-widest mb-1">Active Loan Blocking Disbursal</h4>
+                 <p className="text-xs text-[#FAFAF8]/70">You already have an active $10 loan in the protocol. Repay it to borrow again for the demo!</p>
+              </div>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => navigate('/repay')}
+                  className="px-6 py-2 bg-[#F5A623] text-black text-[9px] font-black uppercase tracking-widest rounded-lg hover:scale-105 transition-all">
+                  Go to Repayment
+                </button>
+              </div>
+           </div>
+        )}
+
         {/* Pathway Selection */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
@@ -180,14 +217,14 @@ export default function Borrow() {
                   <span className="text-[#1A1A1A] dark:text-[#FAFAF8] tracking-tight uppercase text-sm">Target Disbursal</span>
                   <button 
                      onClick={handleRequestLoan}
-                     disabled={isSubmitting || isLoading || !address || safeAmount <= 0}
+                     disabled={isSubmitting || isLoading || !address || safeAmount <= 0 || hasActiveLoan}
                      className={`px-10 py-5 rounded-xl uppercase tracking-widest text-[12px] transition-all transform active:scale-95 flex items-center gap-3
-                        ${(isSubmitting || isLoading || !address || safeAmount <= 0) 
+                        ${(isSubmitting || isLoading || !address || safeAmount <= 0 || hasActiveLoan) 
                             ? 'bg-[#1E2A3A] text-[#8C8C8C] cursor-not-allowed' 
                             : 'bg-gradient-to-r from-[#F5A623] to-[#D4AF37] text-black hover:opacity-90 shadow-[0_0_30px_rgba(245,166,35,0.2)]'
                         }`}>
                     {isSubmitting && <svg className="animate-spin h-4 w-4 text-black" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
-                    {isSubmitting ? t('dashboard.loading') : `${t('borrow.requestLoan')} $${safeAmount.toFixed(2)}`}
+                    {isSubmitting ? t('dashboard.loading') : (hasActiveLoan ? "Active Loan In Progress" : `${t('borrow.requestLoan')} $${safeAmount.toFixed(2)}`)}
                   </button>
                 </div>
               </div>

@@ -129,7 +129,9 @@
     "loanRepaid": "Loan Repaid",
     "loanTaken": "Loan Taken",
     "days": "days",
-    "overdue": "Overdue"
+    "overdue": "Overdue",
+    "noVouches": "No vouches yet",
+    "vouchDesc": "Invite friends to build your credit network and unlock higher limits."
   },
   "tiers": {
     "Platinum": "Platinum",

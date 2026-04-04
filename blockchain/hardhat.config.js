@@ -31,7 +31,6 @@ module.exports = {
     localhost: {
       url: LOCAL_RPC_URL || "http://127.0.0.1:8545",
       chainId: 31337,
-      accounts: ALL_KEYS
     },
     amoy: {
       url: AMOY_RPC_URL || "https://rpc-amoy.polygon.technology",

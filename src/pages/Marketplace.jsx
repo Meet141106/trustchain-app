@@ -7,17 +7,23 @@ import { useLendingPool } from '../hooks/useLendingPool';
 import { useTranslation } from 'react-i18next';
 import Skeleton from '../components/Skeleton';
 import toast from 'react-hot-toast';
+import { getRecentActivity } from '../lib/supabase';
 
 export default function Marketplace() {
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
-  const { address } = useWallet();
+  const { walletAddress: address } = useWallet();
   const navigate = useNavigate();
 
   const { poolStats, lenderBalance, deposit, isLoading } = useLendingPool();
 
   const [depositAmount, setDepositAmount] = useState(500);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recentLoans, setRecentLoans] = useState([]);
+
+  React.useEffect(() => {
+    getRecentActivity().then(setRecentLoans).catch(console.error);
+  }, []);
 
   const handleDeposit = async () => {
     if (!address) {
@@ -127,6 +133,70 @@ export default function Marketplace() {
                 Manage Portfolio
             </button>
           </div>
+        </div>
+
+        {/* Live Platform Activity Feed */}
+        <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
+           <div className="flex justify-between items-center mb-10">
+              <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">Live Platform Activity</h4>
+              <div className="flex items-center gap-2">
+                 <div className="w-2 h-2 rounded-full bg-[#1D9E75] animate-pulse"></div>
+                 <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-widest">Real-time Feed</span>
+              </div>
+           </div>
+
+           <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                 <thead>
+                    <tr className="border-b border-[#E8E8E8] dark:border-[#1E2A3A]">
+                       <th className="pb-4 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em]">Borrower</th>
+                       <th className="pb-4 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em]">Amount</th>
+                       <th className="pb-4 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em]">Tier</th>
+                       <th className="pb-4 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em]">Status</th>
+                       <th className="pb-4 text-right text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em]">Execution</th>
+                    </tr>
+                 </thead>
+                 <tbody className="divide-y divide-[#E8E8E8] dark:divide-[#1E2A3A]">
+                    {recentLoans.length === 0 ? (
+                       <tr>
+                          <td colSpan="5" className="py-10 text-center text-xs text-[#8C8C8C]">No recent activity detected.</td>
+                       </tr>
+                    ) : recentLoans.map((loan, idx) => (
+                       <tr key={loan.id} className="group hover:bg-[#FAFAF8] dark:hover:bg-[#FAFAF8]/5 transition-colors">
+                          <td className="py-5">
+                             <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-[#1E2A3A] border border-[#F5A623]/20 flex items-center justify-center text-[10px] font-black text-[#F5A623]">
+                                   {loan.users?.display_name?.charAt(0) || loan.wallet_address.slice(2,4).toUpperCase()}
+                                </div>
+                                <div>
+                                   <p className="text-[11px] font-black text-[#FAFAF8]">{loan.users?.display_name || 'Anonymous'}</p>
+                                   <p className="text-[9px] text-[#8C8C8C] font-mono">{loan.wallet_address.slice(0, 6)}...{loan.wallet_address.slice(-4)}</p>
+                                </div>
+                             </div>
+                          </td>
+                          <td className="py-5 text-xs font-black text-[#FAFAF8]">${Number(loan.amount).toLocaleString()} TRUST</td>
+                          <td className="py-5">
+                             <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md bg-[#1E2A3A] text-[#F5A623]">
+                                {loan.users?.tier || 'Entry'}
+                             </span>
+                          </td>
+                          <td className="py-5">
+                             <div className="flex items-center gap-1.5">
+                                <div className={`w-1.5 h-1.5 rounded-full ${loan.loan_status === 'active' ? 'bg-[#1D9E75]' : 'bg-[#F5A623]'}`}></div>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-[#FAFAF8]">{loan.loan_status}</span>
+                             </div>
+                          </td>
+                          <td className="py-5 text-right">
+                             <a href={`https://amoy.polygonscan.com/tx/${loan.tx_hash}`} target="_blank" rel="noreferrer" 
+                                className="text-[9px] font-black text-[#8C8C8C] hover:text-[#F5A623] transition-colors flex items-center justify-end gap-1 uppercase tracking-widest">
+                                View TX <iconify-icon icon="lucide:external-link" className="text-[10px]"></iconify-icon>
+                             </a>
+                          </td>
+                       </tr>
+                    ))}
+                 </tbody>
+              </table>
+           </div>
         </div>
       </div>
     </AppShell>

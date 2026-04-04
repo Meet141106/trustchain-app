@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getUser, updateUser } from '../lib/supabase';
+import { initializeOnChainScore, parseBlockchainError } from '../lib/blockchain';
+import toast from 'react-hot-toast';
 
 /* ───────────────────────── helpers ───────────────────────── */
 const shortAddr = (a = '') => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—');
@@ -172,9 +174,24 @@ function StepTrustScore({ wallet, snapshot, onNext }) {
   useEffect(() => { const t = setTimeout(() => setPhase('revealed'), 2000); return () => clearTimeout(t); }, []);
 
   const save = async () => {
-    setPhase('saving');
-    await updateUser(wallet, { trust_score: score, tier: 'Entry', wallet_snapshot: snapshot });
-    setPhase('saved');
+    try {
+      setPhase('saving');
+      
+      // 1. Initialize on blockchain (sets score to 30 and mints soulbound NFT)
+      toast.loading('Initializing on-chain identity...', { id: 'onboarding-tx' });
+      await initializeOnChainScore();
+      toast.success('On-chain identity ready! ⛓️', { id: 'onboarding-tx' });
+
+      // 2. Sync with Supabase
+      await updateUser(wallet, { trust_score: score, tier: 'Entry', wallet_snapshot: snapshot });
+      
+      setPhase('saved');
+    } catch (err) {
+      console.error('[Onboarding] Save error:', err);
+      const msg = parseBlockchainError(err);
+      toast.error(msg, { id: 'onboarding-tx' });
+      setPhase('revealed'); // let them try again
+    }
   };
 
   return (

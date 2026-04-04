@@ -9,7 +9,7 @@
  */
 
 import { ethers } from 'ethers';
-import ADDRESSES from './contracts.json';
+import { ADDRESSES } from '../contracts/addresses';
 
 /* ══════════════════════════════════════════
    MINIMAL ABIs
@@ -27,7 +27,7 @@ const LENDING_POOL_ABI = [
   'function requestLoan(uint256 amount, uint256 durationDays, uint8 path)',
   'function makeRepayment(uint256 amount)',
   'function markDefault(address borrower)',
-  'function getLoan(address borrower) view returns (tuple(address borrower, uint256 amount, uint256 repaidAmount, uint256 interestRate, uint256 startTime, uint256 dueDate, uint8 installmentsPaid, uint8 totalInstallments, uint8 status, uint8 path))',
+  'function initializeUser()',
   'function totalPoolLiquidity() view returns (uint256)',
   'event LoanDisbursed(address indexed borrower, uint256 amount, uint256 dueDate, uint8 path)',
   'event RepaymentMade(address indexed borrower, uint256 amount, uint256 remaining, uint8 newTrustScore)'
@@ -85,7 +85,7 @@ export function parseBlockchainError(err) {
 export async function isBlockchainReady() {
   try {
     if (!window.ethereum) return false;
-    if (!ADDRESSES.LendingPool) return false;
+    if (!ADDRESSES.LENDING_POOL) return false;
 
     const provider = new ethers.BrowserProvider(window.ethereum);
     const network  = await provider.getNetwork();
@@ -102,18 +102,18 @@ export async function isBlockchainReady() {
  */
 export async function getNetworkStatus() {
   if (!window.ethereum) return { ready: false, reason: 'MetaMask not installed' };
-  if (!ADDRESSES.LendingPool) return { ready: false, reason: 'Contracts not deployed' };
+  if (!ADDRESSES.LENDING_POOL) return { ready: false, reason: 'Contracts not deployed' };
   try {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const network  = await provider.getNetwork();
     const chainId  = Number(network.chainId).toString();
-    const ready    = chainId === ADDRESSES.chainId;
+    const ready    = chainId === String(ADDRESSES.CHAIN_ID);
     return {
       ready,
       chainId,
-      expectedChainId: ADDRESSES.chainId,
+      expectedChainId: ADDRESSES.CHAIN_ID,
       network: network.name,
-      reason: ready ? null : `Wrong network (on ${chainId}, need ${ADDRESSES.chainId})`,
+      reason: ready ? null : `Wrong network (on ${chainId}, need ${ADDRESSES.CHAIN_ID})`,
     };
   } catch (e) {
     return { ready: false, reason: e.message };
@@ -139,9 +139,9 @@ export function getProvider() {
 async function getContracts() {
   const signer = await getSigner();
   return {
-    token: new ethers.Contract(ADDRESSES.StableToken, ERC20_ABI, signer),
-    pool:  new ethers.Contract(ADDRESSES.LendingPool, LENDING_POOL_ABI, signer),
-    vouch: new ethers.Contract(ADDRESSES.VouchSystem, VOUCH_SYSTEM_ABI, signer),
+    token: new ethers.Contract(ADDRESSES.TRUST_TOKEN, ERC20_ABI, signer),
+    pool:  new ethers.Contract(ADDRESSES.LENDING_POOL, LENDING_POOL_ABI, signer),
+    vouch: new ethers.Contract(ADDRESSES.VOUCH_SYSTEM, VOUCH_SYSTEM_ABI, signer),
     signer,
   };
 }
@@ -154,9 +154,9 @@ const fromUnits = (n) => parseFloat(ethers.formatUnits(n, 18));
 ═══════════════════════════════════════════ */
 
 export async function getTokenBalance(address) {
-  if (!ADDRESSES.StableToken) return 0;
+  if (!ADDRESSES.TRUST_TOKEN) return 0;
   const provider = getProvider();
-  const token = new ethers.Contract(ADDRESSES.StableToken, ERC20_ABI, provider);
+  const token = new ethers.Contract(ADDRESSES.TRUST_TOKEN, ERC20_ABI, provider);
   return fromUnits(await token.balanceOf(address));
 }
 
@@ -172,7 +172,7 @@ export async function depositLiquidity(amount) {
   const { token, pool } = await getContracts();
   const units = toUnits(amount);
 
-  const approveTx = await token.approve(ADDRESSES.LendingPool, units);
+  const approveTx = await token.approve(ADDRESSES.LENDING_POOL, units);
   await approveTx.wait();
 
   const depositTx = await pool.depositToPool(units);
@@ -180,16 +180,21 @@ export async function depositLiquidity(amount) {
   return { txHash: receipt.hash };
 }
 
-/**
- * Borrower creates an active loan on-chain.
- * Returns the on-chain txHash.
- */
 export async function requestLoan(amount, durationDays = 30, path = 2) {
   const { pool } = await getContracts();
-
   const tx      = await pool.requestLoan(toUnits(amount), durationDays, path);
   const receipt = await tx.wait();
+  return { txHash: receipt.hash };
+}
 
+/**
+ * Mint the Soulbound Reputation NFT and initialize trust score to 30.
+ * Can only be done once per address.
+ */
+export async function initializeOnChainScore() {
+  const { pool } = await getContracts();
+  const tx = await pool.initializeUser();
+  const receipt = await tx.wait();
   return { txHash: receipt.hash };
 }
 
@@ -201,7 +206,7 @@ export async function repayLoan(amount) {
   const { token, pool } = await getContracts();
   const units = toUnits(amount);
 
-  const approveTx = await token.approve(ADDRESSES.LendingPool, units);
+  const approveTx = await token.approve(ADDRESSES.LENDING_POOL, units);
   await approveTx.wait();
 
   const repayTx = await pool.makeRepayment(units);
@@ -210,16 +215,16 @@ export async function repayLoan(amount) {
 }
 
 export async function getPoolLiquidity() {
-  if (!ADDRESSES.LendingPool) return 0;
+  if (!ADDRESSES.LENDING_POOL) return 0;
   const provider = getProvider();
-  const pool = new ethers.Contract(ADDRESSES.LendingPool, LENDING_POOL_ABI, provider);
+  const pool = new ethers.Contract(ADDRESSES.LENDING_POOL, LENDING_POOL_ABI, provider);
   return fromUnits(await pool.totalPoolLiquidity());
 }
 
 export async function getLoanOnChain(borrowerAddress) {
-  if (!ADDRESSES.LendingPool) return null;
+  if (!ADDRESSES.LENDING_POOL) return null;
   const provider = getProvider();
-  const pool  = new ethers.Contract(ADDRESSES.LendingPool, LENDING_POOL_ABI, provider);
+  const pool  = new ethers.Contract(ADDRESSES.LENDING_POOL, LENDING_POOL_ABI, provider);
   const loan  = await pool.getLoan(borrowerAddress);
   const STATUSES = ['Active', 'Repaid', 'Defaulted', 'Liquidated'];
   return {
@@ -244,7 +249,7 @@ export async function stakeForBorrower(borrowerAddress, amount) {
   const { token, vouch } = await getContracts();
   const units = toUnits(amount);
 
-  const approveTx = await token.approve(ADDRESSES.VouchSystem, units);
+  const approveTx = await token.approve(ADDRESSES.VOUCH_SYSTEM, units);
   await approveTx.wait();
 
   const tx      = await vouch.stakeForBorrower(borrowerAddress, units);
@@ -259,9 +264,9 @@ export async function stakeForBorrower(borrowerAddress, amount) {
 }
 
 export async function getTotalActiveStake(borrowerAddress) {
-  if (!ADDRESSES.VouchSystem) return 0;
+  if (!ADDRESSES.VOUCH_SYSTEM) return 0;
   const provider = getProvider();
-  const vouch = new ethers.Contract(ADDRESSES.VouchSystem, VOUCH_SYSTEM_ABI, provider);
+  const vouch = new ethers.Contract(ADDRESSES.VOUCH_SYSTEM, VOUCH_SYSTEM_ABI, provider);
   return fromUnits(await vouch.getTotalActiveStake(borrowerAddress));
 }
 
