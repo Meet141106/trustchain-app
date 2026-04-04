@@ -1,96 +1,122 @@
-import { Link } from 'react-router-dom';
+import React from 'react';
 import AppShell from '../components/AppShell';
-import GlassCard from '../components/GlassCard';
-
-const quickActions = [
-  { to: '/borrow', icon: 'lucide:arrow-down-to-line', label: 'Borrow', id: 'action-borrow', active: true },
-  { to: '/repay', icon: 'lucide:arrow-up-from-line', label: 'Repay', id: 'action-repay', active: true },
-  { to: '#', icon: 'lucide:plus-circle', label: 'Add Collateral', id: 'action-collateral', active: false },
-  { to: '#', icon: 'lucide:users', label: 'Invite Friend', id: 'action-invite', active: true },
-];
+import TrustScoreMeter from '../components/TrustScoreMeter';
+import LoanCard from '../components/LoanCard';
+import HealthIndicator from '../components/HealthIndicator';
+import { motion } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 
 export default function BorrowerDashboard() {
+  const { isDarkMode } = useTheme();
+
   return (
-    <AppShell>
-      {/* Balance section */}
-      <section style={{ marginBottom: 32 }}>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 4 }}>Available to Borrow</p>
-        <div className="flex items-end gap-2">
-          <h1 style={{ fontSize: 36, fontWeight: 700, letterSpacing: '-0.02em' }}>$1,250.00</h1>
-          <span style={{ color: 'var(--gold)', fontSize: 14, fontWeight: 600, marginBottom: 4 }}>USD</span>
-        </div>
-      </section>
-
-      {/* Stats grid */}
-      <div className="stats-grid" style={{ marginBottom: 32 }}>
-        <GlassCard style={{ padding: 16, borderRadius: 'var(--radius-2xl)', display: 'flex', flexDirection: 'column' }}>
-          <div className="flex items-center gap-2" style={{ marginBottom: 12 }}>
-            <iconify-icon icon="lucide:file-text" width="18" height="18" style={{ color: 'var(--gold)' }}></iconify-icon>
-            <span className="text-micro" style={{ color: 'var(--text-secondary)' }}>Active Loan</span>
-          </div>
-          <div style={{ marginTop: 'auto' }}>
-            <p style={{ fontSize: 20, fontWeight: 700 }}>$450</p>
-            <p className="text-micro" style={{ color: 'var(--text-tertiary)', marginTop: 4 }}>Due in 12 days</p>
-          </div>
-        </GlassCard>
-
-        <GlassCard style={{ padding: 16, borderRadius: 'var(--radius-2xl)', display: 'flex', flexDirection: 'column' }}>
-          <div className="flex items-center gap-2" style={{ marginBottom: 12 }}>
-            <iconify-icon icon="lucide:layers" width="18" height="18" style={{ color: 'var(--gold)' }}></iconify-icon>
-            <span className="text-micro" style={{ color: 'var(--text-secondary)' }}>Collateral</span>
-          </div>
-          <div style={{ marginTop: 'auto' }}>
-            <p style={{ fontSize: 20, fontWeight: 700 }}>None</p>
-            <p className="text-micro" style={{ color: 'var(--gold)', marginTop: 4 }}>Reputation-based</p>
-          </div>
-        </GlassCard>
-      </div>
-
-      {/* Health status */}
-      <section className="glass-card" style={{ padding: 20, borderRadius: 'var(--radius-2xl)', marginBottom: 32 }}>
-        <div className="flex justify-between items-center" style={{ marginBottom: 16 }}>
-          <span className="text-micro" style={{ color: 'var(--text-secondary)' }}>Loan Health Status</span>
-          <span className="text-micro" style={{ color: 'var(--emerald)' }}>Healthy</span>
-        </div>
-        <div className="health-bar">
-          <div className="health-bar__indicator" style={{ left: '22%' }} />
-        </div>
-        <div className="flex justify-between" style={{ marginTop: 12 }}>
-          <span className="text-micro" style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>Safe</span>
-          <span className="text-micro" style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>Warning</span>
-          <span className="text-micro" style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>Liquidation Risk</span>
-        </div>
-      </section>
-
-      {/* Quick actions */}
-      <section>
-        <h2 className="text-micro" style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>Quick Actions</h2>
-        <div className="stats-grid">
-          {quickActions.map((action) => (
-            <Link
-              key={action.id}
-              to={action.to}
-              id={action.id}
-              className="glass-card flex flex-col items-center justify-center gap-3"
-              style={{
-                padding: 16, borderRadius: 'var(--radius-2xl)',
-                opacity: action.active ? 1 : 0.5,
-                pointerEvents: action.active ? 'auto' : 'none',
-                transition: 'transform 0.15s ease'
-              }}
-            >
-              <div style={{
-                width: 48, height: 48, borderRadius: 'var(--radius-lg)',
-                background: action.active ? 'rgba(245,166,35,0.1)' : 'rgba(107,114,128,0.1)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
-                <iconify-icon icon={action.icon} width="24" height="24" style={{ color: action.active ? 'var(--gold)' : 'var(--text-secondary)' }}></iconify-icon>
+    <AppShell title="Solvent Terminal" subtitle="Sovereign Credit Control">
+      <div className="grid grid-cols-12 gap-10 lg:gap-16">
+        
+        {/* Left Column: Reputation & Health */}
+        <div className="col-span-12 lg:col-span-5 space-y-12">
+          
+          {/* Trust Score Header */}
+          <div className={`p-12 rounded-[3.5rem] border transition-all duration-500 relative overflow-hidden group
+            ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
+            <div className="relative z-10 flex flex-col items-center">
+              <TrustScoreMeter score={842} />
+              
+              <div className="mt-12 text-center">
+                <h2 className={`text-4xl font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                  ELITE REPUTATION
+                </h2>
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
+                  <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Fidelity Level: Exceptional</span>
+                </div>
               </div>
-              <span style={{ fontSize: 14, fontWeight: 700 }}>{action.label}</span>
-            </Link>
-          ))}
+              
+              <div className="grid grid-cols-2 gap-10 w-full mt-16 pt-16 border-t border-[#F5F3F0] dark:border-[#333]">
+                <div className="text-center">
+                  <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-3">Credit Peak</p>
+                  <p className={`text-2xl font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-[#D4AF37]' : 'text-[#1A1A1A]'}`}>
+                    $45,000
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-3">Active Vouching</p>
+                  <p className={`text-2xl font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-[#D4AF37]' : 'text-[#1A1A1A]'}`}>
+                    14 Members
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <HealthIndicator healthValue={92} label="Reputation Solvency" />
+          
         </div>
-      </section>
+
+        {/* Right Column: Active Facilities & Intelligence */}
+        <div className="col-span-12 lg:col-span-7 space-y-12">
+          
+          <div className="flex items-center justify-between px-4">
+            <div>
+              <h4 className={`text-2xl font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                Active Capital Facilities
+              </h4>
+              <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mt-2">
+                Real-time Lifecycle Status
+              </p>
+            </div>
+            <button className="px-8 py-4 rounded-full border border-[#D4AF37] text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] transition-all hover:bg-[#D4AF37] hover:text-white active:scale-95">
+              Drawdown Request
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <LoanCard amount="$12,500" label="Tier II Liquidity Circle" status="Active" reputationGain="+18 QP" dueDate="Dec 12, 2026" />
+            <LoanCard amount="$4,200" label="Sovereign Merit Loan" status="Active" reputationGain="+8 QP" dueDate="Jan 05, 2027" />
+          </div>
+
+          {/* Protocol Intelligence Row */}
+          <div className={`p-10 rounded-[3rem] border transition-all duration-500 relative overflow-hidden group
+            ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
+            <div className="flex items-center justify-between mb-10">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/5 flex items-center justify-center text-[#D4AF37]">
+                  <iconify-icon icon="lucide:brain" className="text-2xl"></iconify-icon>
+                </div>
+                <div>
+                  <h5 className={`text-lg font-black font-cabinet tracking-tight ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                    Protocol Intelligence
+                  </h5>
+                  <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em]">AI-Powered Insights</p>
+                </div>
+              </div>
+              <span className="px-3 py-1 bg-[#10B981]/10 text-[#10B981] text-[9px] font-bold uppercase rounded-full">Optimal Risk Zone</span>
+            </div>
+            
+            <p className="text-sm font-medium text-[#8C8C8C] leading-relaxed mb-10 italic">
+              "Your current repayment fidelity is at the 98th percentile. Maintaining this trajectory for the next 45 days will unlock the **NOIR ELITE** credit archway."
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 border-t border-[#F5F3F0] dark:border-[#333] pt-10">
+              <div className="space-y-4">
+                <h6 className="text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.4em]">Next Growth Signal</h6>
+                <div className="flex items-center justify-between">
+                  <span className={`text-[12px] font-black ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>Noir Archetype Status</span>
+                  <span className="text-[12px] font-black text-[#10B981]">Reached in 12 days</span>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h6 className="text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.4em]">Liquidity Prediction</h6>
+                <div className="flex items-center justify-between">
+                  <span className={`text-[12px] font-black ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>Market APR Prediction</span>
+                  <span className="text-[12px] font-black text-[#D4AF37]">4.2% (Historical Low)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
     </AppShell>
   );
 }

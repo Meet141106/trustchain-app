@@ -33,10 +33,15 @@ import DisputeScreen from './pages/DisputeScreen';
 import Settings from './pages/Settings';
 import InviteFriends from './pages/InviteFriends';
 
+import { ThemeProvider } from './context/ThemeContext';
+import { AnimatePresence } from 'framer-motion';
+
 export default function App() {
   return (
-    <HashRouter>
-      <Routes>
+    <ThemeProvider>
+      <HashRouter>
+        <AnimatePresence mode="wait">
+          <Routes>
         {/* Onboarding flow (no bottom nav) */}
         <Route path="/" element={<Onboarding />} />
         <Route path="/walkthrough" element={<OnboardingWalkthrough />} />
@@ -82,7 +87,9 @@ export default function App() {
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </HashRouter>
+        </Routes>
+        </AnimatePresence>
+      </HashRouter>
+    </ThemeProvider>
   );
 }

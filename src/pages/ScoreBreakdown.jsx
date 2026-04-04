@@ -1,53 +1,114 @@
-import { Link } from 'react-router-dom';
+import React from 'react';
 import AppShell from '../components/AppShell';
+import TrustScoreMeter from '../components/TrustScoreMeter';
+import { motion } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 
 export default function ScoreBreakdown() {
+  const { isDarkMode } = useTheme();
+
   const factors = [
-    { name: 'Repayment History', pct: '40%', score: 'Excellent', color: 'var(--emerald)' },
-    { name: 'Wallet Age (Identity)', pct: '25%', score: 'Good', color: 'var(--teal)' },
-    { name: 'Group Verification', pct: '20%', score: 'Average', color: 'var(--gold)' },
-    { name: 'Total Borrowed Vol.', pct: '15%', score: 'Needs Work', color: 'var(--red)' }
+    { label: "Repayment Fidelity", value: 98, weight: 40, icon: "lucide:check-circle", color: "#10B981" },
+    { label: "Syndicate Vouching", value: 85, weight: 30, icon: "lucide:users-2", color: "#D4AF37" },
+    { label: "Asset Under Sovereign Control", value: 72, weight: 20, icon: "lucide:landmark", color: "#6366F1" },
+    { label: "Historical Stability", value: 92, weight: 10, icon: "lucide:calendar", color: "#A855F7" }
   ];
 
   return (
-    <AppShell backTo="/credit" backLabel="Profile">
-       <h1 className="text-h2" style={{ marginBottom: 8 }}>Score Breakdown</h1>
-       <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 32 }}>
-          Your <strong>TrustScore (72)</strong> is calculated purely from your decentralized on-chain history. Here is how you are evaluated.
-       </p>
+    <AppShell title="Sovereign Audit" subtitle="Reputation Synthesis & Breakdown">
+      <div className="max-w-6xl mx-auto space-y-16">
+        
+        {/* Core Hero Section */}
+        <div className={`p-16 rounded-[4rem] border transition-all duration-500 relative overflow-hidden group
+          ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            <div className="flex flex-col items-center">
+              <TrustScoreMeter score={842} />
+              <div className="mt-10 text-center">
+                <span className="px-6 py-2 rounded-full border border-[#D4AF37]/20 bg-[#D4AF37]/5 text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.4em]">
+                  Noir Level Verified
+                </span>
+                <p className="mt-8 text-sm font-medium text-[#8C8C8C] max-w-sm leading-relaxed px-4">
+                  "Your score represents the 98th percentile of the TrustLend network. Access to institutional liquidity is now unlocked."
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-10">
+              <div>
+                <h2 className={`text-4xl font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                  Reputation Synthesis
+                </h2>
+                <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mt-3">Factor-Based Scoring Algorithm</p>
+              </div>
+              
+              <div className="space-y-8">
+                {factors.map((factor, idx) => (
+                  <motion.div 
+                    key={factor.label}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * idx, duration: 0.5 }}
+                    className="space-y-3"
+                  >
+                    <div className="flex justify-between items-end">
+                      <div className="flex items-center gap-3">
+                        <iconify-icon icon={factor.icon} className={`text-xl ${isDarkMode ? 'text-white' : 'text-[#D4AF37]'}`}></iconify-icon>
+                        <span className={`text-[12px] font-black uppercase tracking-[0.1em] ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>{factor.label}</span>
+                      </div>
+                      <span className="text-[12px] font-black text-[#D4AF37]">{factor.value}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-[#E8E8E8] dark:bg-[#333] rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${factor.value}%` }}
+                        transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 + 0.1 * idx }}
+                        style={{ backgroundColor: factor.color }}
+                        className="h-full rounded-full shadow-[0_0_10px_rgba(0,0,0,0.1)]"
+                      />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
 
-       <div className="flex flex-col gap-6">
-          {factors.map((f, i) => (
-             <div key={i} style={{
-                background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-emphasis)',
-                borderRadius: 'var(--radius-lg)', padding: 16
-             }}>
-                <div className="flex justify-between items-center" style={{ marginBottom: 12 }}>
-                   <div>
-                      <p style={{ fontWeight: 700, fontSize: 14 }}>{f.name}</p>
-                      <p className="text-micro" style={{ color: 'var(--text-tertiary)' }}>Weight: {f.pct}</p>
-                   </div>
-                   <div style={{ color: f.color, fontSize: 12, fontWeight: 700, background: `rgba(${f.color === 'var(--emerald)' ? '16,185,129' : f.color === 'var(--gold)' ? '245,166,35' : f.color === 'var(--red)' ? '239,68,68' : '45,212,191'},0.1)`, padding: '4px 10px', borderRadius: 16 }}>
-                      {f.score}
-                   </div>
-                </div>
-                
-                {/* Horizontal Progress */}
-                <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 3 }}>
-                   <div style={{ 
-                      height: '100%', borderRadius: 3, background: f.color,
-                      width: f.score === 'Excellent' ? '95%' : f.score === 'Good' ? '75%' : f.score === 'Average' ? '50%' : '25%' 
-                   }} />
-                </div>
-             </div>
-          ))}
-       </div>
+        {/* Intelligence Insights */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className={`p-10 rounded-[3rem] border ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
+            <h4 className={`text-xl font-black font-cabinet tracking-tight mb-8 ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>Reputation Velocity</h4>
+            <div className="flex items-center gap-6 mb-10">
+              <div className="w-16 h-16 rounded-full bg-[#10B981]/10 flex items-center justify-center text-[#10B981]">
+                <iconify-icon icon="lucide:arrow-up-right" className="text-3xl"></iconify-icon>
+              </div>
+              <div>
+                <p className={`text-2xl font-black font-cabinet ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>+42 Points</p>
+                <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] mt-1">Growth in last 30 days</p>
+              </div>
+            </div>
+            <p className="text-sm font-medium text-[#8C8C8C] leading-relaxed">
+              Your recent early repayments of the **"Tier II Circle"** loan have triggered a significant velocity boost, signaling to the protocol that your credit ceiling should be expanded.
+            </p>
+          </div>
 
-       <div style={{ marginTop: 32, padding: 20, background: 'var(--navy-panel)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
-          <iconify-icon icon="lucide:trending-up" width="24" height="24" style={{ color: 'var(--gold)', marginBottom: 8 }} />
-          <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Want to increase your score?</h3>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Join a lending circle or maintain a 5-payment streak to unlock the Gold Tier instantly.</p>
-       </div>
+          <div className={`p-10 rounded-[3rem] border ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
+            <h4 className={`text-xl font-black font-cabinet tracking-tight mb-8 ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>Risk Frontier Mapping</h4>
+            <div className="flex items-center gap-6 mb-10">
+              <div className="w-16 h-16 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
+                <iconify-icon icon="lucide:shield-check" className="text-3xl"></iconify-icon>
+              </div>
+              <div>
+                <p className={`text-2xl font-black font-cabinet ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>Sovereign Tier</p>
+                <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] mt-1">Verified Protocol Stability</p>
+              </div>
+            </div>
+            <p className="text-sm font-medium text-[#8C8C8C] leading-relaxed">
+              The AI risk oracle has calculated your liquidation boundary at 40%. Given your current 92% solvency rating, your risk frontier is within the **Institutional Safety Corridor**.
+            </p>
+          </div>
+        </div>
+      </div>
     </AppShell>
   );
 }

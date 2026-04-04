@@ -2,68 +2,64 @@ import { Link } from 'react-router-dom';
 
 export default function RepaymentSuccess() {
   return (
-    <div className="screen flex-col items-center justify-center text-center">
-      <div className="blur-blob blur-blob--teal" style={{ top: '20%', left: '10%' }} />
-      <div className="blur-blob" style={{ bottom: '10%', right: '-20%', background: 'radial-gradient(circle, rgba(245, 166, 35, 0.08) 0%, rgba(10, 15, 30, 0) 70%)' }} />
+    <div className="min-h-screen bg-[#FAFAF8] text-[#1A1A1A] font-satoshi flex flex-col items-center justify-center p-8 text-center overflow-hidden relative">
+      {/* Decorative luxury elements */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#D4AF37] opacity-[0.05] blur-[150px] animate-pulse"></div>
       
-      <main className="screen__body screen__body--no-tab flex flex-col justify-center items-center text-center w-full" style={{ padding: '0 32px' }}>
-        
-        <div className="animate-fade-in" style={{ marginBottom: 32, position: 'relative' }}>
-          <div style={{
-            width: 120, height: 120, borderRadius: '50%',
-            background: 'rgba(245,166,35,0.1)',
-            border: '2px solid rgba(245,166,35,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 60px rgba(245,166,35,0.2)'
-          }}>
-            <iconify-icon icon="lucide:party-popper" width="56" height="56" style={{ color: 'var(--gold)' }}></iconify-icon>
-          </div>
-          <div style={{
-            position: 'absolute', top: -10, right: -10,
-            background: 'var(--emerald)', color: 'var(--navy)',
-            fontWeight: 700, fontSize: 14, padding: '4px 12px',
-            borderRadius: 16, boxShadow: '0 4px 12px rgba(16,185,129,0.3)'
-          }} className="animate-fade-in-up animate-delay-1">
-            +15 Score
-          </div>
-        </div>
-
-        <h1 className="text-display animate-fade-in-up" style={{ marginBottom: 16 }}>
-          Loan <br />
-          <span style={{ color: 'var(--gold)' }}>Repaid</span>
-        </h1>
-        <p className="animate-fade-in-up animate-delay-1" style={{ color: 'var(--text-secondary)', fontSize: 16, lineHeight: 1.6, marginBottom: 32 }}>
-          Your payment of <strong>$254.50</strong> was successful. Your on-chain reputation has improved.
-        </p>
-
-        {/* Streak Indicator */}
-        <div className="animate-fade-in-up animate-delay-2 flex items-center justify-center gap-3 w-full" style={{
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))',
-          borderRadius: 'var(--radius-lg)', padding: 20, border: '1px solid var(--border-emphasis)'
-        }}>
-           <div style={{
-             width: 48, height: 48, borderRadius: '50%',
-             background: 'linear-gradient(135deg, #F97316, #DC2626)',
-             display: 'flex', alignItems: 'center', justifyContent: 'center',
-             boxShadow: '0 4px 12px rgba(234,88,12,0.2)'
-           }}>
-             <iconify-icon icon="lucide:flame" width="24" height="24" style={{ color: 'white' }}></iconify-icon>
+      <div className="relative z-10 space-y-12 max-w-lg w-full">
+         <div className="relative inline-block mx-auto animate-fade-in">
+           {/* Success iconography */}
+           <div className="w-40 h-40 md:w-56 md:h-56 rounded-full border border-[#D4AF37]/20 flex items-center justify-center relative shadow-2xl bg-white/50 backdrop-blur-xl">
+              <div className="absolute inset-0 rounded-full border-2 border-t-[#D4AF37] border-r-transparent border-b-transparent border-l-transparent animate-spin" style={{ animationDuration: '4s' }}></div>
+              <div className="absolute inset-8 rounded-full border border-[#D4AF37]/10 flex items-center justify-center">
+                 <iconify-icon icon="lucide:party-popper" className="text-7xl text-[#D4AF37]"></iconify-icon>
+              </div>
            </div>
-           <div className="text-left">
-             <h4 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>4 On-Time Streak</h4>
-             <p style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>You're 1 payment away from Gold Tier!</p>
+           
+           <div className="absolute -top-4 -right-10 px-8 py-2.5 bg-[#1A1A1A] text-white rounded-full border border-white/10 shadow-xl animate-bounce">
+              <div className="flex items-center gap-3">
+                 <iconify-icon icon="lucide:zap" className="text-[#D4AF37] text-xl"></iconify-icon>
+                 <span className="text-[10px] font-black uppercase tracking-[0.3em]">+15 Reputation QP</span>
+              </div>
            </div>
-        </div>
-      </main>
+         </div>
 
-      <footer className="screen__footer w-full flex flex-col gap-4">
-         <Link to="/credit" className="btn-primary animate-fade-in-up animate-delay-3" style={{ boxShadow: 'var(--shadow-gold)' }}>
-           View New Score
-         </Link>
-         <Link to="/dashboard" className="btn-ghost animate-fade-in-up animate-delay-4">
-           Return Home
-         </Link>
-      </footer>
+         <div className="space-y-6">
+            <h2 className="font-cabinet text-6xl md:text-8xl font-black tracking-tighter leading-none animate-fade-in-up">
+               Facility <br/>
+               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1A1A1A] via-[#444] to-[#1A1A1A]">Synthesized.</span>
+            </h2>
+            <p className="text-[#8C8C8C] font-black text-[10px] leading-relaxed uppercase tracking-[0.4em] max-w-sm mx-auto animate-fade-in-up animate-delay-1">
+               Your protocol settlement of <span className="text-[#1A1A1A] font-black">$254.50</span> has been verified across all accountability nodes.
+            </p>
+         </div>
+
+         {/* Reward Loop & Streak */}
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in-up animate-delay-2 pt-8">
+            <div className="bg-white p-8 rounded-[3.5rem] border border-[#E8E8E8] luxury-shadow flex flex-col items-center">
+               <div className="w-14 h-14 rounded-2xl bg-[#1A1A1A] flex items-center justify-center text-[#D4AF37] mb-6 shadow-xl">
+                  <iconify-icon icon="lucide:flame" className="text-2xl animate-pulse"></iconify-icon>
+               </div>
+               <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2 font-cabinet">Reputation Momentum</p>
+               <h4 className="text-2xl font-black text-[#1A1A1A] tracking-tighter leading-none">4x Period Streak</h4>
+            </div>
+            
+            <div className="bg-white p-8 rounded-[3.5rem] border border-[#E8E8E8] luxury-shadow flex flex-col items-center">
+               <div className="w-14 h-14 rounded-2xl bg-[#FAFAF8] border border-[#E8E8E8] flex items-center justify-center text-[#D4AF37] mb-6 shadow-xl">
+                  <iconify-icon icon="lucide:trending-up" className="text-2xl"></iconify-icon>
+               </div>
+               <p className="text-[9px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2 font-cabinet">Expansion Buffer</p>
+               <h4 className="text-2xl font-black text-[#1A1A1A] tracking-tighter leading-none">+$250 Limit</h4>
+            </div>
+         </div>
+
+         <div className="flex flex-col gap-6 w-full animate-fade-in-up animate-delay-3 pt-8">
+            <Link to="/credit" className="w-full py-6 rounded-full bg-[#1A1A1A] text-white font-black uppercase text-[12px] tracking-[0.3em] luxury-shadow hover:bg-[#D4AF37] hover:scale-105 transition-all flex items-center justify-center gap-4 group active:scale-95 shadow-2xl">
+               Analyze Reputation Quotient <iconify-icon icon="lucide:arrow-right" className="transition-transform group-hover:translate-x-2 text-lg"></iconify-icon>
+            </Link>
+            <Link to="/dashboard" className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.3em] hover:text-[#1A1A1A] transition-colors">Return to Central Hub</Link>
+         </div>
+      </div>
     </div>
   );
 }

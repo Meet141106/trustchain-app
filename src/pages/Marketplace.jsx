@@ -1,110 +1,116 @@
-import { useState } from 'react';
+import React from 'react';
 import AppShell from '../components/AppShell';
-import FilterChips from '../components/FilterChips';
-
-const filters = ['All Requests', 'Low Risk', 'High Yield', 'Group Loans'];
-
-const loanRequests = [
-  {
-    id: 'TR-9421', risk: 'Low Risk', riskColor: 'var(--emerald)', borderColor: 'var(--emerald)',
-    riskIcon: 'lucide:shield-check', stars: 4.5, amount: '$1,200', currency: 'USDT',
-    desc: 'Verified Personal Loan', apy: '8.5%', apyColor: 'var(--emerald)',
-    term: '3 mo', collateral: 'Reputation', primary: true
-  },
-  {
-    id: 'TR-8820', risk: 'Medium Risk', riskColor: '#FBBF24', borderColor: '#F59E0B',
-    riskIcon: 'lucide:alert-circle', stars: 3, amount: '$3,500', currency: 'USDT',
-    desc: 'Micro-Entrepreneurial Credit', apy: '14.2%', apyColor: '#FBBF24',
-    term: '6 mo', collateral: 'ETH', primary: false
-  },
-  {
-    id: 'TR-1255', risk: 'High Yield', riskColor: '#FB7185', borderColor: '#F43F5E',
-    riskIcon: 'lucide:trending-up', stars: 2, amount: '$8,200', currency: 'USDT',
-    desc: 'Mumbai Circle #4 (Group Loan)', apy: '22.5%', apyColor: '#FB7185',
-    term: '12 mo', collateral: 'Group', primary: false
-  },
-];
-
-function StarRating({ rating }) {
-  const full = Math.floor(rating);
-  const half = rating % 1 >= 0.5;
-  const empty = 5 - full - (half ? 1 : 0);
-  return (
-    <div className="flex gap-1">
-      {Array(full).fill(0).map((_, i) => <iconify-icon key={`f${i}`} icon="mdi:star" width="14" height="14" style={{ color: 'var(--gold)' }} />)}
-      {half && <iconify-icon icon="mdi:star-half-full" width="14" height="14" style={{ color: 'var(--gold)' }} />}
-      {Array(empty).fill(0).map((_, i) => <iconify-icon key={`e${i}`} icon="mdi:star-outline" width="14" height="14" style={{ color: 'var(--text-muted)' }} />)}
-    </div>
-  );
-}
+import { motion } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Marketplace() {
-  const [activeFilter, setActiveFilter] = useState('All Requests');
+  const { isDarkMode } = useTheme();
+
+  const requests = [
+    { id: 1, borrower: "Sovereign Node 452", amount: "$5,000", score: 842, rate: "2.4% APR", term: "90 Days", status: "Open" },
+    { id: 2, borrower: "Reputation Circle Beta", amount: "$12,400", score: 790, rate: "3.1% APR", term: "180 Days", status: "Open" },
+    { id: 3, borrower: "Archway Verified Individual", amount: "$2,800", score: 620, rate: "4.5% APR", term: "30 Days", status: "Open" },
+    { id: 4, borrower: "Syndicate Genesis Pool", amount: "$45,000", score: 910, rate: "1.9% APR", term: "365 Days", status: "Open" }
+  ];
 
   return (
-    <AppShell>
-      {/* Title */}
-      <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-        <h1 className="text-h2">Marketplace</h1>
-        <button className="flex items-center gap-1" style={{ color: 'var(--gold)', fontSize: 14, fontWeight: 700 }}>
-          <iconify-icon icon="lucide:sliders-horizontal" width="18" height="18"></iconify-icon>
-          Sort
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div style={{ marginBottom: 24 }}>
-        <FilterChips items={filters} active={activeFilter} onSelect={setActiveFilter} />
-      </div>
-
-      {/* Loan cards */}
-      <div className="flex flex-col gap-4">
-        {loanRequests.map((loan) => (
-          <div key={loan.id} className="loan-card loan-card--bordered" style={{ borderLeftColor: loan.borderColor }}>
-            <div className="flex justify-between items-start" style={{ marginBottom: 16 }}>
-              <div>
-                <span className="text-micro" style={{ color: 'var(--text-tertiary)', display: 'block', marginBottom: 4 }}>Request ID: #{loan.id}</span>
-                <div className="flex items-center gap-1" style={{ color: loan.riskColor, fontWeight: 700, fontSize: 12 }}>
-                  <iconify-icon icon={loan.riskIcon} width="14" height="14"></iconify-icon>
-                  {loan.risk}
+    <AppShell title="Liquidity Archway" subtitle="Premium Capital Deployment Opportunities">
+      <div className="max-w-7xl mx-auto space-y-12">
+        
+        {/* Marketplace Header Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {[
+            { label: "Archway Liquidity", val: "$1.4M", icon: "lucide:droplets" },
+            { label: "Deployment Yield", val: "3.42%", icon: "lucide:trending-up" },
+            { label: "Protocol Fidelity", val: "99.2%", icon: "lucide:shield-check" }
+          ].map((stat, idx) => (
+            <div key={stat.label} className={`p-10 rounded-[2.5rem] border ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
+              <div className="flex items-center gap-6">
+                <div className="w-14 h-14 rounded-2xl bg-[#D4AF37]/5 flex items-center justify-center text-[#D4AF37]">
+                  <iconify-icon icon={stat.icon} className="text-2xl"></iconify-icon>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-1 font-cabinet">{stat.label}</p>
+                  <p className={`text-2xl font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>{stat.val}</p>
                 </div>
               </div>
-              <StarRating rating={loan.stars} />
             </div>
+          ))}
+        </div>
 
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>
-                {loan.amount} <span style={{ fontSize: 14, color: 'var(--text-tertiary)', fontWeight: 400 }}>{loan.currency}</span>
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{loan.desc}</div>
+        {/* Filter Toolbar */}
+        <div className={`p-6 rounded-full border flex flex-col md:flex-row items-center justify-between gap-6 px-12
+          ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
+          <div className="flex items-center gap-10">
+            <div className="flex items-center gap-4 cursor-pointer group">
+              <iconify-icon icon="lucide:filter" className="text-lg text-[#8C8C8C] group-hover:text-[#D4AF37]"></iconify-icon>
+              <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] group-hover:text-[#D4AF37]">Filter Risk</span>
             </div>
-
-            <div className="stats-grid--3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, marginBottom: 24, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>
-              <div>
-                <div className="text-micro" style={{ color: 'var(--text-tertiary)', marginBottom: 4 }}>APY</div>
-                <div style={{ fontWeight: 700, color: loan.apyColor }}>{loan.apy}</div>
-              </div>
-              <div>
-                <div className="text-micro" style={{ color: 'var(--text-tertiary)', marginBottom: 4 }}>Term</div>
-                <div style={{ fontWeight: 700 }}>{loan.term}</div>
-              </div>
-              <div>
-                <div className="text-micro" style={{ color: 'var(--text-tertiary)', marginBottom: 4 }}>Collateral</div>
-                <div style={{ fontWeight: 700 }}>{loan.collateral}</div>
-              </div>
+            <div className="flex items-center gap-4 cursor-pointer group">
+              <iconify-icon icon="lucide:arrow-down-wide-narrow" className="text-lg text-[#8C8C8C] group-hover:text-[#D4AF37]"></iconify-icon>
+              <span className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] group-hover:text-[#D4AF37]">Sort by Yield</span>
             </div>
-
-            {loan.primary ? (
-              <button className="btn-primary" style={{ height: 48, fontSize: 14, borderRadius: 'var(--radius-md)' }} id={`fund-loan-${loan.id}`}>
-                Fund This Loan
-              </button>
-            ) : (
-              <button className="btn-outline-gold" id={`fund-loan-${loan.id}`}>
-                Fund This Loan
-              </button>
-            )}
           </div>
-        ))}
+          <div className="flex items-center gap-4 bg-[#FAFAF8] dark:bg-[#333] px-8 py-3 rounded-full border border-[#E8E8E8] dark:border-[#444] min-w-[300px]">
+            <iconify-icon icon="lucide:search" className="text-[#8C8C8C]"></iconify-icon>
+            <input type="text" placeholder="Search archway nodes..." className="bg-transparent border-none outline-none text-xs font-medium w-full text-[#1A1A1A] dark:text-white" />
+          </div>
+        </div>
+
+        {/* Request List Table */}
+        <div className={`rounded-[3rem] border overflow-hidden ${isDarkMode ? 'bg-[#1A1A1A] border-[#333]' : 'bg-white border-[#E8E8E8] luxury-shadow'}`}>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className={`${isDarkMode ? 'bg-black/20' : 'bg-[#FAFAF8]'} border-b border-[#E8E8E8] dark:border-[#333]`}>
+                <th className="px-12 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Archway Member</th>
+                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Capital Request</th>
+                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Risk Score</th>
+                <th className="px-8 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em]">Target Yield</th>
+                <th className="px-12 py-8 text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] text-right">Audit Status</th>
+              </tr>
+            </thead>
+            <tbody className={`divide-y ${isDarkMode ? 'divide-[#333]' : 'divide-[#F5F3F0]'}`}>
+              {requests.map((req, idx) => (
+                <motion.tr 
+                  key={req.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="group hover:bg-[#FAFAF8] dark:hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  <td className="px-12 py-10">
+                    <div className="flex items-center gap-6">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FAFAF8] to-[#E8E8E8] dark:from-[#333] dark:to-[#444] flex items-center justify-center text-xs font-black shadow-inner">
+                        {req.borrower.charAt(0)}
+                      </div>
+                      <span className={`text-sm font-black tracking-tight ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>
+                        {req.borrower}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-8 py-10">
+                    <p className={`text-lg font-black font-cabinet tracking-tighter ${isDarkMode ? 'text-[#D4AF37]' : 'text-[#1A1A1A]'}`}>{req.amount}</p>
+                    <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.2em] mt-1">{req.term}</p>
+                  </td>
+                  <td className="px-8 py-10">
+                    <div className="flex items-center gap-3">
+                      <span className={`w-2 h-2 rounded-full ${req.score > 800 ? 'bg-[#10B981]' : req.score > 700 ? 'bg-[#F59E0B]' : 'bg-[#EF4444]'}`}></span>
+                      <span className={`text-sm font-black ${isDarkMode ? 'text-white' : 'text-[#1A1A1A]'}`}>{req.score}</span>
+                    </div>
+                  </td>
+                  <td className="px-8 py-10">
+                    <span className="text-sm font-black text-[#10B981]">{req.rate}</span>
+                  </td>
+                  <td className="px-12 py-10 text-right">
+                    <button className="px-8 py-4 rounded-full bg-[#1A1A1A] text-white group-hover:bg-[#D4AF37] group-hover:text-black transition-all font-black text-[10px] tracking-[0.2em] uppercase dark:bg-[#D4AF37] dark:text-black dark:group-hover:bg-white active:scale-95">
+                      Fund Facility
+                    </button>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </AppShell>
   );
