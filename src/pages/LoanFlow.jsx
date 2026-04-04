@@ -34,9 +34,9 @@ function StepSelectPath({ onNext, limit, tier, tierColor }) {
       id: 'trust',
       icon: '🤝',
       label: 'Trust-Only',
-      badge: `${tier} Tier`,
+      badge: `${tier} Level`,
       badgeColor: tierColor,
-      desc: 'Borrow against your Trust Score alone. No collateral, no vouchers required.',
+      desc: 'Borrow based on your Trust Score. No collateral, no vouchers needed.',
       limit: `$${limit}.00`,
       apr: '0% (Demo)',
       available: true,
@@ -45,9 +45,9 @@ function StepSelectPath({ onNext, limit, tier, tierColor }) {
       id: 'vouched',
       icon: '👥',
       label: 'Vouched',
-      badge: 'Locked',
+      badge: 'Coming Soon',
       badgeColor: '#8C8C8C',
-      desc: 'Get vouched by peers to unlock larger limits. Requires ≥1 active voucher.',
+      desc: 'Get peers to vouch for you and unlock bigger loans. Need at least 1 active voucher.',
       limit: 'Up to $200',
       apr: '8% APR',
       available: false,
@@ -55,10 +55,10 @@ function StepSelectPath({ onNext, limit, tier, tierColor }) {
     {
       id: 'group',
       icon: '🌐',
-      label: 'Group Pool',
-      badge: 'Locked',
+      label: 'Group Loan',
+      badge: 'Coming Soon',
       badgeColor: '#8C8C8C',
-      desc: 'Join a lending circle with shared risk. Requires pool membership.',
+      desc: 'Join a lending group where members share responsibility. Requires pool membership.',
       limit: 'Up to $500',
       apr: '5% APR',
       available: false,
@@ -69,9 +69,9 @@ function StepSelectPath({ onNext, limit, tier, tierColor }) {
     <div className="space-y-7">
       <div>
         <p className="text-[10px] font-black uppercase tracking-widest text-[#F5A623] mb-2">Step 1 of 3</p>
-        <h2 className="font-cabinet font-black text-3xl text-[#FAFAF8] tracking-tight">Select Loan Path</h2>
+        <h2 className="font-cabinet font-black text-3xl text-[#FAFAF8] tracking-tight">How Do You Want to Borrow?</h2>
         <p className="text-[#8C8C8C] text-sm mt-2 leading-relaxed">
-          Choose how you want to back this loan. Trust-only is available immediately for new members.
+          Choose your loan type. Trust-only is available right away — no collateral needed.
         </p>
       </div>
 
@@ -123,7 +123,7 @@ function StepSelectPath({ onNext, limit, tier, tierColor }) {
                    hover:opacity-90 active:scale-[0.98] transition-all
                    shadow-[0_0_30px_rgba(245,166,35,0.2)]"
       >
-        Continue with Trust-Only →
+        Continue → Trust-Only Loan
       </button>
     </div>
   );
@@ -166,10 +166,10 @@ function StepConfirm({ wallet, onSuccess }) {
     <div className="space-y-7">
       <div>
         <p className="text-[10px] font-black uppercase tracking-widest text-[#F5A623] mb-2">Step 2 of 3</p>
-        <h2 className="font-cabinet font-black text-3xl text-[#FAFAF8] tracking-tight">Confirm Loan</h2>
+        <h2 className="font-cabinet font-black text-3xl text-[#FAFAF8] tracking-tight">Review Your Loan</h2>
         <p className="text-[#8C8C8C] text-sm mt-2 leading-relaxed">
-          Review your loan terms. Confirming will trigger the on-chain{' '}
-          <span className="font-mono text-[#F5A623]">createLoan()</span> call.
+          Check the details before confirming. This will create your loan on-chain via{' '}
+          <span className="font-mono text-[#F5A623]">createLoan()</span>.
         </p>
       </div>
 
@@ -266,9 +266,9 @@ function StepSuccess({ loan, txHash, navigate }) {
     <div className="space-y-7 text-center">
       <div>
         <p className="text-[10px] font-black uppercase tracking-widest text-[#1D9E75] mb-2">Loan Active</p>
-        <h2 className="font-cabinet font-black text-3xl text-[#FAFAF8] tracking-tight">Funds Disbursed! 🎉</h2>
+        <h2 className="font-cabinet font-black text-3xl text-[#FAFAF8] tracking-tight">Money on Its Way! 🎉</h2>
         <p className="text-[#8C8C8C] text-sm mt-2 leading-relaxed">
-          Your ${loan?.amount ?? '—'} is live. The smart contract has recorded this loan on-chain.
+          Your ${loan?.amount ?? '—'} loan is active. Repay it on time to grow your Trust Score.
         </p>
       </div>
 

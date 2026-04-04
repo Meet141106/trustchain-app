@@ -253,7 +253,7 @@ export default function Marketplace() {
   const repaidPositions = positions.filter(p => p.status === 'repaid');
 
   return (
-    <AppShell pageTitle="Liquidity Archway" pageSubtitle="Capital Deployment Interface">
+    <AppShell pageTitle="Marketplace" pageSubtitle="Fund loans, earn yield">
       {selectedLoan && (
         <FundModal
           loan={selectedLoan} apy={selectedApy} wallet={wallet}
@@ -278,9 +278,9 @@ export default function Marketplace() {
         {/* ── Stats ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           {[
-            { l: 'Pool Liquidity',    v: '$1.2M+',    c: '#1D9E75' },
-            { l: 'Active Requests',   v: loading ? '…' : pendingLoans.length, c: '#F5A623' },
-            { l: 'Avg Protocol APY',  v: '10.5%',     c: '#F5A623' },
+            { l: 'Total Funds',       v: '$1.2M+',    c: '#1D9E75' },
+            { l: 'Open Loan Requests', v: loading ? '…' : pendingLoans.length, c: '#F5A623' },
+            { l: 'Average Return',    v: '10.5%',     c: '#F5A623' },
             { l: 'Default Rate',      v: '0.12%',     c: '#1D9E75' },
           ].map((m, i) => (
             <div key={i} className="bg-white dark:bg-[#111827] p-6 rounded-2xl border border-[#E8E8E8] dark:border-[#1E2A3A]">
@@ -294,7 +294,7 @@ export default function Marketplace() {
         <div className="flex items-center justify-between">
           <div className="flex bg-white dark:bg-[#111827] border border-[#E8E8E8] dark:border-[#1E2A3A] rounded-xl p-1 gap-1">
             {[
-              { id: 'live',      label: `Live Requests (${loading ? '…' : pendingLoans.length})` },
+              { id: 'live',      label: `Open Requests (${loading ? '…' : pendingLoans.length})` },
               { id: 'portfolio', label: `My Portfolio (${positions.length})` },
             ].map(t => (
               <button key={t.id} onClick={() => setTab(t.id)}
@@ -323,8 +323,8 @@ export default function Marketplace() {
             ) : pendingLoans.length === 0 ? (
               <div className="text-center py-24 space-y-4">
                 <div className="text-5xl">🏦</div>
-                <p className="font-black font-cabinet text-xl text-[#FAFAF8]">No Open Requests</p>
-                <p className="text-[#8C8C8C] text-sm">All current loan requests have been funded. Check back soon.</p>
+                <p className="font-black font-cabinet text-xl text-[#FAFAF8]">No Open Loans Right Now</p>
+                <p className="text-[#8C8C8C] text-sm">Check back soon — new loan requests come in daily.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -343,8 +343,8 @@ export default function Marketplace() {
             {positions.length === 0 ? (
               <div className="text-center py-24 space-y-4">
                 <div className="text-5xl">💼</div>
-                <p className="font-black font-cabinet text-xl text-[#FAFAF8]">No Positions Yet</p>
-                <p className="text-[#8C8C8C] text-sm">Fund a loan to start earning yield on trust-verified borrowers.</p>
+                <p className="font-black font-cabinet text-xl text-[#FAFAF8]">No Loans Funded Yet</p>
+                <p className="text-[#8C8C8C] text-sm">Fund a loan to start earning returns on trust-verified borrowers.</p>
                 <button onClick={() => setTab('live')}
                   className="px-8 py-3 rounded-xl border border-[#1D9E75] text-[#1D9E75]
                              font-black text-[11px] uppercase tracking-widest hover:bg-[#1D9E75] hover:text-white transition-all">
@@ -414,7 +414,7 @@ export default function Marketplace() {
         <div className="flex items-center gap-4 p-5 rounded-2xl bg-[#F59E0B]/5 border border-[#F59E0B]/15">
           <span className="text-xl">💡</span>
           <p className="text-[10px] font-black uppercase tracking-widest text-[#F59E0B] leading-relaxed">
-            Loans with 3+ vouches have a 99.8% historical repayment rate. Higher Trust Score = lower default risk.
+            Borrowers with 3+ vouchers have a 99.8% repayment rate. Higher Trust Score = lower risk for you.
           </p>
         </div>
       </div>

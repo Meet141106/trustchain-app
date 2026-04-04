@@ -106,8 +106,8 @@ export default function VouchInvite() {
           <p className="text-[10px] font-black uppercase tracking-widest text-[#F5A623] mb-2">Vouch Network</p>
           <h1 className="font-cabinet font-black text-4xl text-[#FAFAF8] tracking-tight">Invite a Voucher</h1>
           <p className="text-[#8C8C8C] text-sm mt-2 leading-relaxed max-w-xl">
-            Ask trusted peers to vouch for you. Each accepted vouch stakes $
-            {stakeAmt} tokens on-chain and adds <strong className="text-[#1D9E75]">+10 Trust Score</strong>.
+            Ask someone you trust to put money behind your name. Each accepted vouch stakes $
+            {stakeAmt} tokens and adds <strong className="text-[#1D9E75]">+10 to your Trust Score</strong> — which means you can borrow more.
           </p>
         </div>
 
@@ -116,12 +116,12 @@ export default function VouchInvite() {
           {/* ── Left: Send invite form ── */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-[#111827] border border-[#1E2A3A] rounded-2xl p-8 space-y-6">
-              <h2 className="font-cabinet font-black text-xl text-[#FAFAF8] tracking-tight">Send Vouch Request</h2>
+              <h2 className="font-cabinet font-black text-xl text-[#FAFAF8] tracking-tight">Invite Someone to Vouch for You</h2>
 
               {/* voucher address */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8C8C8C]">
-                  Voucher Wallet Address <span className="text-[#EF4444]">*</span>
+                  Their Wallet Address <span className="text-[#EF4444]">*</span>
                 </label>
                 <input
                   value={voucherAddr}
@@ -136,7 +136,7 @@ export default function VouchInvite() {
               {/* stake amount */}
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-[#8C8C8C]">
-                  Stake Amount (TL Tokens)
+                  How Much They Stake (TL Tokens)
                 </label>
                 <div className="flex gap-3">
                   {[5, 10, 25, 50].map(amt => (
@@ -150,7 +150,7 @@ export default function VouchInvite() {
                   ))}
                 </div>
                 <p className="text-[10px] text-[#8C8C8C] leading-relaxed">
-                  Higher stake = stronger vouch signal. Slashed if borrower defaults.
+                  More stake = stronger vouch. If you default, their stake is slashed.
                 </p>
               </div>
 
@@ -158,11 +158,11 @@ export default function VouchInvite() {
               <div className="flex items-center gap-4 p-4 rounded-xl border border-[#1D9E75]/20 bg-[#1D9E75]/5">
                 <span className="text-xl">🏆</span>
                 <div>
-                  <p className="text-sm font-black text-[#FAFAF8]">If accepted: +10 Trust Score</p>
+                  <p className="text-sm font-black text-[#FAFAF8]">If they accept: +10 Trust Score for you</p>
                   <p className="text-[10px] font-black text-[#1D9E75] uppercase tracking-widest mt-0.5">
                     Score {user?.trust_score ?? 30} → {(user?.trust_score ?? 30) + 10}
                     {' '}·{' '}
-                    {(user?.trust_score ?? 30) + 10 >= 40 && (user?.trust_score ?? 30) < 40 ? 'Bronze unlocked! 🥉' : 'Limit grows'}
+                    {(user?.trust_score ?? 30) + 10 >= 40 && (user?.trust_score ?? 30) < 40 ? 'Bronze unlocked! 🥉' : 'Your borrow limit goes up'}
                   </p>
                 </div>
               </div>
@@ -254,10 +254,10 @@ export default function VouchInvite() {
             <div className="bg-[#111827] border border-[#1E2A3A] rounded-2xl p-6 space-y-4">
               <p className="text-[10px] font-black uppercase tracking-widest text-[#8C8C8C]">How Vouching Works</p>
               {[
-                { n: '01', t: 'You send an invite',      d: 'Enter their wallet — they get notified.' },
-                { n: '02', t: 'Voucher stakes tokens',   d: `They stake $${stakeAmt} TL tokens on-chain — skin in the game.` },
-                { n: '03', t: 'Your score increases',    d: '+10 Trust Score → higher borrow limit.' },
-                { n: '04', t: 'Mutual accountability',   d: 'Their stake is slashed if you default. Trust is real.' },
+                { n: '01', t: 'You send an invite',          d: 'Enter their wallet address — they get notified.' },
+                { n: '02', t: 'They stake tokens',           d: `They stake $${stakeAmt} TL tokens on-chain — real skin in the game.` },
+                { n: '03', t: 'Your Trust Score goes up',    d: '+10 points → higher borrow limit.' },
+                { n: '04', t: 'Everyone is accountable',     d: 'Their stake is slashed if you default. That\'s what makes trust real.' },
               ].map(({ n, t, d }) => (
                 <div key={n} className="flex gap-4">
                   <span className="text-[10px] font-black text-[#F5A623] w-6 flex-shrink-0 pt-0.5">{n}</span>
@@ -274,7 +274,7 @@ export default function VouchInvite() {
           <div className="lg:col-span-2 space-y-4">
             <div className="bg-[#111827] border border-[#1E2A3A] rounded-2xl p-6">
               <p className="text-[10px] font-black uppercase tracking-widest text-[#8C8C8C] mb-5">
-                Your Voucher Network ({vouches.length})
+                People Vouching for You ({vouches.length})
               </p>
 
               {vouches.length === 0 ? (
@@ -282,7 +282,7 @@ export default function VouchInvite() {
                   <p className="text-4xl mb-3">🤝</p>
                   <p className="text-[#8C8C8C] text-sm font-bold">No vouchers yet</p>
                   <p className="text-[#8C8C8C] text-xs mt-1 leading-relaxed">
-                    Invite trusted contacts to vouch for you and grow your score.
+                    Invite someone you trust. Their stake is what makes your score trustworthy.
                   </p>
                 </div>
               ) : (

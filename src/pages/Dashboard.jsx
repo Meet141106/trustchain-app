@@ -111,8 +111,8 @@ export default function Dashboard() {
   const isNewUser  = !user;
 
   return (
-    <AppShell pageTitle={user?.display_name ? `Welcome, ${user.display_name.split(' ')[0]}` : 'Solvent Terminal'}
-              pageSubtitle={user?.uid ? `${user.uid} · ${shortAddr(wallet)}` : 'Real-time Capital & Trust Synthesis'}>
+    <AppShell pageTitle={user?.display_name ? `Welcome back, ${user.display_name.split(' ')[0]}` : 'Dashboard'}
+              pageSubtitle={user?.uid ? `${user.uid} · ${shortAddr(wallet)}` : 'Your loans and trust score, live'}>
       <div className="max-w-7xl mx-auto space-y-10 pb-24">
 
         {/* ── TOP ROW: stats ── */}
@@ -151,14 +151,14 @@ export default function Dashboard() {
           {/* Borrow Limit */}
           <StatCard label="Borrow Limit"
             value={`$${limit.toLocaleString()}.00`}
-            sub={score >= 40 ? `Unlocked at ${tier} tier` : 'Grow your score to raise limit'}
+            sub={score >= 40 ? `You're at ${tier} level — repay to grow` : 'Repay loans to increase your limit'}
             subColor={score >= 40 ? '#1D9E75' : '#F5A623'} />
 
           {/* Active Loan / Empty */}
           {hasLoan ? (
             <div className="bg-white dark:bg-[#111827] p-8 rounded-[12px] border border-[#F59E0B]/40
                             flex flex-col justify-center group transition-all">
-              <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest mb-3">Active Drawdown</p>
+              <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest mb-3">Active Loan</p>
               <h3 className="text-4xl font-black tracking-tighter text-[#1A1A1A] dark:text-[#FAFAF8] font-cabinet mb-4">
                 ${activeLoan.amount}
               </h3>
@@ -198,7 +198,7 @@ export default function Dashboard() {
               className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#F59E0B]/20 dark:border-[#F59E0B]/20">
               <div className="flex justify-between items-center mb-8">
                 <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">
-                  Loan Health Monitor
+                  Your Active Loan
                 </h4>
                 <span className="px-3 py-1 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/20
                                  text-[9px] font-black uppercase text-[#F59E0B] tracking-widest">
@@ -223,7 +223,7 @@ export default function Dashboard() {
                   className="w-full py-4 rounded-xl bg-[#1D9E75] text-white font-black text-[12px]
                              uppercase tracking-widest hover:bg-[#13C296] transition-all active:scale-[0.98]
                              shadow-[0_0_25px_rgba(29,158,117,0.2)]">
-                  Repay Loan — +10 Trust Score
+                  Repay Loan — Earn +10 Trust Score
                 </button>
               </div>
             </motion.div>
@@ -273,7 +273,7 @@ export default function Dashboard() {
           <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
             <div className="flex justify-between items-start mb-8">
               <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">
-                Repayment Rhythm
+                Loan History
               </h4>
               {loans.filter(l => l.loan_status === 'repaid').length > 0
                 ? <span className="px-3 py-1 rounded-full bg-[#1D9E75]/10 border border-[#1D9E75]/20 text-[9px] font-black uppercase text-[#1D9E75] tracking-widest">
@@ -345,7 +345,7 @@ export default function Dashboard() {
         {loans.length > 0 && (
           <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
             <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest mb-8">
-              On-Chain Activity
+              Recent Transactions
             </h4>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -360,7 +360,7 @@ export default function Dashboard() {
                   {loans.map((l, i) => (
                     <tr key={i} className="hover:bg-white/[0.02] transition-all duration-300">
                       <td className="py-5 text-sm font-bold text-[#1A1A1A] dark:text-[#FAFAF8]">
-                        {l.loan_status === 'repaid' ? 'Repayment' : 'Capital Drawdown'}
+                        {l.loan_status === 'repaid' ? 'Loan Repaid' : 'Loan Taken'}
                       </td>
                       <td className={`py-5 font-mono font-black text-sm ${l.loan_status === 'repaid' ? 'text-[#1D9E75]' : 'text-[#EF4444]'}`}>
                         {l.loan_status === 'repaid' ? '+' : '-'}${l.amount}

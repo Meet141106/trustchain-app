@@ -27,7 +27,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
               AETHER<span className="font-light opacity-60 ml-1">GOLD</span>
             </span>
             <span className="text-[9px] font-black tracking-[0.3em] text-[#D4AF37] uppercase leading-none mt-1 block">
-              DECENTRALIZED CREDIT
+              TRUST-BASED LENDING
             </span>
           </div>
         </div>
@@ -38,12 +38,12 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       
       <nav className="flex-1 px-8 space-y-4 overflow-y-auto hide-scrollbar">
         <div className="mb-10">
-          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Main Terminal</p>
+          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Main</p>
           <div className="space-y-3">
             {[
-              { to: '/dashboard', label: 'Solvent Terminal', icon: 'lucide:layout-grid' },
-              { to: '/borrow', label: 'Credit Drawdown', icon: 'lucide:landmark' },
-              { to: '/marketplace', label: 'Liquidity Archway', icon: 'lucide:shopping-bag' }
+              { to: '/dashboard',  label: 'Dashboard',   icon: 'lucide:layout-grid' },
+              { to: '/borrow',     label: 'Borrow',      icon: 'lucide:landmark' },
+              { to: '/marketplace',label: 'Marketplace', icon: 'lucide:shopping-bag' }
             ].map((link) => (
               <Link 
                 key={link.to}
@@ -63,12 +63,12 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         </div>
 
         <div className="mb-10">
-          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Capital Operations</p>
+          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Loans & Money</p>
           <div className="space-y-3">
             {[
-              { to: '/loan/1', label: 'Active Lifecycle', icon: 'lucide:activity' },
-              { to: '/portfolio', label: 'Liquidity Inventory', icon: 'lucide:briefcase' },
-              { to: '/ledger', label: 'Ledger of Trust', icon: 'lucide:scroll' }
+              { to: '/loan/1',    label: 'My Loans',      icon: 'lucide:activity' },
+              { to: '/portfolio', label: 'My Portfolio',   icon: 'lucide:briefcase' },
+              { to: '/ledger',    label: 'Transactions',   icon: 'lucide:scroll' }
             ].map((link) => (
               <Link 
                 key={link.to}
@@ -88,12 +88,12 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
         </div>
 
         <div className="pb-10">
-          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Sovereign Identity</p>
+          <p className="text-[10px] font-black text-[#8C8C8C] uppercase tracking-[0.4em] mb-6 ml-2">Your Profile</p>
           <div className="space-y-3">
             {[
-              { to: '/audit', label: 'Sovereign Audit', icon: 'lucide:shield-check' },
-              { to: '/reputation', label: 'Reputation Synthesis', icon: 'lucide:award' },
-              { to: '/network', label: 'Topology Graph', icon: 'lucide:network' }
+              { to: '/audit',      label: 'Credit Profile',  icon: 'lucide:shield-check' },
+              { to: '/reputation', label: 'Trust Score',      icon: 'lucide:award' },
+              { to: '/network',    label: 'Vouch Network',    icon: 'lucide:network' }
             ].map((link) => (
               <Link 
                 key={link.to}
@@ -115,7 +115,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
       
       <div className="p-8 lg:p-10 border-t border-[#E8E8E8] dark:border-[#333]">
         <div className="p-6 rounded-3xl bg-[#FAFAF8] dark:bg-[#1A1A1A] border border-[#E8E8E8] dark:border-[#333] text-center">
-          <p className="text-xs font-semibold text-[#8C8C8C] uppercase tracking-widest mb-2">Tier Status</p>
+          <p className="text-xs font-semibold text-[#8C8C8C] uppercase tracking-widest mb-2">Your Level</p>
           <h4 className="text-lg font-bold bg-gradient-to-br from-[#D4AF37] to-[#8A6E2F] bg-clip-text text-transparent">
             PREMIUM NOIR
           </h4>
