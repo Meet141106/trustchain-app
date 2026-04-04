@@ -155,8 +155,8 @@ export default function Dashboard() {
                 <div className="bg-white dark:bg-[#111827] p-8 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]
                                 flex flex-col justify-center items-center text-center group transition-all hover:border-[#F5A623]/40">
                   <div className="text-4xl mb-4">💸</div>
-                  <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2">No Active Loan</p>
-                  <p className="text-[#8C8C8C] text-xs mb-6 leading-relaxed">Your limit is ready.</p>
+                  <p className="text-[11px] font-black text-[#8C8C8C] uppercase tracking-widest mb-2">{t('dashboard.noActiveLoan')}</p>
+                  <p className="text-[#8C8C8C] text-xs mb-6 leading-relaxed">{t('dashboard.limitReady')}</p>
                   <button id="btn-get-first-loan" onClick={() => navigate('/borrow')}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-[#F5A623] to-[#D4AF37]
                                text-black text-[11px] font-black uppercase tracking-widest
@@ -176,7 +176,7 @@ export default function Dashboard() {
               className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#F59E0B]/20 dark:border-[#F59E0B]/20">
               <div className="flex justify-between items-center mb-8">
                 <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] uppercase tracking-widest">
-                  Your Active Loan
+                  {t('dashboard.activeLoan')}
                 </h4>
                 <span className="px-3 py-1 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/20
                                  text-[9px] font-black uppercase text-[#F59E0B] tracking-widest">
@@ -187,9 +187,9 @@ export default function Dashboard() {
                 <LoanHealthBar loan={userLoan} />
                 <div className="grid grid-cols-3 gap-4">
                   {[
-                    { l: 'Borrowed',  v: `$${userLoan.amount}`,           c: '#FAFAF8' },
-                    { l: 'Repaid',    v: `$${userLoan.repaidAmount}`,     c: '#1D9E75' },
-                    { l: 'Loan Path', v: getPathName(userLoan.path),      c: '#F5A623' },
+                    { l: t('dashboard.borrowed'),  v: `$${userLoan.amount}`,           c: '#FAFAF8' },
+                    { l: t('dashboard.repaid'),    v: `$${userLoan.repaidAmount}`,     c: '#1D9E75' },
+                    { l: t('dashboard.loanPath'), v: getPathName(userLoan.path),      c: '#F5A623' },
                   ].map(({ l, v, c }, i) => (
                     <div key={i} className="text-center p-4 bg-[#FAFAF8] dark:bg-[#0A0F1E] rounded-xl border border-[#E8E8E8] dark:border-[#1E2A3A]">
                       <p className="text-[9px] font-black uppercase tracking-widest text-[#8C8C8C] mb-2">{l}</p>
@@ -201,7 +201,7 @@ export default function Dashboard() {
                   className="w-full py-4 rounded-xl bg-[#1D9E75] text-white font-black text-[12px]
                              uppercase tracking-widest hover:bg-[#13C296] transition-all active:scale-[0.98]
                              shadow-[0_0_25px_rgba(29,158,117,0.2)]">
-                  Repay Outstanding Balance
+                  {t('dashboard.repayBalance')}
                 </button>
               </div>
             </motion.div>
@@ -212,13 +212,13 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white dark:bg-[#111827] p-10 rounded-[12px] border border-[#E8E8E8] dark:border-[#1E2A3A]">
             <h4 className="text-lg font-black font-cabinet tracking-tight text-[#1A1A1A] dark:text-[#FAFAF8] mb-8 uppercase tracking-widest">
-              Vouch Network ({vouches.length})
+              {t('dashboard.vouchNetwork', { count: vouches.length })}
             </h4>
             
             {vouches.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-6 text-center border border-[#E8E8E8] dark:border-[#1E2A3A] rounded-lg mb-8">
-                  <p className="text-[#8C8C8C] text-sm font-bold mb-2">No Active Vouches</p>
-                  <p className="text-[#8C8C8C] text-[10px] leading-relaxed">Establish trust to unlock the Vouch-Backed loan pathway.</p>
+                  <p className="text-[#8C8C8C] text-sm font-bold mb-2">{t('dashboard.noVouches')}</p>
+                  <p className="text-[#8C8C8C] text-[10px] leading-relaxed">{t('dashboard.vouchDesc')}</p>
               </div>
             ) : (
               <div className="space-y-4 mb-8">
@@ -247,7 +247,7 @@ export default function Dashboard() {
                 className="flex-1 py-4 rounded-[8px] bg-gradient-to-r from-[#F5A623] to-[#D4AF37]
                            text-black text-[10px] font-black uppercase tracking-widest
                            hover:opacity-90 active:scale-[0.98] transition-all">
-                + Invite Voucher
+                + {t('dashboard.inviteVoucher')}
               </button>
               <button onClick={() => navigate('/network')}
                 className="flex-1 py-4 border border-[#F5A623] text-[#F5A623] rounded-[8px]
