@@ -19,6 +19,7 @@ import ReputationBreakdown from './pages/ReputationBreakdown';
 import TransactionHistory  from './pages/TransactionHistory';
 import TrustNetworkGraph   from './pages/TrustNetworkGraph';
 import UserProfile         from './pages/UserProfile';
+import MLApiStatus         from './pages/MLApiStatus';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { WalletProvider } from './context/WalletContext';
@@ -73,6 +74,7 @@ export default function App() {
                 <Route path="/ledger"       element={<ProtectedRoute><TransactionHistory /></ProtectedRoute>} />
                 <Route path="/network"      element={<ProtectedRoute><TrustNetworkGraph /></ProtectedRoute>} />
                 <Route path="/profile"      element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+                <Route path="/mlapi"        element={<MLApiStatus />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </AnimatePresence>

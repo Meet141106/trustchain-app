@@ -11,7 +11,7 @@ import { calculateInterestRate, getRepaymentSchedule, checkFraudRisk } from '../
 import Skeleton from '../components/Skeleton';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import LoanMLSummary from '../components/ml/LoanMLSummary';
 export default function Borrow() {
   const { t } = useTranslation();
   const { isDarkMode } = useTheme();
@@ -20,7 +20,7 @@ export default function Borrow() {
 
   const { borrowLimit, submitLoanRequest, userLoan, pendingRequest, isRequestPending, cancelRequest, isLoading } = useLendingPool();
   const { isApproved, approvePool, trustBalance } = useTrustToken();
-  const { trustScore } = useReputationNFT();
+  const { trustScore, hasNFT } = useReputationNFT();
   
   const hasActiveLoan = userLoan && (Number(userLoan.status) === 1);
 
@@ -41,7 +41,7 @@ export default function Borrow() {
   const [isCalculatingML, setIsCalculatingML] = useState(false);
 
   const limitValue = isLoading ? 0 : Number(borrowLimit);
-  const isUninitialized = limitValue === 0 && !isLoading;
+  const isUninitialized = !hasNFT && !isLoading;
   const safeAmount = isUninitialized ? 0 : Math.min(amount, limitValue);
 
   const tenureRange = {
@@ -354,6 +354,9 @@ export default function Borrow() {
                     </div>
 
                     <div className="space-y-8">
+                        {/* Task 3 Loan ML Summary integration */}
+                        {!isUninitialized && <LoanMLSummary loanAmount={safeAmount} />}
+                        
                         {/* ML Insight Card */}
                         <div className="bg-[#111827] p-10 rounded-[40px] border border-[#1E2A3A] relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-4">

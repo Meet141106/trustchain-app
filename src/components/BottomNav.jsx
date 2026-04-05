@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 
 const tabs = [
   { to: '/dashboard', icon: 'lucide:home', label: 'Home', key: 'home' },
-  { to: '/group', icon: 'lucide:users', label: 'Groups', key: 'groups' },
+  { to: '/network', icon: 'lucide:users', label: 'Groups', key: 'groups' },
   { to: '/marketplace', icon: 'lucide:trending-up', label: 'Invest', key: 'invest' },
   { to: '/profile', icon: 'lucide:user', label: 'Profile', key: 'profile' },
 ];

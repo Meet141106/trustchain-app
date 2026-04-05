@@ -49,9 +49,8 @@ async function main() {
   // On local node, they already have 10000 ETH, so this is just protocol check
   await deployer.sendTransaction({ to: borrower.address, value: hre.ethers.parseEther("0.1") });
 
-  console.log("4. LENDER: Approving and Depositing 8,000 TRUST into pool...");
-  await trustToken.connect(lender).approve(lendingPoolAddr, trustUnits(8000));
-  await lendingPool.connect(lender).depositToPool(trustUnits(8000));
+  console.log("4. LENDER: Approving LendingPool for P2P funding (10,000 TRUST)...");
+  await trustToken.connect(lender).approve(lendingPoolAddr, trustUnits(10000));
 
   // 5. Initialize Identity for BORROWER (Protocol Node)
   console.log("5. Initializing SOR (Sovereign On-Chain Reputation) for BORROWER...");
