@@ -4,10 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "blockchain:node": "cd blockchain && npx hardhat node --hostname 0.0.0.0",
+    "blockchain:deploy": "cd blockchain && npx hardhat run scripts/deploy.js --network localhost",
+    "blockchain:setup": "cd blockchain && npx hardhat run scripts/setupDemo.js --network localhost",
+    "blockchain:start": "bash scripts/start-blockchain.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.101.1",

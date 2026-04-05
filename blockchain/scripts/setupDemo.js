@@ -80,9 +80,15 @@ async function main() {
   // 8. Submit an Open Loan Request into the Marketplace
   console.log("8. BORROWER: Submitting P2P Loan Request (120 TRUST, Vouch-Backed)...");
   try {
-    // pathway 0 = VouchBacked
-    await lendingPool.connect(borrower).submitLoanRequest(trustUnits(120), 30, 0);
-    console.log("   ✓ Loan Request broadcast to Marketplace");
+    // Check if borrower already has a pending request to prevent revert
+    const existingReqId = await lendingPool.borrowerPendingRequestId(borrower.address);
+    if (existingReqId > 0n) {
+        console.log("   ⏭ Borrower already has a pending request in the Marketplace, skipping duplicate submission.");
+    } else {
+        // pathway 0 = VouchBacked
+        await lendingPool.connect(borrower).submitLoanRequest(trustUnits(120), 30, 0);
+        console.log("   ✓ Loan Request broadcast to Marketplace");
+    }
   } catch (e) {
     console.log("   ⏭ Loan request submission skipped:", e.message);
   }

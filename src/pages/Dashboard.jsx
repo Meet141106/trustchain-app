@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppShell from '../components/AppShell';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +10,8 @@ import { useVouchSystem } from '../hooks/useVouchSystem';
 import { useTransactionHistory } from '../hooks/useTransactionHistory';
 import { getTier, TIER_COLORS } from '../utils/constants';
 import Skeleton from '../components/Skeleton';
+import { fetchUserProfile } from '../services/supabaseSync';
+import { getTrustScore as getMLTrustScore } from '../services/mlApi';
 
 const shortAddr = (a = '') => a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—';
 const daysLeft = (due, t) => {
@@ -45,6 +47,35 @@ export default function Dashboard() {
   const tierName = getTier(isInitialized ? score : 30);
   const tierColor = TIER_COLORS[tierName];
   const hasLoan = !!userLoan && userLoan?.amount > 0;
+
+  // ── Supabase + ML enrichment ─────────────────────────────────────────────
+  const [supabaseUser, setSupabaseUser]   = useState(null);
+  const [mlScore, setMlScore]             = useState(null);
+  const [archetype, setArchetype]         = useState(null);
+
+  useEffect(() => {
+    if (!address) return;
+    // 1. Load Supabase profile (has cached ml_trust_score + repayment_archetype)
+    fetchUserProfile(address).then(u => {
+      if (u) {
+        setSupabaseUser(u);
+        if (u.ml_trust_score)      setMlScore(u.ml_trust_score);
+        if (u.repayment_archetype) setArchetype(u.repayment_archetype);
+      }
+    }).catch(()=>{});
+
+    // 2. Call ML API for fresh score (non-blocking)
+    getMLTrustScore({
+      repayment_history:      0.7,
+      repayment_speed:        0.8,
+      voucher_quality:        0.6,
+      loan_to_repayment_ratio:1.0,
+      vouch_network_balance:  0.5,
+      transaction_frequency:  12,
+    }).then(res => {
+      if (res?.trust_score) setMlScore(res.trust_score);
+    }).catch(()=>{});
+  }, [address]);
   
   const handleInitialize = async () => {
     const { initializeOnChainScore, parseBlockchainError } = await import('../lib/blockchain');
@@ -80,10 +111,23 @@ export default function Dashboard() {
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-3xl font-black font-cabinet text-[#FAFAF8]">{isInitialized ? score : '—'}</span>
-                      <span className="text-[9px] text-[#8C8C8C] font-black uppercase tracking-widest mt-1">Trust</span>
+                      <span className="text-[9px] text-[#8C8C8C] font-black uppercase tracking-widest mt-1">On-chain</span>
                     </div>
                   </div>
                   <p className="mt-4 text-[9px] font-black uppercase tracking-widest" style={{ color: tierColor }}>{tierName} TIER</p>
+                  {/* ML Score badge */}
+                  {mlScore !== null && (
+                    <div className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#1D9E75]/10 border border-[#1D9E75]/20">
+                      <iconify-icon icon="lucide:brain-circuit" className="text-sm text-[#1D9E75]"></iconify-icon>
+                      <span className="text-[9px] font-black text-[#1D9E75] uppercase tracking-widest">ML: {mlScore}</span>
+                    </div>
+                  )}
+                  {/* Repayment archetype badge */}
+                  {archetype && (
+                    <div className="mt-2 px-3 py-1.5 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/20">
+                      <span className="text-[9px] font-black text-[#F5A623] uppercase tracking-widest">{archetype}</span>
+                    </div>
+                  )}
                 </div>
             )}
           </StatCard>

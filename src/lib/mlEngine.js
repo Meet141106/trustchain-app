@@ -1,26 +1,23 @@
 /**
- * TrustLend ML Engine Interface
- * This utility handles calls to the AI/ML backend for dynamic risk and interest modeling.
+ * TrustLend ML Engine Interface (legacy shim)
+ * New code should import from src/services/mlApi.js directly.
+ * This file is kept because Borrow.jsx and other components import from here.
  */
 
-const BASE_URL = import.meta.env.VITE_ML_API_URL || 'http://localhost:5000/api/v1';
+const BASE_URL = (import.meta.env.VITE_ML_API_URL || 'http://localhost:8000') + '/api/v1';
 
 async function callML(endpoint, payload) {
     try {
-        // For demo/development: generate fallback mock data if API is not reachable
-        // In production, this would be a real fetch call
-        if (import.meta.env.MODE === 'development' || !import.meta.env.VITE_ML_API_URL) {
-            return mockResponse(endpoint, payload);
-        }
-
         const response = await fetch(`${BASE_URL}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(10000),
         });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.json();
     } catch (error) {
-        console.warn(`ML Engine Error [${endpoint}]:`, error);
+        console.warn(`[mlEngine] ${endpoint} offline — using fallback:`, error.message);
         return mockResponse(endpoint, payload);
     }
 }

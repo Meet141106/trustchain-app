@@ -16,13 +16,13 @@ const SUPPORTED_NETWORKS = {
   31337: {
     name: "TrustLend Local",
     chainId: '0x7A69',
-    rpcUrl: "http://127.0.0.1:8545",
+    rpcUrl: import.meta.env.VITE_RPC_URL,
     isLocal: true,
     params: {
       chainId: '0x7A69',
       chainName: 'TrustLend Local',
       nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-      rpcUrls: ['http://127.0.0.1:8545'],
+      rpcUrls: [import.meta.env.VITE_RPC_URL],
     }
   },
   80002: {
@@ -60,8 +60,19 @@ export function WalletProvider({ children }) {
     try {
       const p  = new ethers.BrowserProvider(window.ethereum);
       const s  = await p.getSigner();
-      const raw = await p.getBalance(address);
-      const bal = parseFloat(ethers.formatEther(raw)).toFixed(4);
+      
+      let bal = '0.00';
+      try {
+        const raw = await p.getBalance(address);
+        bal = parseFloat(ethers.formatEther(raw)).toFixed(4);
+      } catch (err) {
+        console.warn('[WalletContext] eth_getBalance failed:', err.message);
+        // Basic backoff to avoid hammering on -32002 rate limit
+        if (err.info?.error?.code === -32002 || err.code === 'UNKNOWN_ERROR') {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
       setProvider(p);
       setSigner(s);
       setBalance(bal);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ethers } from 'ethers';
 import { useWallet } from '../context/WalletContext';
 import { ADDRESSES } from '../contracts/addresses';
@@ -6,6 +6,7 @@ import LendingPoolABI from '../contracts/LendingPool.json';
 import { useDemo } from '../context/DemoContext';
 import { showTxLoading, showTxSuccess, showTxError } from '../utils/txToast';
 import { translateContractError } from '../utils/contractErrors';
+import { syncNewLoan, updateLoanStatus, syncUserProfile, syncTransaction } from '../services/supabaseSync';
 
 export function useLendingPool() {
   const { provider, walletAddress } = useWallet();
@@ -141,7 +142,11 @@ export function useLendingPool() {
             // Fetch Lender Portfolio (as a lender)
             try {
                 const fundFilter = contract.filters.LoanFunded(null, walletAddress);
-                const fundEvents = await contract.queryFilter(fundFilter, -5000);
+                const currentBlock = await provider.getBlockNumber();
+                // Cap to 1000 blocks to avoid -4990 RPC error on local hardhat
+                let fromBlock = Math.max(0, Number(currentBlock) - 1000);
+                if (isNaN(fromBlock)) fromBlock = 0;
+                const fundEvents = await contract.queryFilter(fundFilter, fromBlock);
                 
                 const borrowers = [...new Set(fundEvents.map(e => e.args.borrower))];
                 const loansData = await Promise.all(borrowers.map(async b => {
@@ -182,7 +187,7 @@ export function useLendingPool() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  const submitLoanRequest = async (amount, durationDays, path) => {
+  const submitLoanRequest = async (amount, durationDays, path, mlResults = {}) => {
     if (!provider || !walletAddress) throw new Error("Wallet not connected");
     const id = showTxLoading("Submitting loan request to marketplace...");
     try {
@@ -191,8 +196,19 @@ export function useLendingPool() {
         const amountWei = ethers.parseUnits(amount.toString(), 18);
         const txPromise = contract.submitLoanRequest(amountWei, durationDays, path);
         const tx = await simulateTx(txPromise);
-        await tx.wait();
+        const receipt = await tx.wait();
         showTxSuccess(`Request submitted! Waiting for a lender.`, tx.hash, id);
+
+        // ── Supabase Sync (non-blocking, non-critical) ──────────────────────
+        syncNewLoan(
+          { borrowerAddress: walletAddress, amount, durationDays, blockchainLoanId: tx.hash },
+          mlResults
+        ).catch(e => console.warn('[useLendingPool] syncNewLoan:', e.message));
+
+        syncTransaction(tx.hash, 'borrow', walletAddress, ADDRESSES.LENDING_POOL, amount, null)
+          .catch(e => console.warn('[useLendingPool] syncTransaction:', e.message));
+        // ───────────────────────────────────────────────────────────────────
+
         await fetchData();
         return tx;
     } catch (err) {
@@ -201,7 +217,7 @@ export function useLendingPool() {
     }
   };
 
-  const fundLoanRequest = async (requestId) => {
+  const fundLoanRequest = async (requestId, supabaseLoanId = null) => {
     if (!provider || !walletAddress) throw new Error("Wallet not connected");
     const id = showTxLoading("Funding loan for borrower...");
     try {
@@ -211,6 +227,16 @@ export function useLendingPool() {
         const tx = await simulateTx(txPromise);
         await tx.wait();
         showTxSuccess("Loan funded! Principal has been sent.", tx.hash, id);
+
+        // ── Supabase Sync ──────────────────────────────────────────────────
+        if (supabaseLoanId) {
+          updateLoanStatus(supabaseLoanId, 'funded', tx.hash, walletAddress)
+            .catch(e => console.warn('[useLendingPool] updateLoanStatus:', e.message));
+        }
+        syncTransaction(tx.hash, 'fund', walletAddress, null, null, supabaseLoanId)
+          .catch(e => console.warn('[useLendingPool] syncTransaction:', e.message));
+        // ───────────────────────────────────────────────────────────────────
+
         await fetchData();
         return tx;
     } catch (err) {
@@ -237,7 +263,7 @@ export function useLendingPool() {
     }
   };
 
-  const makeRepayment = async (amount) => {
+  const makeRepayment = async (amount, supabaseLoanId = null) => {
     if (!provider || !walletAddress) throw new Error("Wallet not connected");
     const id = showTxLoading("Processing loan repayment...");
     try {
@@ -248,6 +274,19 @@ export function useLendingPool() {
         const tx = await simulateTx(txPromise);
         await tx.wait();
         showTxSuccess("Direct repayment successful!", tx.hash, id);
+
+        // ── Supabase Sync ──────────────────────────────────────────────────
+        if (supabaseLoanId) {
+          updateLoanStatus(supabaseLoanId, 'repaid', tx.hash)
+            .catch(e => console.warn('[useLendingPool] updateLoanStatus repaid:', e.message));
+        }
+        syncTransaction(tx.hash, 'repay', walletAddress, null, amount, supabaseLoanId)
+          .catch(e => console.warn('[useLendingPool] syncTransaction repay:', e.message));
+        // Sync user profile after repayment
+        syncUserProfile(walletAddress, {}, {})
+          .catch(e => console.warn('[useLendingPool] syncUserProfile:', e.message));
+        // ───────────────────────────────────────────────────────────────────
+
         await fetchData();
         return tx;
     } catch (err) {

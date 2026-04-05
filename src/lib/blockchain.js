@@ -294,7 +294,7 @@ export async function switchToLocalhost() {
       chainId: '0x7A69', // 31337
       chainName: 'Hardhat Localhost',
       nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-      rpcUrls: ['http://127.0.0.1:8545'],
+      rpcUrls: [import.meta.env.VITE_RPC_URL],
     }],
   });
 }

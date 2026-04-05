@@ -16,13 +16,13 @@ function ScanLink({ hash }) {
 
     return (
         <a 
-          href={`https://amoy.polygonscan.com/tx/${hash}`} 
+          href={`${import.meta.env.VITE_EXPLORER_URL}/tx/${hash}`} 
           target="_blank" 
           rel="noopener noreferrer" 
           className="block mt-1 text-[#F5A623] hover:underline text-[11px]"
           onClick={(e) => e.stopPropagation()}
         >
-            View on Polygonscan →
+            View on Explorer →
         </a>
     );
 }

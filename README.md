@@ -1,202 +1,130 @@
-# Decentralized Lending Platform
+# TrustLend — AI-Governed Decentralized P2P Lending
 
-Repository: [https://github.com/Meet141106/AP_Hacks](https://github.com/Meet141106/AP_Hacks)
+> Credit without banks. Trust without borders.
 
-A blockchain-based decentralized lending platform designed to provide secure borrowing and lending services for individuals without access to formal banking systems.
+A decentralized micro-lending platform that enables 
+secure borrowing and lending for individuals without 
+access to formal banking — replacing traditional credit 
+systems with on-chain reputation, community trust, 
+and adaptive AI risk scoring.
 
-The platform focuses on trust, transparency, digital identity verification, credit risk evaluation, secure transactions, and dependable repayment without relying on centralized authorities.
+## The Problem
+1.4 billion adults globally remain unbanked.
+Existing DeFi lending requires crypto collateral 
+that the unbanked don't have.
+TrustLend solves this with Trust Score as collateral.
 
----
+## Architecture
 
-## Problem Statement
+```
+Frontend (React + Vite)
+        │
+        ├── Supabase (Real-time marketplace data)
+        ├── ML API (FastAPI — AI risk engine)  
+        └── Blockchain (Hardhat / Polygon Amoy)
+                ├── TrustToken.sol (ERC-20)
+                ├── ReputationNFT.sol (Soulbound)
+                ├── LendingPool.sol (Core engine)
+                ├── VouchSystem.sol (Social guarantee)
+                └── StableToken.sol (Mock stable)
+```
 
-Millions of people do not have access to traditional banking services, making it difficult for them to borrow money, build credit, or access financial support.
+## ML Models
+| Endpoint | Model | Purpose |
+|----------|-------|---------|
+| /api/v1/trust-score | Random Forest | Credit scoring 0-100 |
+| /api/v1/fraud-check | Isolation Forest | Sybil detection |
+| /api/v1/repayment-schedule | K-Means | Earning archetype |
+| /api/v1/interest-rate | Rule-based | Dynamic APR |
 
-Traditional lending systems are often:
+## Quick Start (Local)
 
-* Slow and paperwork-heavy
-* Dependent on banks or intermediaries
-* Difficult for unbanked individuals to access
-* Lacking transparency in loan approvals and repayments
+### Prerequisites
+- Node.js 18+
+- Python 3.11+
+- MetaMask browser extension
 
-This project aims to solve these problems by building a decentralized lending ecosystem using blockchain technology.
+### 1. Clone & Install
+```bash
+git clone https://github.com/Meet141106/trustchain-app.git
+cd trustchain-app
+npm install
+```
 
----
+### 2. Environment Setup
+```bash
+cp .env.example .env
+# Fill in your Supabase URL and anon key in .env
+```
 
-## Objectives
+### 3. Start Blockchain
+```bash
+npm run blockchain:start
+# Starts Hardhat node + deploys contracts + seeds demo data
+```
 
-* Enable peer-to-peer lending and borrowing
-* Remove dependency on centralized banks
-* Provide transparent loan processing and repayment tracking
-* Build trust using blockchain smart contracts
-* Create a digital identity system for users
-* Evaluate borrower risk using transaction history and reputation
-* Ensure secure and tamper-proof transactions
+### 4. Start ML API
+```bash
+cd ml-api
+pip install -r requirements.txt
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+```
 
----
+### 5. Start Frontend
+```bash
+# In new terminal, from project root
+npm run dev
+```
 
-## Features
+### 6. Add MetaMask Network
+```
+Network Name: TrustLend Local
+RPC URL:      http://127.0.0.1:8545
+Chain ID:     31337
+Symbol:       ETH
+```
 
-### User Features
+### 7. Import Demo Wallets
+```
+Borrower: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+Lender:   0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+(Keys available in Hardhat node output)
+```
 
-* User registration and login
-* Digital wallet integration
-* Borrow loan requests
-* Lend funds to borrowers
-* View loan history and repayment status
-* Credit score and trust rating system
-* Notifications for due dates and repayments
+### 8. Verify All Systems
+Visit: http://localhost:5173/diagnostics
 
-### Admin Features
+## Deployment
 
-* Manage user accounts
-* Monitor transactions and disputes
-* Verify identity documents
-* Review flagged or suspicious activities
-* Generate reports and analytics
+### ML API → Render.com
+1. Go to render.com → New Web Service
+2. Connect this GitHub repo
+3. Set Root Directory: ml-api
+4. Build: pip install -r requirements.txt
+5. Start: uvicorn app:app --host 0.0.0.0 --port $PORT
+6. Add environment variables in Render dashboard
+7. Update VITE_ML_API_URL in .env
 
-### Blockchain Features
+### Frontend → Vercel
+1. Go to vercel.com → Import Git Repository
+2. Connect this GitHub repo
+3. Add all VITE_ environment variables
+4. Deploy
 
-* Smart contract-based lending agreements
-* Immutable transaction records
-* Transparent repayment schedules
-* Secure digital identity verification
-* Decentralized storage for loan-related data
-
----
+## Smart Contracts (Local)
+| Contract | Address |
+|----------|---------|
+| TrustToken | 0x5FbDB2315678afecb367f032d93F642f64180aa3 |
+| ReputationNFT | 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 |
+| VouchSystem | 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 |
+| LendingPool | 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 |
 
 ## Tech Stack
-
-### Frontend
-
-* HTML
-* CSS
-* JavaScript
-* React.js
-
-### Backend
-
-* Node.js
-* Express.js
-
-### Database
-
-* MongoDB
-
-### Blockchain
-
-* Solidity
-* Ethereum
-* MetaMask
-* Hardhat / Ganache
-
-### Other Tools
-
-* GitHub
-* Postman
-* Figma
-* VS Code
-
----
-
-## System Modules
-
-1. User Authentication Module
-2. Digital Identity Verification Module
-3. Wallet Integration Module
-4. Loan Request Module
-5. Loan Approval and Lending Module
-6. Smart Contract Module
-7. Repayment Tracking Module
-8. Risk Assessment and Credit Scoring Module
-9. Notification Module
-10. Admin Dashboard Module
-
----
-
-## Workflow
-
-1. User creates an account and completes identity verification.
-2. Borrower submits a loan request.
-3. Risk score and trust rating are generated.
-4. Lenders browse available loan requests.
-5. A smart contract is created when a lender approves the request.
-6. Funds are transferred securely.
-7. Borrower repays according to the schedule.
-8. Blockchain records all repayments and transactions.
-9. Credit score and reputation are updated.
-
----
-
-## Project Architecture
-
-```text
-Frontend (React)
-       |
-Backend API (Node.js + Express)
-       |
-MongoDB Database
-       |
-Blockchain Network (Ethereum)
-       |
-Smart Contracts (Solidity)
-```
-
----
-
-## Future Scope
-
-* AI-based credit risk prediction
-* Multi-chain blockchain support
-* Mobile application support
-* Integration with Aadhaar or government identity systems
-* NFT-based collateral system
-* Real-time fraud detection
-* Support for multiple currencies and stablecoins
-
----
-
-## Installation
-
-```bash
-git clone https://github.com/Meet141106/AP_Hacks.git
-cd AP_Hacks
-npm install
-npm start
-```
-
----
-
-## Folder Structure
-
-```text
-/decentralized-lending-platform
-│
-├── /client          # Frontend files
-├── /server          # Backend files
-├── /contracts       # Smart contracts
-├── /database        # Database models and schemas
-├── /docs            # Documentation files
-├── README.md
-```
-
----
-
-## Team Members
-
-* Member 1 – Frontend Development
-* Member 2 – Backend Development
-* Member 3 – Blockchain and Smart Contracts
-* Member 4 – Database and Testing
-
----
-
-## Conclusion
-
-This project provides a decentralized and transparent alternative to traditional lending systems. By using blockchain, smart contracts, and digital identity verification, the platform can help underserved individuals access financial services in a secure and reliable way.
-
----
+- **Frontend**: React, Vite, TailwindCSS, Framer Motion
+- **Blockchain**: Solidity, Hardhat, OpenZeppelin, Ethers.js v6
+- **AI/ML**: FastAPI, Scikit-learn, XGBoost, Pandas
+- **Database**: Supabase (PostgreSQL + Real-time)
+- **Network**: Polygon (Amoy Testnet)
 
 ## License
-
-This project is for academic and educational purposes.
+MIT

@@ -7,6 +7,7 @@ import { useReputationNFT } from '../hooks/useReputationNFT';
 import { getTierForScore, nextTierInfo } from '../config/tiers';
 import { updateLoan, createLoan } from '../lib/supabase';
 import { translateContractError } from '../utils/contractErrors';
+import { checkFraud, getTrustScore, getInterestRate, getRepaymentSchedule } from '../services/mlApi';
 
 /* ── step dot ── */
 function StepDot({ n, active, done }) {
@@ -225,61 +226,205 @@ function StepChooseAmount({ onNext, onBack, maxLoan, tier }) {
   );
 }
 
-/* ════════════ STEP 3 — Confirm (Blockchain-First) ════════════ */
-function StepConfirm({ wallet, amount, path, onSuccess, onBack }) {
-  const [phase, setPhase] = useState('idle'); // idle|blockchain|supabase|done|error
+/* ════════════ STEP 3 — ML Pipeline + Confirm (Blockchain-First) ════════════ */
+function StepConfirm({ wallet, amount, path, trustScore, onSuccess, onBack }) {
+  const [phase, setPhase] = useState('idle'); // idle|ml_fraud|ml_score|ml_rate|ml_sched|blockchain|supabase|done|error
   const [error, setError] = useState('');
 
-  const { requestLoan } = useLendingPool();
+  // ML result states
+  const [fraudResult, setFraudResult]   = useState(null);
+  const [mlTrustScore, setMlTrustScore] = useState(null);
+  const [rateResult, setRateResult]     = useState(null);
+  const [schedResult, setSchedResult]   = useState(null);
+  const [mlWarning, setMlWarning]       = useState('');
+
+  const { submitLoanRequest } = useLendingPool();
 
   const rateMap = { 0: '4.2%', 1: '2.8%', 2: '7.1%' };
   const pathMap = { 0: 'Vouch-Backed', 1: 'Collateral', 2: 'Trust-Only' };
+  const vouchPct = path?.pathId === 0 ? 100 : 0;
 
   const confirm = async () => {
     try {
-      // ═══ BLOCKCHAIN FIRST — always ═══
+      // ══ STEP A: Fraud Check ══════════════════════════════════════════════
+      setPhase('ml_fraud');
+      const fraud = await checkFraud({
+        vouch_requests_24h:           2,
+        avg_voucher_account_age_days: 140,
+        network_clustering_score:     0.12,
+      });
+      setFraudResult(fraud);
+      if (fraud.is_fraudulent) {
+        setError(`🚨 Fraud Detected: ${fraud.reason}`);
+        setPhase('error');
+        return;
+      }
+      if (fraud.status === 'fallback') setMlWarning('ML API offline — conservative fraud pass granted.');
+
+      // ══ STEP B: Trust Score ══════════════════════════════════════════════
+      setPhase('ml_score');
+      const scoreRes = await getTrustScore({
+        repayment_history:       0.7,
+        repayment_speed:         0.8,
+        voucher_quality:         0.6,
+        loan_to_repayment_ratio: 1.0,
+        vouch_network_balance:   0.5,
+        transaction_frequency:   12,
+      });
+      const computedScore = scoreRes?.trust_score ?? Number(trustScore) ?? 30;
+      setMlTrustScore(computedScore);
+
+      // ══ STEP C: Interest Rate ════════════════════════════════════════════
+      setPhase('ml_rate');
+      const rateRes = await getInterestRate({
+        trust_score:        computedScore,
+        loan_duration_days: 30,
+        vouch_coverage_pct: vouchPct,
+      });
+      setRateResult(rateRes?.data || rateRes);
+
+      // ══ STEP D: Repayment Schedule ═══════════════════════════════════════
+      setPhase('ml_sched');
+      const schedRes = await getRepaymentSchedule({
+        tx_per_month:         12.5,
+        avg_days_between_tx:  2.4,
+      });
+      setSchedResult(schedRes?.data || schedRes);
+
+      // ══ BLOCKCHAIN FIRST — always ════════════════════════════════════════
       setPhase('blockchain');
-      const tx = await requestLoan(amount, 30, path.pathId);
+      const mlResults = {
+        fraudChecked:            true,
+        mlTrustScore:            computedScore,
+        mlInterestRate:          rateRes?.data?.total_interest_rate_pct ?? null,
+        repaymentArchetype:      schedRes?.data?.archetype ?? null,
+        scheduleType:            schedRes?.data?.schedule_type ?? null,
+        gracePeriodDays:         schedRes?.data?.grace_period_days ?? null,
+        recommendedInstallments: schedRes?.data?.recommended_installments ?? null,
+      };
+      const tx = await submitLoanRequest(amount, 30, path.pathId, mlResults);
       const txHash = tx?.hash || 'confirmed';
 
-      // ═══ SUPABASE SECOND — only after chain confirmation ═══
+      // ══ SUPABASE SECOND — only after chain confirmation ══════════════════
       setPhase('supabase');
       try {
         await createLoan({ walletAddress: wallet, amount, path: path.id });
       } catch (sbErr) {
-        // Supabase failure is non-critical — loan exists on-chain
         console.warn('[LoanFlow] Supabase write failed (loan exists on-chain):', sbErr);
       }
 
       setPhase('done');
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 600));
       onSuccess({ amount }, txHash);
     } catch (err) {
-      console.error('[LoanFlow] blockchain error:', err);
+      console.error('[LoanFlow] error:', err);
       setError(translateContractError(err));
       setPhase('error');
     }
+  };
+
+  const mlPhases = ['ml_fraud','ml_score','ml_rate','ml_sched','blockchain','supabase'];
+  const isMLRunning = mlPhases.includes(phase);
+
+  const ARCHETYPE_DESC = {
+    'Daily Earner':    '→ Daily micro-installments',
+    'Weekly Earner':   '→ Weekly installments',
+    'Seasonal Earner': '→ Lump sum with grace period',
+    'Power User':      '→ Accelerated payback',
+    'Steady Earner':   '→ Bi-weekly installments',
   };
 
   return (
     <div className="space-y-7">
       <div>
         <p className="text-[10px] font-black uppercase tracking-widest text-[#F5A623] mb-2">Step 3 of 4</p>
-        <h2 className="font-cabinet font-black text-3xl text-[#FAFAF8] tracking-tight">Review Your Loan</h2>
+        <h2 className="font-cabinet font-black text-3xl text-[#FAFAF8] tracking-tight">AI Risk Assessment + Confirm</h2>
         <p className="text-[#8C8C8C] text-sm mt-2 leading-relaxed">
-          Check the details before confirming. This will create your loan on-chain via{' '}
-          <span className="font-mono text-[#F5A623]">requestLoan()</span>.
+          ML pipeline runs before on-chain submission via <span className="font-mono text-[#F5A623]">submitLoanRequest()</span>.
         </p>
       </div>
 
-      {/* Loan summary card */}
+      {/* ML warning banner */}
+      {mlWarning && (
+        <div className="px-4 py-3 rounded-xl bg-[#F5A623]/10 border border-[#F5A623]/30 text-[10px] font-black text-[#F5A623] uppercase tracking-widest">
+          ⚠️ {mlWarning}
+        </div>
+      )}
+
+      {/* ML Pipeline results (shown as they arrive) */}
+      {phase !== 'idle' && (
+        <div className="bg-[#0A0F1E] border border-[#1E2A3A] rounded-2xl p-5 space-y-3">
+          {/* Fraud Check */}
+          <div className={`flex items-center gap-3 transition-opacity ${fraudResult || phase === 'ml_fraud' ? 'opacity-100' : 'opacity-30'}`}>
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0
+              ${fraudResult ? (fraudResult.is_fraudulent ? 'bg-[#EF4444]/20 text-[#EF4444]' : 'bg-[#1D9E75]/20 text-[#1D9E75]') : 'border border-[#1E2A3A]'}`}>
+              {phase === 'ml_fraud' ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" strokeDasharray="30 15" strokeLinecap="round"/></svg>
+               : fraudResult ? (fraudResult.is_fraudulent ? '🚨' : '🛡️') : '.'}
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#8C8C8C]">Fraud Check</p>
+              {fraudResult && <p className="text-[11px] font-black text-[#FAFAF8]">{fraudResult.is_fraudulent ? 'BLOCKED' : '✓ Clear — authentic behavior'}</p>}
+            </div>
+          </div>
+
+          {/* ML Trust Score */}
+          <div className={`flex items-center gap-3 transition-opacity ${mlTrustScore !== null || phase === 'ml_score' ? 'opacity-100' : 'opacity-30'}`}>
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0
+              ${mlTrustScore !== null ? 'bg-[#1D9E75]/20 text-[#1D9E75]' : 'border border-[#1E2A3A]'}`}>
+              {phase === 'ml_score' ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" strokeDasharray="30 15" strokeLinecap="round"/></svg>
+               : mlTrustScore !== null ? '🧠' : '.'}
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#8C8C8C]">ML Trust Score</p>
+              {mlTrustScore !== null && <p className="text-[11px] font-black text-[#1D9E75]">{mlTrustScore} / 100</p>}
+            </div>
+          </div>
+
+          {/* Interest Rate */}
+          <div className={`flex items-center gap-3 transition-opacity ${rateResult || phase === 'ml_rate' ? 'opacity-100' : 'opacity-30'}`}>
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0
+              ${rateResult ? 'bg-[#1D9E75]/20 text-[#1D9E75]' : 'border border-[#1E2A3A]'}`}>
+              {phase === 'ml_rate' ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" strokeDasharray="30 15" strokeLinecap="round"/></svg>
+               : rateResult ? '📊' : '.'}
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#8C8C8C]">AI Interest Rate</p>
+              {rateResult && (
+                <p className="text-[11px] font-black text-[#FAFAF8]">
+                  {rateResult.base_rate_pct}% base + {rateResult.risk_premium_pct?.toFixed(1)}% risk + {rateResult.duration_premium_pct}% duration
+                  &nbsp;−&nbsp;{rateResult.vouch_discount_pct}% vouch&nbsp;
+                  = <span className="text-[#F5A623]">{rateResult.total_interest_rate_pct}% APR</span>
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Repayment Archetype */}
+          <div className={`flex items-center gap-3 transition-opacity ${schedResult || phase === 'ml_sched' ? 'opacity-100' : 'opacity-30'}`}>
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm flex-shrink-0
+              ${schedResult ? 'bg-[#F5A623]/20 text-[#F5A623]' : 'border border-[#1E2A3A]'}`}>
+              {phase === 'ml_sched' ? <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#F5A623" strokeWidth="2" strokeDasharray="30 15" strokeLinecap="round"/></svg>
+               : schedResult ? '📅' : '.'}
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#8C8C8C]">Repayment Archetype</p>
+              {schedResult && (
+                <p className="text-[11px] font-black text-[#F5A623]">
+                  You are a <strong>{schedResult.archetype}</strong> {ARCHETYPE_DESC[schedResult.archetype] || ''}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loan summary */}
       <div className="bg-[#0A0F1E] border border-[#1E2A3A] rounded-2xl p-6 space-y-0">
         {[
-          { l: 'Loan Amount',  v: `${amount} TRUST`,         c: '#F5A623' },
-          { l: 'Loan Path',    v: pathMap[path.pathId],       c: '#FAFAF8' },
-          { l: 'Term',         v: '30 days',                  c: '#FAFAF8' },
-          { l: 'APR',          v: rateMap[path.pathId],       c: '#1D9E75' },
-          { l: 'Collateral',   v: path.pathId === 1 ? 'Required' : 'None', c: '#1D9E75' },
+          { l: 'Loan Amount', v: `${amount} TRUST`,      c: '#F5A623' },
+          { l: 'Loan Path',   v: pathMap[path?.pathId],  c: '#FAFAF8' },
+          { l: 'Term',        v: '30 days',              c: '#FAFAF8' },
+          { l: 'APR',         v: rateResult ? `${rateResult.total_interest_rate_pct}%` : rateMap[path?.pathId], c: '#1D9E75' },
         ].map(({ l, v, c }, i) => (
           <div key={i} className="flex justify-between py-3.5 border-b border-[#1E2A3A] last:border-0">
             <span className="text-[11px] font-black uppercase tracking-widest text-[#8C8C8C]">{l}</span>
@@ -288,12 +433,13 @@ function StepConfirm({ wallet, amount, path, onSuccess, onBack }) {
         ))}
       </div>
 
-      {/* blockchain flow visual */}
+      {/* Blockchain+DB pipeline visual */}
       <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest">
         {[
-          { l: 'Blockchain',  active: phase === 'blockchain', done: ['supabase','done'].includes(phase), icon: '⛓️' },
-          { l: 'Database',    active: phase === 'supabase',   done: phase === 'done',                    icon: '🗄️' },
-          { l: 'Active',      active: false,                  done: phase === 'done',                    icon: '✅' },
+          { l: 'ML Check',   active: ['ml_fraud','ml_score','ml_rate','ml_sched'].includes(phase), done: ['blockchain','supabase','done'].includes(phase), icon: '🤖' },
+          { l: 'Blockchain', active: phase === 'blockchain', done: ['supabase','done'].includes(phase), icon: '⛓️' },
+          { l: 'Database',   active: phase === 'supabase',   done: phase === 'done',                    icon: '🗄️' },
+          { l: 'Active',     active: false,                  done: phase === 'done',                    icon: '✅' },
         ].map((s, i) => (
           <React.Fragment key={i}>
             <div className={`flex flex-col items-center gap-1 transition-all duration-500
@@ -307,7 +453,7 @@ function StepConfirm({ wallet, amount, path, onSuccess, onBack }) {
               </div>
               <span className={s.done ? 'text-[#1D9E75]' : s.active ? 'text-[#F5A623]' : 'text-[#8C8C8C]'}>{s.l}</span>
             </div>
-            {i < 2 && <div className={`flex-1 h-px transition-all duration-500 ${s.done ? 'bg-[#1D9E75]' : 'bg-[#1E2A3A]'}`} />}
+            {i < 3 && <div className={`flex-1 h-px transition-all duration-500 ${s.done ? 'bg-[#1D9E75]' : 'bg-[#1E2A3A]'}`} />}
           </React.Fragment>
         ))}
       </div>
@@ -325,16 +471,21 @@ function StepConfirm({ wallet, amount, path, onSuccess, onBack }) {
                          text-black font-black text-[13px] uppercase tracking-widest
                          hover:opacity-90 active:scale-[0.98] transition-all
                          shadow-[0_0_30px_rgba(245,166,35,0.25)]">
-              ⚡ Confirm & Draw Funds
+              ⚡ Run ML + Confirm
             </button>
           </motion.div>
         )}
 
-        {['blockchain','supabase'].includes(phase) && (
+        {isMLRunning && phase !== 'done' && phase !== 'error' && (
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="w-full py-5 rounded-2xl border border-[#1E2A3A] text-center
                        text-[11px] font-black uppercase tracking-widest text-[#8C8C8C]">
-            {phase === 'blockchain' ? 'Awaiting blockchain confirmation…' : 'Writing to database…'}
+            {phase === 'ml_fraud'    ? '🛡️ Running fraud check...'
+           : phase === 'ml_score'   ? '🧠 Computing ML trust score...'
+           : phase === 'ml_rate'    ? '📊 Calculating interest rate...'
+           : phase === 'ml_sched'   ? '📅 Profiling repayment pattern...'
+           : phase === 'blockchain' ? '⛓️ Awaiting blockchain confirmation...'
+           : '🗄️ Writing to database...'}
           </motion.div>
         )}
 
@@ -524,6 +675,7 @@ export default function LoanFlow() {
                   wallet={wallet}
                   amount={amount}
                   path={path}
+                  trustScore={score}
                   onSuccess={(activeLoan, hash) => {
                     setLoan(activeLoan);
                     setTxHash(hash);

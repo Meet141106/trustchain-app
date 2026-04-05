@@ -30,7 +30,7 @@ self.addEventListener('fetch', (event) => {
   if (!url.protocol.startsWith('http')) return;
 
   // Skip Vite dev server JS/TS modules — always fetch fresh so HMR works
-  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return;
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '192.168.10.186') return;
 
   // Skip non-GET
   if (event.request.method !== 'GET') return;

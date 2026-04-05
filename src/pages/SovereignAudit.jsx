@@ -95,7 +95,7 @@ export default function SovereignAudit() {
                         <p className="font-mono text-[10px] font-bold text-[#8C8C8C] break-all max-w-xs">{address}</p>
                         <div className="flex gap-4 mt-6">
                             <span className="px-4 py-1.5 rounded-full bg-[#1D9E75]/10 border border-[#1D9E75]/20 text-[#1D9E75] text-[9px] font-black uppercase tracking-widest">Active Verification</span>
-                            <a href={`https://amoy.polygonscan.com/token/${ADDRESSES.REPUTATION_NFT}?a=${tokenId}`} target="_blank" rel="noopener noreferrer" className="px-4 py-1.5 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-widest text-[#8C8C8C] hover:text-[#FAFAF8] transition-all">Blockchain Ledger ↗</a>
+                            <a href={`${import.meta.env.VITE_EXPLORER_URL}/token/${ADDRESSES.REPUTATION_NFT}?a=${tokenId}`} target="_blank" rel="noopener noreferrer" className="px-4 py-1.5 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-widest text-[#8C8C8C] hover:text-[#FAFAF8] transition-all">Blockchain Ledger ↗</a>
                         </div>
                     </div>
                 </div>
