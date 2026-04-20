@@ -14,7 +14,7 @@ NODE_PID=$!
 # 3. Poll net_version until ready (max 60 seconds)
 echo "⏳ Waiting for Hardhat node to be ready..."
 for i in $(seq 1 60); do
-  RESULT=$(curl -s -X POST http://192.168.10.186:8545 \
+  RESULT=$(curl -s -X POST http://127.0.0.1:8545 \
     -H "Content-Type: application/json" \
     -d '{"jsonrpc":"2.0","method":"net_version","params":[],"id":1}')
   

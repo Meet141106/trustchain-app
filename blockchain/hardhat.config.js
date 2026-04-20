@@ -35,7 +35,7 @@ module.exports = {
       saveDeployments: true,
     },
     localhost: {
-      url: LOCAL_RPC_URL || "http://192.168.10.186:8545",
+      url: LOCAL_RPC_URL || "http://127.0.0.1:8545",
       chainId: 31337,
     },
     amoy: {
